@@ -52,8 +52,8 @@ const pwa = VitePWA({
   manifest: {
     name: 'Epoch',
     short_name: 'Epoch',
-    description: '百家说论坛 · NBA 五十年数据',
-    lang: 'zh-CN',
+    description: 'A community forum and fifty years of NBA statistics',
+    lang: 'en',
     start_url: '/',
     scope: '/',
     display: 'standalone',
