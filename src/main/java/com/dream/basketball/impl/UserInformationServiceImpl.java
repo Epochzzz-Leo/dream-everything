@@ -13,6 +13,8 @@ import com.dream.basketball.service.DreamNewsService;
 import com.dream.basketball.service.UserInformationService;
 import com.dream.basketball.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,22 @@ import static com.dream.basketball.utils.Constants.*;
 
 @Service
 public class UserInformationServiceImpl extends ServiceImpl<UserInformationMapper, UserInformation> implements UserInformationService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserInformationServiceImpl.class);
+
+    /** 库里 CONTENT 列是 varchar(255)，按字符计。 */
+    static final int CONTENT_MAX = 255;
+
+    /**
+     * 按字符（码点）截到 max 以内，截掉时末尾留一个省略号。
+     * 按码点而不是 String.length()：emoji 是两个 char，按 char 截可能把一个 emoji 劈成半个。
+     */
+    static String fitColumn(String s, int max) {
+        if (s == null || s.codePointCount(0, s.length()) <= max) {
+            return s;
+        }
+        return s.substring(0, s.offsetByCodePoints(0, max - 1)) + "…";
+    }
 
     @Autowired
     DreamNewsService dreamNewsService;
@@ -55,6 +73,8 @@ public class UserInformationServiceImpl extends ServiceImpl<UserInformationMappe
             return;
         }
         UserInformation userInformation = getMsgContentInit(msgType, msgId, commentContent);
+        // CONTENT 列只有 255 字：日程提醒这类由调用方拼出来的摘要可能超长，这里截断兜底
+        userInformation.setContent(fitColumn(userInformation.getContent(), CONTENT_MAX));
         userInformation.setUserInformationId(UUID.randomUUID().toString());
         userInformation.setMsgType(msgType);
         userInformation.setMsgId(msgId);
@@ -68,7 +88,16 @@ public class UserInformationServiceImpl extends ServiceImpl<UserInformationMappe
         userInformation.setLevel(level);
         userInformation.setMsgIdThird(msgIdThird);
         userInformation.setCommentRelRelId(commentRelRelId);
-        saveOrUpdate(userInformation);
+        try {
+            saveOrUpdate(userInformation);
+        } catch (RuntimeException e) {
+            // 消息是附带的：写不进去只记日志，不能连累发评论、点赞这些主操作一起报错。
+            // 2026-10-05 撞到过：评论全文存进 CONTENT_MSG（当时是 varchar(255)），长评论在
+            // 评论本身已经落库之后才在这一步失败，前端收到 500、库里却多了一条评论，
+            // 用户再点一次就是重复评论。该列已改成 TEXT，这里再兜一层。
+            log.error("保存消息失败 type={} receiver={}", msgType, receiverId, e);
+            return;
+        }
         // 推到手机上。挂在这里是因为这里是全站消息的唯一入口——各调用方（点赞 MQ 消费者/
         // 评论/@/关注/专题/日程）都经过这一行，推送的接入点就只有这一个。
         // 哪些类型真的会响手机由 WebPushSender.PUSHABLE 决定，不是每条都推
