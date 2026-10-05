@@ -8,10 +8,10 @@ import en from './locales/en.json'
  * 为什么不另起英文 key 名（`nba.rankings.title` 这种）：全站有一千六百多条文案，
  * 逐条起名本身就是一项工程，而且起完之后代码里只剩 `t('nba.rankings.title')`，
  * 读代码的人得去翻 JSON 才知道这一行显示什么。用原文当 key，代码照样一眼能读，
- * 中文也不需要资源文件——`t('薪资计算')` 在中文模式下就是原样返回。
+ * 中文也不需要资源文件——`t('百家说')` 在中文模式下就是原样返回。
  *
  * 由此推出三条：
- *   · 只维护一份 `locales/en.json`：`{ "薪资计算": "Wage Calculation" }`
+ *   · 只维护一份 `locales/en.json`：`{ "百家说": "Chat Everything" }`
  *   · **英文缺翻译时回落到中文**（fallbackLng 关掉，key 即中文），漏翻的地方在英文界面上
  *     会直接显示中文，肉眼就能找出来——比静默显示一个 key 名要好得多
  *   · keySeparator / nsSeparator 必须关：中文文案里常有「：」「.」「:」，

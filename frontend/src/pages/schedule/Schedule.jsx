@@ -471,7 +471,7 @@ export default function Schedule() {
       )}
 
       {/* 当天详情：PC=居中弹窗、移动端=底部抽屉（拇指顺手、和 PC 交互一致）。
-          detailBody 是普通 JSX 变量而非内部组件——内部组件会因身份变化整树重挂、输入框丢焦点（Burning 踩过） */}
+          detailBody 是普通 JSX 变量而非内部组件——内部组件每次渲染都是新的组件类型，整树重挂，输入框每敲一个字就丢焦点（踩过） */}
       {(() => {
         const detailTitle = (
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 10 }}>

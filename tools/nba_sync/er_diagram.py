@@ -63,10 +63,10 @@ DOMAINS = OrderedDict([
         'game_rating', 'game_player_rating', 'game_comment', 'game_rating_reply',
     ]),
     ('开黑战绩', ['lol_account', 'lol_match', 'lol_match_player', 'lol_summoner']),
-    ('烤串台账', [
+    ('已下线：烤串模块（代码已移除，表保留待确认）', [
         'bbq_staff', 'bbq_skewer_type', 'bbq_wage_record', 'bbq_wage_skewer', 'bbq_settlement',
+        'burning_like', 'burning_comment',
     ]),
-    ('遗留（无引用，待清理确认）', ['burning_comment', 'burning_like']),
 ])
 
 # ─────────────────────────────────────────── 关系（手工维护）
@@ -130,14 +130,15 @@ RELATIONS = {
         'dream_user ||--o{ lol_account : "绑定 Riot 账号"',
         'lol_match ||--o{ lol_match_player : "MATCH_ID(只存站内成员)"',
     ],
-    '烤串台账': [
+    '已下线：烤串模块（代码已移除，表保留待确认）': [
         'dream_user ||--o{ bbq_staff : "店员档案"',
         'dream_user ||--o{ bbq_wage_record : "工时记录"',
         'bbq_wage_record ||--o{ bbq_wage_skewer : "RECORD_ID 串数明细"',
         'bbq_skewer_type ||--o{ bbq_wage_skewer : "TYPE_ID(快照价)"',
         'dream_user ||--o{ bbq_settlement : "结清记录"',
+        'dream_user ||--o{ burning_like : "Burning 榜点赞"',
+        'dream_user ||--o{ burning_comment : "Burning 榜评论"',
     ],
-    '遗留（无引用，待清理确认）': [],
 }
 
 # 各域图下面的补充说明（图说不清的口径写在这里）
@@ -155,8 +156,11 @@ NOTES = {
         '`lol_account` 有两个 PUUID：`PUUID` 是本地规范身份（永不变），`API_PUUID` 是当前 key 下调接口用的（换 key 自愈重解析）。',
         '`lol_summoner` 按 PUUID 缓存路人段位，后台每轮补 30 个。',
     ],
-    '遗留（无引用，待清理确认）': [
-        '这两张表 0 行且代码中无活跃引用，保留待确认后删除。',
+    '已下线：烤串模块（代码已移除，表保留待确认）': [
+        '2026-10-06 按站长要求整体移除了烤串的前后端代码（最后一个含烤串的提交打了 git 标签 `bbq-module-final`）。'
+        '这 7 张表连结构带数据已导出到 `~/IdeaProjects/basketball-backups/bbq-module-2026-10-06/`，'
+        '表本身先留在库里，删不删等站长确认。导出时 `bbq_staff` 10 行、`bbq_skewer_type` 2 行，其余 5 张 0 行。',
+        '早先这里把 `burning_like` / `burning_comment` 标成「无引用」是错的：移除之前它们一直被 `BbqBurningController` 读写。',
     ],
 }
 

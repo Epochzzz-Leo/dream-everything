@@ -12,7 +12,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 export const NAV_ROOTS = [
   '/', '/news', '/league', '/players', '/rankings', '/games', '/history', '/compare',
   '/official', '/messages', '/schedule', '/search',
-  '/bbq/wage', '/bbq/ledger', '/bbq/burning', '/bbq/members', '/bbq/skewers',
   '/login', '/register', '/403', '/admin/players', '/admin/users',
 ]
 

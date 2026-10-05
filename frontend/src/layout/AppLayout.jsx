@@ -5,7 +5,6 @@ import {
   BellOutlined,
   CalendarOutlined,
   CaretRightOutlined,
-  FireOutlined,
   MessageOutlined,
   ReloadOutlined,
   DatabaseOutlined,
@@ -35,7 +34,6 @@ import MobileTabBar, { TAB_BAR_HEIGHT, TOP_BAR_HEIGHT } from './MobileTabBar'
 import { showTabBar, showTopBar } from './mobileNav'
 import useNavigationPaint from './useNavigationPaint'
 import useAppSwipe from './useAppSwipe'
-import { bbqSections } from '../pages/bbq/bbqSections'
 import LangToggle from '../components/LangToggle'
 import { useTranslation } from 'react-i18next'
 
@@ -152,17 +150,6 @@ export default function AppLayout() {
     if (blocked) navigate('/', { replace: true })
   }, [location.pathname, user, authLoading, canUse, navigate])
 
-  // 耿阿姨烤串按店内角色（bbqRole）而非功能开关：台账店内成员皆可（店员只见自己的数据），
-  // 其余页面店长专属。超管也不豁免——想看就到用户管理里任命自己当店长（后端逐接口校验，这里只是少一次白屏）。
-  useEffect(() => {
-    if (!user) return
-    const p = location.pathname
-    if (!p.startsWith('/bbq')) return
-    const memberPage = p.startsWith('/bbq/ledger') || p.startsWith('/bbq/burning')
-    const ok = memberPage ? !!user.bbqRole : user.bbqRole === 'manager'
-    if (!ok) navigate('/', { replace: true })
-  }, [location.pathname, user, navigate])
-
   // 功能模块可用性（按用户）的规则在 AuthContext.canUse 里，全站一份：
   // 百家说/新闻/私信/日程默认开放（游客可看）。NBA 已从侧栏移除，入口在 NBA 专题里。
   // 关掉的模块整块从导航隐藏。
@@ -178,17 +165,6 @@ export default function AppLayout() {
         ...(canUse('featNews') ? [{ path: '/official', name: t("新闻"), icon: <NotificationOutlined /> }] : []),
         // 日程（登录用户；按用户可关）
         ...(user && canUse('featSchedule') ? [{ path: '/schedule', name: t("日程"), icon: <CalendarOutlined /> }] : []),
-        // 耿阿姨烤串（单店薪资管理）：店长共管全店账本，店员只看自己的薪资。
-        // 分区清单来自 pages/bbq/bbqSections——**和页内标签条（BbqTabs）是同一份**，
-        // 加一个分区只改那一处，不会出现"侧栏有、标签条没有"。
-        ...(bbqSections(user?.bbqRole).length
-          ? [{
-              path: '/bbq',
-              name: t("耿阿姨烤串"),
-              icon: <FireOutlined />,
-              routes: bbqSections(user?.bbqRole).map((s) => ({ path: s.path, name: t(s.label), icon: s.icon })),
-            }]
-          : []),
         // 私信：侧栏一个入口（未读数在 menuItemRender 里挂角标），头像下拉里那个也保留——
         // 两个入口指同一页，习惯点哪个都行
         ...(user && canUse('featPm') ? [{ path: '/messages', name: t("私信"), icon: <MessageOutlined /> }] : []),
@@ -462,7 +438,7 @@ export default function AppLayout() {
               borderBottom: '1px solid #f0f0f0',
             }}
           >
-            {/* 汉堡菜单去掉了：它打开的抽屉里那些入口（新闻、耿阿姨烤串、球员/用户管理、
+            {/* 汉堡菜单去掉了：它打开的抽屉里那些入口（新闻、球员/用户管理、
                 订阅的专题）现在全在「我」页里，四个底部 Tab 覆盖其余部分。
                 两个入口指同一批东西只会让人犹豫点哪个，而且顶栏这一行在手机上很值钱——
                 去掉之后搜索框能占满整条。 */}

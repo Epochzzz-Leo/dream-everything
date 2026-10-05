@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Avatar, Badge, Button, Card, Empty, message } from 'antd'
 import {
-  BarChartOutlined, BellOutlined, DatabaseOutlined, DollarOutlined, FireOutlined,
-  LogoutOutlined, NotificationOutlined, PushpinFilled, ReadOutlined, RightOutlined,
-  TagsOutlined, TeamOutlined, UsergroupAddOutlined, UserOutlined,
+  BellOutlined, DatabaseOutlined, LogoutOutlined, NotificationOutlined, PushpinFilled,
+  ReadOutlined, RightOutlined, UsergroupAddOutlined, UserOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
@@ -59,7 +58,7 @@ function Divider() {
  *
  * 底部只放得下四个入口，其余功能总得有地方去。这一页就是那个地方：
  * **凡是跟"我这个人"有关的，都收在这里**——我的消息、推送开关、订阅的专题、
- * 按角色才有的模块（耿阿姨烤串）、超管的管理入口、登出。
+ * 新闻入口、超管的管理入口、登出。
  *
  * 和顶部汉堡抽屉的分工：这里是"我自己的东西"，抽屉是"去别的模块"。两者暂时有重叠，
  * 等用一阵子再决定要不要砍掉一边——现在就拍板容易砍错。
@@ -93,9 +92,7 @@ export default function Mine() {
     )
   }
 
-  const bbqManager = user.bbqRole === 'manager'
-  const bbqStaff = user.bbqRole === 'staff'
-  const hasModules = canUse('featNews') || bbqManager || bbqStaff
+  const hasModules = canUse('featNews')
 
   return (
     <>
@@ -171,27 +168,6 @@ export default function Mine() {
       {hasModules && (
         <Group>
           {canUse('featNews') && <Row icon={<ReadOutlined />} label={t("新闻")} onClick={() => navigate('/official')} />}
-          {canUse('featNews') && (bbqManager || bbqStaff) && <Divider />}
-          {bbqManager && (
-            <>
-              <Row icon={<DollarOutlined />} label={t("薪资计算")} onClick={() => navigate('/bbq/wage')} />
-              <Divider />
-              <Row icon={<BarChartOutlined />} label={t("经营台账")} onClick={() => navigate('/bbq/ledger')} />
-              <Divider />
-              <Row icon={<FireOutlined />} label="Burning！" onClick={() => navigate('/bbq/burning')} />
-              <Divider />
-              <Row icon={<TeamOutlined />} label={t("成员管理")} onClick={() => navigate('/bbq/members')} />
-              <Divider />
-              <Row icon={<TagsOutlined />} label={t("串价设置")} onClick={() => navigate('/bbq/skewers')} />
-            </>
-          )}
-          {bbqStaff && (
-            <>
-              <Row icon={<BarChartOutlined />} label={t("我的薪资")} onClick={() => navigate('/bbq/ledger')} />
-              <Divider />
-              <Row icon={<FireOutlined />} label="Burning！" onClick={() => navigate('/bbq/burning')} />
-            </>
-          )}
         </Group>
       )}
 

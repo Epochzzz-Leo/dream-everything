@@ -36,11 +36,6 @@ import MyMessages from './pages/user/MyMessages'
 import Mine from './pages/user/Mine'
 import Messages from './pages/user/Messages'
 import Schedule from './pages/schedule/Schedule'
-import BbqWage from './pages/bbq/BbqWage'
-import BbqLedger from './pages/bbq/BbqLedger'
-import BbqBurning from './pages/bbq/BbqBurning'
-import BbqMembers from './pages/bbq/BbqMembers'
-import BbqSkewers from './pages/bbq/BbqSkewers'
 import UserProfile from './pages/user/UserProfile'
 import UserManage from './pages/admin/UserManage'
 import UserManageDetail from './pages/admin/UserManageDetail'
@@ -149,12 +144,6 @@ export default function App() {
         <Route path="me" element={<ProtectedRoute><MyMessages /></ProtectedRoute>} />
         <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-        {/* 耿阿姨烤串（菜单按 bbqRole 显隐，后端逐接口校验）：台账店员可见（自己的数据），其余店长专属 */}
-        <Route path="bbq/wage" element={<ProtectedRoute><BbqWage /></ProtectedRoute>} />
-        <Route path="bbq/ledger" element={<ProtectedRoute><BbqLedger /></ProtectedRoute>} />
-        <Route path="bbq/burning" element={<ProtectedRoute><BbqBurning /></ProtectedRoute>} />
-        <Route path="bbq/members" element={<ProtectedRoute><BbqMembers /></ProtectedRoute>} />
-        <Route path="bbq/skewers" element={<ProtectedRoute><BbqSkewers /></ProtectedRoute>} />
 
         {/* 需 superManager */}
         <Route path="admin/users" element={<RoleRoute role="superManager"><UserManage /></RoleRoute>} />
