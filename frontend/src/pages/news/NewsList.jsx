@@ -33,6 +33,7 @@ import LolModuleEntry from '../../components/LolModuleEntry'
 import { onPostPublished } from '../../utils/postBus'
 import TopicFilesEntry from '../../components/TopicFilesEntry'
 import useLoginRedirect from '../../auth/useLoginRedirect'
+import { byHotThenNewest } from '../../utils/hot'
 
 /**
  * 帖子列表（公开，P5-2 内容流改版），按频道复用：
@@ -79,7 +80,6 @@ const avatarColor = (name) => {
   return `hsl(${h}, 52%, 52%)`
 }
 
-const hotOf = (p) => (p.goodNum ?? 0) * 2 + (p.commentNum ?? 0) * 3
 
 /** 单条帖子卡：头像 + 标题/摘要/元信息 + 首图缩略图 */
 function PostCard({ post, topicOwnerIds, categoryName }) {
@@ -168,9 +168,8 @@ function PostCard({ post, topicOwnerIds, categoryName }) {
 function HotRail({ rows, official }) {
   const hot = useMemo(
     () =>
-      (rows || [])
-        .map((p) => ({ ...p, hot: hotOf(p) }))
-        .sort((a, b) => b.hot - a.hot || dayjs(b.publishDate).valueOf() - dayjs(a.publishDate).valueOf())
+      [...(rows || [])]
+        .sort(byHotThenNewest)
         .slice(0, 5),
     [rows],
   )
@@ -286,7 +285,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
     if (view === 'featured') hit = hit.filter((p) => p.essence === '1')
     if (view === 'owner' && topic?.ownerIds?.length) hit = hit.filter((p) => topic.ownerIds.includes(p.authorId))
     const sorted = view === 'hot'
-      ? [...hit].sort((a, b) => hotOf(b) - hotOf(a) || dayjs(b.publishDate).valueOf() - dayjs(a.publishDate).valueOf())
+      ? [...hit].sort(byHotThenNewest)
       : hit // 后端已按（置顶优先 + 发布时间倒序）排好
     // 置顶帖始终浮到最前（不论哪个视图）
     return [...sorted.filter((p) => p.top === '1'), ...sorted.filter((p) => p.top !== '1')]

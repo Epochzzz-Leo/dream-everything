@@ -24,4 +24,7 @@ public class NewsDto extends News {
     /** 收藏数（列表读时按 NEWS_ID 批量 COUNT 回填，和点赞/评论数同展示位） */
     private Integer favoriteCount;
 
+    /** 原始热度（HotScore.raw：点赞×2 + 评论×3）。前端的 Hot 排序只读这个字段，不再自己算 */
+    private Integer hotScore;
+
 }

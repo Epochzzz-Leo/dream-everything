@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button, Card, Col, Empty, Row, Tag } from 'antd'
 import { FireOutlined, RightOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
 import { useAuth } from '../auth/AuthContext'
 import { newsApi } from '../api/news'
 import { topicApi } from '../api/topic'
@@ -14,6 +13,7 @@ import useIsMobile from '../hooks/useIsMobile'
 import useUrlState from '../hooks/useUrlState'
 import { LATEST_SEASON, displayName, fmtDelta, fmtNum, numOrNull, playoffRecord, qualifiedBoard, teamName, teamRegion } from './players/rankConfig'
 import useLoginRedirect from '../auth/useLoginRedirect'
+import { byHotThenNewest } from '../utils/hot'
 
 /**
  * 首页（P5-2 现代化改版 v2）：赛季维度的联盟总览仪表盘
@@ -325,14 +325,14 @@ export default function Home() {
     return () => { alive = false }
   }, [seasonNum])
 
-  // 热帖榜：点赞×2 + 评论×3 计热度，同分按时间新旧。
+  // 热帖榜：按后端给的热度分排（utils/hot.js），同分按时间新旧。
   // 联盟概览是 NBA 模块的首页——只展示 NBA 专区（话题名含 "NBA"）的帖子
   const hotPosts = useMemo(() => {
     if (forum === null) return null
     return forum
-      .map((p) => ({ ...p, hot: (p.goodNum ?? 0) * 2 + (p.commentNum ?? 0) * 3, topicName: topicNameMap[p.topicId] }))
+      .map((p) => ({ ...p, topicName: topicNameMap[p.topicId] }))
       .filter((p) => p.topicName && p.topicName.includes('NBA'))
-      .sort((a, b) => b.hot - a.hot || dayjs(b.publishDate).valueOf() - dayjs(a.publishDate).valueOf())
+      .sort(byHotThenNewest)
       .slice(0, 6)
   }, [forum, topicNameMap])
 

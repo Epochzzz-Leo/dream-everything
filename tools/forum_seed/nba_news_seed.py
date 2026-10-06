@@ -26,7 +26,8 @@ import argparse
 import json
 import subprocess
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 TOPIC_ID = 'd0e7cfae-d26b-42f2-9b32-09b90332ea3d'          # NBA🏀
 AUTHOR_ID = '67ac56b4-79fb-40d8-9e98-71412ac0acac'          # Dream Owner（超管）
@@ -242,6 +243,14 @@ def build():
     return rows
 
 
+def mysql_time(es_time):
+    """ES 里这串时间网站按 UTC 读（Spring Data ES 的约定），MySQL 存的是墨尔本当地时间。
+    换算成同一个时刻再写进 MySQL，两边才对得上。比如 ES 的 2026-07-23 09:00:00 是墨尔本 19:00。
+    2026-10-06 以前这里只写日期（[:10]），PUBLISH_DATE 改成精确到秒以后，重跑会把回填好的时间冲成 0 点。"""
+    t = datetime.strptime(es_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
+    return t.astimezone(ZoneInfo('Australia/Melbourne')).strftime('%Y-%m-%d %H:%M:%S')
+
+
 def sql_escape(s):
     return s.replace('\\', '\\\\').replace("'", "\\'")
 
@@ -307,7 +316,7 @@ def main():
             "'0','0',0,0,'0','0',0,'{cat}')".format(
                 id=r['newsId'], author=sql_escape(AUTHOR), aid=AUTHOR_ID,
                 content=sql_escape(r['content']), tags=sql_escape(r['tags']),
-                date=r['publishDate'][:10], title=sql_escape(r['title']), topic=TOPIC_ID,
+                date=mysql_time(r['publishDate']), title=sql_escape(r['title']), topic=TOPIC_ID,
                 cat=cat_id))
     sql = ('insert into dream_news (NEWS_ID,AUTHOR,AUTHOR_ID,BAD_NUM,COMMENT_NUM,CONTENT,GOOD_NUM,TAGS,'
            'PUBLISH_DATE,TITLE,NEWS_CHANNEL,TOPIC_ID,TOP,ESSENCE,VIEW_COUNT,VIEWER_COUNT,LOCKED,HIDDEN,DRAFT,CATEGORY_ID) values '

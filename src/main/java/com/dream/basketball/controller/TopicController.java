@@ -178,13 +178,17 @@ public class TopicController {
     }
 
     /**
-     * 上次访问后的新活动数（他人的发帖 + 评论各 +1；隐藏帖/墓碑评论不算）。
+     * 上次访问后的新活动数（他人的发帖 + 评论各 +1；隐藏帖/草稿/墓碑评论不算）。
      * 没有 seen 记录 = 0（首次进专题才开始跟踪，避免新用户看到吓人的大数字）。
+     *
+     * <p>PUBLISH_DATE 在 2026-10-06 之前只存到「天」（当天 0 点），上午看过专题、下午别人发的帖
+     * 永远不算新；改成精确到秒以后才算得对。别人的草稿以前也会被算进来，可点进去又看不到，现在排除。
      */
     private int newActivityCount(String topicId, Date seen, String myId) {
         Integer posts = dreamNewsMapper.selectCount(new QueryWrapper<DreamNews>()
                 .eq("TOPIC_ID", topicId).ne("AUTHOR_ID", myId).gt("PUBLISH_DATE", seen)
-                .and(w -> w.isNull("HIDDEN").or().ne("HIDDEN", "1")));
+                .and(w -> w.isNull("HIDDEN").or().ne("HIDDEN", "1"))
+                .and(w -> w.isNull("DRAFT").or().ne("DRAFT", "1")));
         Integer comments = newsCommentMapper.selectCount(new QueryWrapper<com.dream.basketball.entity.DreamNewsComment>()
                 .inSql("NEWS_ID", "SELECT NEWS_ID FROM dream_news WHERE TOPIC_ID = '" + topicId + "'")
                 .ne("USER_ID", myId).gt("COMMENT_DATE", seen)

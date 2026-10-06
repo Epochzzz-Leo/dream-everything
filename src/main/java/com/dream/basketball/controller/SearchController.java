@@ -217,10 +217,13 @@ public class SearchController {
         // 排序表达式不能走 orderByDesc（它按列名处理），只能整段拼在 last 里。
         // n 是 int，拼进去没有注入面。
         //
-        // 最后那道 NEWS_ID 不是凑数的：PUBLISH_DATE 是 **date** 不是 datetime，
-        // 同一天发的帖子在前两个条件上完全打平（实测有 30 篇同日、热度都是 0）。
-        // 不给一个稳定的兜底，同一份榜单每次刷新的顺序都可能不一样。
-        qw.last("order by (ifnull(GOOD_NUM,0)*2 + ifnull(COMMENT_NUM,0)*3) desc, PUBLISH_DATE desc, NEWS_ID desc limit " + n);
+        // 热度式子来自 HotScore（全站只有这一份），列名是写死的常量。
+        //
+        // 最后那道 NEWS_ID 不是凑数的：PUBLISH_DATE 以前是 date，同一天发的帖子在前两个条件上
+        // 完全打平（实测有 30 篇同日、热度都是 0）。2026-10-06 起它是 datetime，打平少了很多，
+        // 但脚本批量发的帖子仍可能同一秒，兜底继续留着，保证同一份榜单每次刷新顺序一样。
+        qw.last("order by " + com.dream.basketball.utils.HotScore.sqlRaw("GOOD_NUM", "COMMENT_NUM")
+                + " desc, PUBLISH_DATE desc, NEWS_ID desc limit " + n);
         List<com.dream.basketball.entity.DreamNews> rows = dreamNewsMapper.selectList(qw);
 
         // 专题名一把查完再分发：榜单最多 30 条，逐条 selectById 就是 30 次往返
@@ -244,6 +247,7 @@ public class SearchController {
             m.put("author", r.getAuthor());
             m.put("goodNum", r.getGoodNum() == null ? 0 : r.getGoodNum());
             m.put("commentNum", r.getCommentNum() == null ? 0 : r.getCommentNum());
+            m.put("hotScore", com.dream.basketball.utils.HotScore.raw(r.getGoodNum(), r.getCommentNum()));
             m.put("topicId", r.getTopicId());
             m.put("topicName", topicName.get(r.getTopicId()));
             out.add(m);

@@ -81,6 +81,9 @@ public class NewsController extends BaseUtils {
     @Autowired
     private com.dream.basketball.mapper.NewsViewerMapper newsViewerMapper;
 
+    @Autowired
+    private com.dream.basketball.service.EventLogger eventLogger;
+
     /** 资讯列表数据（公开）：指定专题要有浏览权；跨专题聚合时滤掉无权浏览的私密专题帖 */
     @GetMapping("/newsListData")
     public Object newsListData(NewsDto param, Integer page, Integer limit, HttpServletRequest request) throws Exception {
@@ -144,6 +147,7 @@ public class NewsController extends BaseUtils {
             }
             for (NewsDto r : rows) {
                 r.setFavoriteCount(favCounts.getOrDefault(r.getNewsId(), 0));
+                r.setHotScore(com.dream.basketball.utils.HotScore.raw(r.getGoodNum(), r.getCommentNum()));
             }
         }
         return handlerSuccessPageJson(0, "OK", rows.size(), rows);
@@ -593,7 +597,8 @@ public class NewsController extends BaseUtils {
     @PostMapping("/favorite")
     public Object favorite(String newsId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
-        if (StringUtils.isBlank(newsId) || dreamNewsService.getById(newsId) == null) {
+        com.dream.basketball.entity.DreamNews post = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
+        if (post == null) {
             return handlerResultJson(false, "Post not found");
         }
         QueryWrapper<com.dream.basketball.entity.NewsFavorite> mineQ =
@@ -611,6 +616,8 @@ public class NewsController extends BaseUtils {
             f.setCreateTime(new java.util.Date());
             favoriteMapper.insert(f);
             favorited = true;
+            // 只记「收藏」这个动作；取消收藏不记（推荐只关心喜欢过什么）
+            eventLogger.server(me.getUserId(), newsId, post.getTopicId(), "favorite");
         }
         Map<String, Object> out = new HashMap<>();
         out.put("favorited", favorited);

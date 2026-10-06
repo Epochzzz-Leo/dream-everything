@@ -80,6 +80,9 @@ public class NewsServiceImpl implements NewsService {
     RabbitMqProducer rabbitMqProducer;
 
     @Autowired
+    com.dream.basketball.service.EventLogger eventLogger;
+
+    @Autowired
     private com.dream.basketball.mapper.ForumRatingItemMapper ratingItemMapper;
 
     @Autowired
@@ -587,6 +590,10 @@ public class NewsServiceImpl implements NewsService {
                 boolean whetherClicked = Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember("good:user:" + userId + ":newsId:" + newsId, userId));
                 // rabbitmq处理点赞
                 rabbitMqProducer.newsActionRmq(newsId, userId, whetherClicked, dreamUser, dreamNews, "good");
+                // 行为记录：只记「点赞」，取消点赞不记
+                if (!whetherClicked) {
+                    eventLogger.server(userId, newsId, dreamNews.getTopicId(), "like");
+                }
                 return likeResult(whetherClicked, whetherClicked ? "Hmm, let me take another look at this post" : "Great post, upvoted!");
             }
         } catch (Exception e){
@@ -865,6 +872,8 @@ public class NewsServiceImpl implements NewsService {
                     MENTION_COMMENT, dreamNewsComment.getCommentId(), dreamNewsComment.getNewsId(),
                     dreamNewsComment.getCommentId(), level, dreamNewsComment.getContent(), "");
         }
+        // 行为记录：楼中楼的回复也算对这篇帖子的一次评论
+        eventLogger.server(dreamUser.getUserId(), dreamNews.getNewsId(), dreamNews.getTopicId(), "comment");
         return handlerResultJson(true, "Comment posted");
     }
 

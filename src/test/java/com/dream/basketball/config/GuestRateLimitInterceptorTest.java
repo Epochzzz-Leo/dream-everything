@@ -115,4 +115,31 @@ class GuestRateLimitInterceptorTest {
         direct.addHeader("X-Forwarded-For", "1.2.3.4");
         assertEquals("172.18.0.5", GuestRateLimitInterceptor.clientIp(direct), "没有 Cloudflare 头时用连接地址");
     }
+
+    /** IPv6 按 /64 计：同一段里换地址还是同一个桶；隔壁段、IPv4、套在 IPv6 里的 IPv4、看不懂的格式各归各的 */
+    @Test
+    void limitKey_groupsIpv6BySlash64() {
+        String bucket = "2001:db8:85a3:8d3::/64";
+        assertEquals(bucket, GuestRateLimitInterceptor.limitKey("2001:db8:85a3:8d3:1319:8a2e:370:7348"));
+        assertEquals(bucket, GuestRateLimitInterceptor.limitKey("2001:db8:85a3:8d3::1"), "同一段里换一个地址");
+        assertEquals(bucket, GuestRateLimitInterceptor.limitKey("2001:0DB8:85A3:08D3:0000:0000:0000:0001"), "大写、不缩写、带前导零");
+        assertEquals("2001:db8:85a3:8d4::/64", GuestRateLimitInterceptor.limitKey("2001:db8:85a3:8d4::1"), "隔壁一段");
+        assertEquals("fe80:0:0:0::/64", GuestRateLimitInterceptor.limitKey("fe80::1%eth0"), "去掉网卡后缀");
+        assertEquals("0:0:0:0::/64", GuestRateLimitInterceptor.limitKey("::1"));
+        assertEquals("203.0.113.7", GuestRateLimitInterceptor.limitKey("203.0.113.7"), "IPv4 不变");
+        assertEquals("203.0.113.7", GuestRateLimitInterceptor.limitKey("::ffff:203.0.113.7"), "套在 IPv6 里的 IPv4 按它本身算");
+        assertEquals("1:2:3", GuestRateLimitInterceptor.limitKey("1:2:3"), "段数不够：原样计数");
+        assertEquals("1::2::3", GuestRateLimitInterceptor.limitKey("1::2::3"), "两个 ::：原样计数");
+        assertEquals("::ffff:1.2.3.999", GuestRateLimitInterceptor.limitKey("::ffff:1.2.3.999"), "IPv4 段超过 255：原样计数");
+        assertEquals("12345::1", GuestRateLimitInterceptor.limitKey("12345::1"), "一段超过 4 位：原样计数");
+    }
+
+    @Test
+    void ipv6Visitor_isCountedUnderTheirSlash64() throws Exception {
+        String key = GuestRateLimitInterceptor.PREFIX + "2001:db8:85a3:8d3::/64:" + (NOW / 60_000L);
+        when(ops.increment(key)).thenReturn(4L);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        assertFalse(limiter.preHandle(guest("2001:db8:85a3:8d3:1319:8a2e:370:7348"), response, null));
+        assertEquals(429, response.getStatus());
+    }
 }

@@ -1,4 +1,5 @@
 import { Empty, Spin, Tag } from 'antd'
+import dayjs from 'dayjs'
 import {
   EnterOutlined, FileTextOutlined, FolderOpenOutlined, LockOutlined, ReadOutlined, UserOutlined,
 } from '@ant-design/icons'
@@ -13,11 +14,9 @@ import { displayName, teamName } from '../pages/players/rankConfig'
 
 const ellipsis = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
-const dateStr = (v) => {
-  if (!v) return ''
-  const s = typeof v === 'string' ? v : new Date(v).toISOString()
-  return s.slice(0, 10)
-}
+// 接口给的是 UTC 时间（2026-10-05T09:28:36.000+00:00）。以前直接切前 10 位，
+// 当地上午发的帖子会显示成前一天；按浏览器所在时区换算后再取日期
+const dateStr = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : '')
 
 const newsRow = (n, icon) => (
   <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>

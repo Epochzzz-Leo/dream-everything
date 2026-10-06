@@ -20,6 +20,7 @@ import UserTitles from '../../components/UserTitles'
 import useIsMobile from '../../hooks/useIsMobile'
 import { MENTION_CSS, MENTION_SELECTOR, markPlayerMentions, mentionHref, readMentionInfo } from '../../utils/mention'
 import useLoginRedirect from '../../auth/useLoginRedirect'
+import { byHotThenNewest } from '../../utils/hot'
 
 /**
  * 资讯详情（公开，/news/:newsId，P5-2 文章页改版）。
@@ -114,8 +115,7 @@ function MorePosts({ channel, exceptId, topicId, topicName }) {
     () =>
       (rows || [])
         .filter((p) => p.newsId !== exceptId)
-        .map((p) => ({ ...p, hot: (p.goodNum ?? 0) * 2 + (p.commentNum ?? 0) * 3 }))
-        .sort((a, b) => b.hot - a.hot || dayjs(b.publishDate).valueOf() - dayjs(a.publishDate).valueOf())
+        .sort(byHotThenNewest)
         .slice(0, 5),
     [rows, exceptId],
   )

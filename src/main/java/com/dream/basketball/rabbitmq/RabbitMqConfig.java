@@ -117,4 +117,16 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(queue).to(exchange).with("bad.comment");
     }
 
+    /**
+     * 用户行为记录（推荐首页用，2026-10-06）：EventLogger 发，UserEventConsumer 写 user_event 表。
+     */
+    @Bean(name = "userEventQueue")
+    public Queue userEventQueue() {
+        return QueueBuilder.durable("user_event_queue").build();
+    }
+
+    @Bean
+    public Binding userEventBinding(@Qualifier("userEventQueue") Queue queue, @Qualifier("exchange") TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with("user.event");
+    }
 }
