@@ -4,17 +4,15 @@ import { BarChartOutlined, TeamOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import AllPlayerSeasonStats from './AllPlayerSeasonStats'
 import { playerApi } from '../../api/player'
-import { NBA_TEAM_NAMES } from './rankConfig'
+import { NBA_TEAM_NAMES, teamName } from './rankConfig'
 import TeamLogo from '../../components/TeamLogo'
 import useIsMobile from '../../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 球队卡片墙：NBA 30 队全量展示。有球员数据的队正常高亮（队码来自 /player/teams 去重），
  * 暂无数据的队置灰标注，但都可点进本队页。
  */
 function TeamGrid() {
-  const { t } = useTranslation()
   const [activeTeams, setActiveTeams] = useState(null) // 数据中实际出现过的队码
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -31,7 +29,8 @@ function TeamGrid() {
 
   return (
     <Row gutter={isMobile ? [8, 8] : [16, 16]}>
-      {Object.entries(NBA_TEAM_NAMES).map(([code, name]) => {
+      {/* 只拿 NBA_TEAM_NAMES 的队码遍历现役 30 队；显示的队名走 teamName（英文） */}
+      {Object.keys(NBA_TEAM_NAMES).map((code) => {
         const active = activeTeams.has(code)
         return (
           <Col key={code} xs={8} sm={8} md={6} lg={4}>
@@ -46,11 +45,11 @@ function TeamGrid() {
               </div>
               {/* 一行三支队时卡片只有 110px 上下：队码另起一行，"查看本队球员"整句放不下 */}
               <div style={{ fontWeight: 600, fontSize: isMobile ? 12 : 14, lineHeight: 1.3 }}>
-                {name}
+                {teamName(code)}
                 {!isMobile && <span style={{ color: '#bbb', fontSize: 12, fontWeight: 400, marginLeft: 6 }}>{code}</span>}
               </div>
               <div style={{ color: '#999', fontSize: isMobile ? 11 : 12, marginTop: 2 }}>
-                {isMobile ? (active ? code : t("暂无数据")) : (active ? t("查看本队球员") : t("暂无球员数据"))}
+                {isMobile ? (active ? code : 'No data') : (active ? 'View roster' : 'No player data')}
               </div>
             </Card>
           </Col>
@@ -65,7 +64,6 @@ function TeamGrid() {
  * 球队卡片墙在前，球员数据概览（原赛季榜）在后；选中态为品牌橙圆角滑块。
  */
 export default function PlayersHome() {
-  const { t } = useTranslation()
   const [tab, setTab] = useState('teams')
 
   return (
@@ -95,7 +93,7 @@ export default function PlayersHome() {
               value: 'teams',
               label: (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 10px' }}>
-                  <TeamOutlined /> {t("球队")}
+                  <TeamOutlined /> Team
                 </span>
               ),
             },
@@ -103,7 +101,7 @@ export default function PlayersHome() {
               value: 'overview',
               label: (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 10px' }}>
-                  <BarChartOutlined /> {t("球员数据概览")}
+                  <BarChartOutlined /> Player Stats Overview
                 </span>
               ),
             },

@@ -1,5 +1,4 @@
-import { NBA_TEAM_NAMES, teamRegion, teamZh } from '../pages/players/rankConfig'
-import i18n from '../i18n'
+import { NBA_TEAM_NAMES, teamRegion } from '../pages/players/rankConfig'
 
 /**
  * 全局搜索的**数据部分**：最近搜索的存取、以及把接口返回打平成一串可渲染的行。
@@ -50,12 +49,12 @@ export const dropHistory = () => {
   return []
 }
 
-/** 球队是固定的 30 支（前端配置），直接本地匹配：队码（不分大小写）或中文名包含关键词 */
+/** 球队是固定的 30 支（前端配置），直接本地匹配：队码或队名包含关键词（都不分大小写） */
 function matchTeams(kw) {
   const k = kw.trim().toLowerCase()
   if (!k) return []
   return Object.entries(NBA_TEAM_NAMES)
-    .filter(([code, name]) => code.toLowerCase().includes(k) || name.includes(kw.trim()) || teamZh(code).toLowerCase().includes(k))
+    .filter(([code, name]) => code.toLowerCase().includes(k) || name.toLowerCase().includes(k))
     .slice(0, 6)
     .map(([code, name]) => ({ code, name, ...teamRegion(code) }))
 }
@@ -74,11 +73,11 @@ export function flatten(d, kw, canData) {
     out.push({ kind: 'group', key: `g-${group}`, label: group })
     items.forEach((it) => out.push({ kind: 'item', type, ...it }))
   }
-  push(i18n.t("球员", { context: 'plural' }), 'player', d?.players?.map((p) => ({ key: `player:${p.playerId}`, to: `/players/${p.playerId}`, d: p })))
-  push(i18n.t("球队", { context: 'plural' }), 'team', canData ? matchTeams(kw).map((t) => ({ key: `team:${t.code}`, to: `/players/team/${t.code}`, d: t })) : [])
-  push(i18n.t("新闻"), 'news', d?.news?.map((n) => ({ key: `news:${n.newsId}`, to: `/news/${n.newsId}`, d: n })))
-  push(i18n.t("专题", { context: 'plural' }), 'topic', d?.topics?.map((t) => ({ key: `topic:${t.topicId}`, to: `/news/topic/${t.topicId}`, d: t })))
-  push(i18n.t("资讯"), 'forum', d?.forum?.map((n) => ({ key: `forum:${n.newsId}`, to: `/news/${n.newsId}`, d: n })))
-  push(i18n.t("用户", { context: 'plural' }), 'user', d?.users?.map((u) => ({ key: `user:${u.userId}`, to: `/users/${u.userId}`, d: u })))
+  push('Players', 'player', d?.players?.map((p) => ({ key: `player:${p.playerId}`, to: `/players/${p.playerId}`, d: p })))
+  push('Teams', 'team', canData ? matchTeams(kw).map((t) => ({ key: `team:${t.code}`, to: `/players/team/${t.code}`, d: t })) : [])
+  push('News', 'news', d?.news?.map((n) => ({ key: `news:${n.newsId}`, to: `/news/${n.newsId}`, d: n })))
+  push('Topics', 'topic', d?.topics?.map((t) => ({ key: `topic:${t.topicId}`, to: `/news/topic/${t.topicId}`, d: t })))
+  push('Posts', 'forum', d?.forum?.map((n) => ({ key: `forum:${n.newsId}`, to: `/news/${n.newsId}`, d: n })))
+  push('Users', 'user', d?.users?.map((u) => ({ key: `user:${u.userId}`, to: `/users/${u.userId}`, d: u })))
   return out
 }

@@ -124,7 +124,7 @@ public class FileUtils {
      */
     public static String upload(MultipartFile file, String uploadPath, String folderKey) throws IOException {
         return store(file, uploadPath, folderKey, ALLOWED_EXTENSIONS::contains, MAX_FILE_SIZE,
-                "仅允许图片 " + ALLOWED_EXTENSIONS);
+                "Only images are allowed: " + ALLOWED_EXTENSIONS);
     }
 
     /**
@@ -136,7 +136,7 @@ public class FileUtils {
      */
     public static String uploadBanner(MultipartFile file, String uploadPath, String folderKey) throws IOException {
         return store(file, uploadPath, folderKey, ALLOWED_EXTENSIONS::contains, MAX_BANNER_SIZE,
-                "仅允许图片 " + ALLOWED_EXTENSIONS);
+                "Only images are allowed: " + ALLOWED_EXTENSIONS);
     }
 
     /**
@@ -147,7 +147,7 @@ public class FileUtils {
         Set<String> allowed = new HashSet<>(ALLOWED_EXTENSIONS);
         allowed.addAll(ALLOWED_DOC_EXTENSIONS);
         return store(file, uploadPath, folderKey, allowed::contains, MAX_ATTACHMENT_SIZE,
-                "支持图片与常见文档 " + allowed);
+                "Images and common documents are allowed: " + allowed);
     }
 
     /**
@@ -157,7 +157,7 @@ public class FileUtils {
      */
     public static String uploadTopicFile(MultipartFile file, String uploadPath, String folderKey) throws IOException {
         return store(file, uploadPath, folderKey, ext -> !DANGEROUS_EXTENSIONS.contains(ext),
-                MAX_ATTACHMENT_SIZE, "网页脚本与可执行文件不能上传（" + DANGEROUS_EXTENSIONS.size() + " 种）");
+                MAX_ATTACHMENT_SIZE, "Web scripts and executables can't be uploaded (" + DANGEROUS_EXTENSIONS.size() + " types)");
     }
 
     /** Validate (non-empty / size / extension rule) then store with a random name; returns the URL. */
@@ -165,14 +165,14 @@ public class FileUtils {
                                 java.util.function.Predicate<String> extAllowed, long maxSize,
                                 String typeHint) throws IOException {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("上传文件为空");
+            throw new IllegalArgumentException("The uploaded file is empty");
         }
         if (file.getSize() > maxSize) {
-            throw new IllegalArgumentException("文件过大，最大 " + (maxSize / 1024 / 1024) + "MB");
+            throw new IllegalArgumentException("File too large (max " + (maxSize / 1024 / 1024) + " MB)");
         }
         String ext = safeExtension(file.getOriginalFilename());
         if (!extAllowed.test(ext)) {
-            throw new IllegalArgumentException("不支持的文件类型，" + typeHint);
+            throw new IllegalArgumentException("Unsupported file type. " + typeHint);
         }
         // path-traversal-safe folder segment; the filename is always server-generated
         String safeFolder = folderKey == null ? "" : folderKey.replaceAll("[^a-zA-Z0-9_\\-]", "");

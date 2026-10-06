@@ -107,7 +107,7 @@ public class UserProfileController {
     public Result<Map<String, Object>> profile(String userId, HttpServletRequest request) {
         DreamUser u = StringUtils.isBlank(userId) ? null : userMapper.selectById(userId);
         if (u == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
 
         // 隐私：本人看自己不隐藏；他人看时按开关隐藏发帖/评论列表
@@ -322,7 +322,7 @@ public class UserProfileController {
         // 他人视角：该用户是否隐藏了关注/粉丝列表（计数照常展示，列表点不开）
         boolean isProfileSelf = profileViewer != null && StringUtils.equals(profileViewer.getUserId(), userId);
         data.put("followsHidden", !isProfileSelf && "1".equals(u.getHideFollows()));
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /* ==================== 本人资料编辑 ==================== */
@@ -334,18 +334,18 @@ public class UserProfileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         String nick = StringUtils.trimToEmpty(userNickname);
         if (nick.isEmpty() || nick.length() > 20) {
-            return new Result<>(1, "昵称需为 1-20 个字符", null);
+            return new Result<>(1, "Nicknames must be 1 to 20 characters", null);
         }
         Integer dup = userMapper.selectCount(new QueryWrapper<DreamUser>()
                 .eq("USER_NICKNAME", nick).ne("USER_ID", me.getUserId()));
         if (dup != null && dup > 0) {
-            return new Result<>(1, "该昵称已被占用", null);
+            return new Result<>(1, "That nickname is taken", null);
         }
         userMapper.update(null, new UpdateWrapper<DreamUser>()
                 .eq("USER_ID", me.getUserId()).set("USER_NICKNAME", nick));
         me.setUserNickname(nick);
         SecUtil.setLoginUserToSession(request, me);
-        return new Result<>(0, "昵称已更新", null);
+        return new Result<>(0, "Nickname updated", null);
     }
 
     /** 上传头像（图片白名单/限 5MB，每人一个文件夹，先清旧再存新，返回可访问 URL） */
@@ -362,7 +362,7 @@ public class UserProfileController {
         SecUtil.setLoginUserToSession(request, me);
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);
-        return new Result<>(0, "头像已更新", data);
+        return new Result<>(0, "Avatar updated", data);
     }
 
     /** 改密码（核对原密码，BCrypt 落库，会话同步） */
@@ -372,11 +372,11 @@ public class UserProfileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamUser fresh = userMapper.selectById(me.getUserId());
         if (fresh == null || !PasswordUtil.matches(StringUtils.trimToEmpty(oldPassword), fresh.getPassword())) {
-            return new Result<>(1, "原密码不正确", null);
+            return new Result<>(1, "Your current password is wrong", null);
         }
         String np = StringUtils.trimToEmpty(newPassword);
         if (np.length() < 6 || np.length() > 32) {
-            return new Result<>(1, "新密码需为 6-32 位", null);
+            return new Result<>(1, "The new password must be 6 to 32 characters", null);
         }
         String hashed = PasswordUtil.hash(np);
         userMapper.update(null, new UpdateWrapper<DreamUser>()
@@ -388,7 +388,7 @@ public class UserProfileController {
         // 而「改密码要能立刻作废已发出的凭据」正是当初选 Redis 而不是 JWT 的理由之一
         javax.servlet.http.HttpSession sess = request.getSession(false);
         singleSession.revokeAll(me.getUserId(), sess == null ? null : sess.getId());
-        return new Result<>(0, "密码已修改，其它设备需要重新登录", null);
+        return new Result<>(0, "Password changed. Other devices will need to sign in again", null);
     }
 
     /** 主页隐私（仅本人）：是否隐藏我的发帖 / 评论。传哪个改哪个（'1' 隐藏 / '0' 显示）。 */
@@ -410,7 +410,7 @@ public class UserProfileController {
             uw.set("HIDE_FAVORITES", "1".equals(hideFavorites) ? "1" : "0");
         }
         userMapper.update(null, uw);
-        return new Result<>(0, "已保存", null);
+        return new Result<>(0, "Saved", null);
     }
 
     /** 私信权限（本人）：all=所有人可发，following=仅我关注的人可发 */
@@ -421,7 +421,7 @@ public class UserProfileController {
         String value = "following".equals(policy) ? "following" : "all";
         userMapper.update(null, new UpdateWrapper<DreamUser>()
                 .eq("USER_ID", me.getUserId()).set("PM_POLICY", value));
-        return new Result<>(0, "已保存", null);
+        return new Result<>(0, "Saved", null);
     }
 
     private long sumGood(List<Object> objs) {

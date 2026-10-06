@@ -5,6 +5,8 @@
  * 一个文件同时导出组件和普通函数时，热更新没法判断该重建什么，整份文件都会退化。
  * 这个项目为同一条规则拆过两次（backNav / BackButton、searchModel / SearchResults），
  * 照同样的做法。
+ *
+ * 技能名、段位名用 Riot 官方英文名（Data Dragon 16.19.1 核对过）。
  */
 
 /** 昵称 → 一个稳定的颜色。没有头像的人用首字母 + 这个底色，同一个人每次都一样 */
@@ -60,22 +62,25 @@ export const mmss = (sec) => {
  * 抄进来的那一刻就开始过期。认不出的原样显示编号，不至于显示成空白。
  */
 export const SPELL_NAME = {
-  1: '净化', 3: '虚弱', 4: '闪现', 6: '幽灵疾步', 7: '治疗', 11: '惩戒',
-  12: '传送', 13: '清晰', 14: '点燃', 21: '屏障', 30: '至高之拳', 31: '传送门',
-  32: '标记', 39: '标记', 54: '占位', 55: '占位',
+  1: 'Cleanse', 3: 'Exhaust', 4: 'Flash', 6: 'Ghost', 7: 'Heal', 11: 'Smite',
+  12: 'Teleport', 13: 'Clarity', 14: 'Ignite', 21: 'Barrier', 30: 'To the King!', 31: 'Poro Toss',
+  32: 'Mark', 39: 'Mark', 54: 'Placeholder', 55: 'Placeholder and Attack-Smite',
 }
-export const spellName = (id) => SPELL_NAME[id] || (id ? `技能${id}` : '')
+export const spellName = (id) => {
+  if (SPELL_NAME[id]) return SPELL_NAME[id]
+  return id ? `Spell ${id}` : ''
+}
 
 /**
- * 段位缩写：`BRONZE` + `I` → `黄铜 I`。
+ * 段位缩写：`BRONZE` + `I` → `Bronze I`。
  *
  * 这是**当前**段位，不是打那一场时的段位——对局数据里根本没有段位字段，
  * league-v4 也只给当前值。界面上要标清楚，否则会被当成「他那时候就这水平」。
  */
 export const TIER_NAME = {
-  IRON: '坚韧黑铁', BRONZE: '英勇黄铜', SILVER: '不屈白银', GOLD: '荣耀黄金',
-  PLATINUM: '华贵铂金', EMERALD: '流光翡翠', DIAMOND: '璀璨钻石',
-  MASTER: '超凡大师', GRANDMASTER: '傲世宗师', CHALLENGER: '最强王者',
+  IRON: 'Iron', BRONZE: 'Bronze', SILVER: 'Silver', GOLD: 'Gold',
+  PLATINUM: 'Platinum', EMERALD: 'Emerald', DIAMOND: 'Diamond',
+  MASTER: 'Master', GRANDMASTER: 'Grandmaster', CHALLENGER: 'Challenger',
 }
 export const tierText = (tier, div) => {
   if (!tier) return null

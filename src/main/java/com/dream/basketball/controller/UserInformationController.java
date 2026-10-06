@@ -43,7 +43,7 @@ public class UserInformationController extends BaseUtils {
         PageHelper.startPage(page, limit);
         param.setReceiverId(SecUtil.getLoginUserIdToSession(request));
         List<UserInformationDto> rows = userInformationService.getUserInformationListByParam(param);
-        return handlerSuccessPageJson(0, "成功", (int) new PageInfo<>(rows).getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) new PageInfo<>(rows).getTotal(), rows);
     }
 
     /** 未读条数（顶栏红点） */
@@ -53,7 +53,7 @@ public class UserInformationController extends BaseUtils {
         Integer n = userInformationMapper.selectCount(new QueryWrapper<UserInformation>()
                 .eq("RECEIVER_ID", SecUtil.getLoginUserIdToSession(request))
                 .eq("WHETHER_READ", Constants.TO_READ));
-        return new Result<>(0, "成功", n == null ? 0 : n);
+        return new Result<>(0, "OK", n == null ? 0 : n);
     }
 
     /** 一键已读（只动自己的） */
@@ -64,6 +64,6 @@ public class UserInformationController extends BaseUtils {
                 .eq("RECEIVER_ID", SecUtil.getLoginUserIdToSession(request))
                 .eq("WHETHER_READ", Constants.TO_READ)
                 .set("WHETHER_READ", Constants.READ));
-        return new Result<>(0, "已全部标记为已读", null);
+        return new Result<>(0, "All marked as read", null);
     }
 }

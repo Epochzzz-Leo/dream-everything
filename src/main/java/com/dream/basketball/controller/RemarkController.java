@@ -38,20 +38,20 @@ public class RemarkController {
     public Object set(String targetId, String remark, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(targetId) || userMapper.selectById(targetId) == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
         if (StringUtils.equals(targetId, me.getUserId())) {
-            return new Result<>(1, "不能给自己设置备注", null);
+            return new Result<>(1, "You can't set an alias for yourself", null);
         }
         String r = StringUtils.trimToNull(remark);
         QueryWrapper<UserRemark> qw = new QueryWrapper<UserRemark>()
                 .eq("OWNER_ID", me.getUserId()).eq("TARGET_ID", targetId);
         if (r == null) {
             remarkMapper.delete(qw);
-            return new Result<>(0, "已清除备注", null);
+            return new Result<>(0, "Alias cleared", null);
         }
         if (r.length() > REMARK_MAX) {
-            return new Result<>(1, "备注不能超过 " + REMARK_MAX + " 字", null);
+            return new Result<>(1, "Aliases can be up to " + REMARK_MAX + " characters", null);
         }
         UserRemark row = remarkMapper.selectList(qw).stream().findFirst().orElse(null);
         if (row == null) {
@@ -66,7 +66,7 @@ public class RemarkController {
             row.setRemark(r);
             remarkMapper.updateById(row);
         }
-        return new Result<>(0, "已备注", r);
+        return new Result<>(0, "Alias saved", r);
     }
 
     /** 我的全部备注（前端启动时拉一次做显示替换的映射表）。 */
@@ -82,6 +82,6 @@ public class RemarkController {
             m.put("remark", r.getRemark());
             out.add(m);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 }

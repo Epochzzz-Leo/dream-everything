@@ -64,7 +64,7 @@ export default function UserManageDetail() {
     setData((d) => ({ ...d, [field]: checked }))
     try {
       await userApi.setUserPerms({ userId, [field]: checked ? '1' : '0' })
-      message.success('已保存')
+      message.success('Saved')
     } catch {
       load()
     }
@@ -74,17 +74,18 @@ export default function UserManageDetail() {
     setTitles(arr) // 乐观（颜色来自色板、文字已限长去重，与后端规范化结果一致）
     try {
       await userApi.setUserTitles(userId, JSON.stringify(arr))
-      message.success('头衔已更新')
+      message.success('Titles updated')
     } catch {
       load()
     }
   }
   const addTitle = () => {
-    const t = newT.trim()
-    if (!t) return
-    if (titles.some((x) => x.t === t)) { message.info('已有同名头衔'); return }
-    if (titles.length >= 10) { message.info('最多 10 个头衔'); return }
-    commitTitles([...titles, { t, c: newC }])
+    // 头衔数据的格式是 { t: 文字, c: 颜色 }，存进后端的就是它
+    const text = newT.trim()
+    if (!text) return
+    if (titles.some((x) => x.t === text)) { message.info('That title already exists'); return }
+    if (titles.length >= 10) { message.info('Up to 10 titles'); return }
+    commitTitles([...titles, { t: text, c: newC }])
     setNewT('')
   }
   const removeTitle = (i) => commitTitles(titles.filter((_, idx) => idx !== i))
@@ -100,7 +101,7 @@ export default function UserManageDetail() {
     try {
       await userApi.setUserPerms({ userId, topicLimit: next === null ? '' : String(next) })
       setSavedTopicLimit(next)
-      message.success('已保存')
+      message.success('Saved')
     } catch {
       load()
     }
@@ -127,23 +128,23 @@ export default function UserManageDetail() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {dn(data.userId, data.userNickname)}
-              {data.isSuperManager && <Tag color="red"><CrownFilled /> 超管</Tag>}
-              {data.userId === me?.userId && <Tag>我</Tag>}
+              {data.isSuperManager && <Tag color="red"><CrownFilled /> Super admin</Tag>}
+              {data.userId === me?.userId && <Tag>Me</Tag>}
             </div>
             <div style={{ color: '#999', fontSize: 13, marginTop: 6 }}>
-              {dn(data.userId, data.userNickname) !== data.userNickname && `原昵称 ${data.userNickname} · `}
-              登录名 {data.loginName || '—'} · 注册 {fmt(data.registTime)} · 最近登录 {fmt(data.lastLoginTime)}
+              {dn(data.userId, data.userNickname) !== data.userNickname && `Original nickname ${data.userNickname} · `}
+              {`Login name ${data.loginName || '—'} · Registered ${fmt(data.registTime)} · Last sign-in ${fmt(data.lastLoginTime)}`}
             </div>
           </div>
         </div>
       </Card>
 
       {/* 头衔 */}
-      <Card title="头衔" style={{ borderRadius: 12, marginBottom: 16 }} extra={<span style={{ color: '#999', fontSize: 12 }}>可多个、可各自设颜色</span>}>
+      <Card title="Titles" style={{ borderRadius: 12, marginBottom: 16 }} extra={<span style={{ color: '#999', fontSize: 12 }}>Several allowed, each with its own color</span>}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', minHeight: 24 }}>
           {titles.length
             ? titles.map((item, i) => (
-                <Popover key={item.t} trigger="click" title="改颜色" content={<Swatches value={item.c} onPick={(c) => recolor(i, c)} />}>
+                <Popover key={item.t} trigger="click" title="Change color" content={<Swatches value={item.c} onPick={(c) => recolor(i, c)} />}>
                   <Tag
                     color={TITLE_HEX[item.c] || '#1677ff'}
                     closable
@@ -154,34 +155,34 @@ export default function UserManageDetail() {
                   </Tag>
                 </Popover>
               ))
-            : <span style={{ color: '#bbb' }}>暂无头衔</span>}
+            : <span style={{ color: '#bbb' }}>No titles yet</span>}
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Input value={newT} onChange={(e) => setNewT(e.target.value)} onPressEnter={addTitle} placeholder="输入头衔文字" maxLength={20} style={{ width: 200 }} />
-          <Popover trigger="click" title="选颜色" content={<Swatches value={newC} onPick={setNewC} />}>
+          <Input value={newT} onChange={(e) => setNewT(e.target.value)} onPressEnter={addTitle} placeholder="Title text" maxLength={20} style={{ width: 200 }} />
+          <Popover trigger="click" title="Pick a color" content={<Swatches value={newC} onPick={setNewC} />}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '4px 10px', border: '1px solid #d9d9d9', borderRadius: 6 }}>
-              <span style={{ width: 16, height: 16, borderRadius: '50%', background: TITLE_HEX[newC] }} /> 颜色
+              <span style={{ width: 16, height: 16, borderRadius: '50%', background: TITLE_HEX[newC] }} /> Color
             </span>
           </Popover>
-          <Button type="primary" ghost onClick={addTitle}>添加</Button>
+          <Button type="primary" ghost onClick={addTitle}>Add</Button>
         </div>
-        <div style={{ color: '#bbb', fontSize: 12, marginTop: 8 }}>点头衔可改颜色，× 删除；最多 10 个。</div>
+        <div style={{ color: '#bbb', fontSize: 12, marginTop: 8 }}>Click a title to change its color, or × to remove it. Up to 10.</div>
       </Card>
 
       {/* 账号与动作权限 */}
-      <Card title="账号与权限" style={{ borderRadius: 12, marginBottom: 16 }}>
-        {locked && <div style={{ color: '#faad14', fontSize: 12, marginBottom: 4 }}>超级管理员和你自己的权限不可修改</div>}
-        {permRow('允许登录', 'enabled')}
+      <Card title={'Account & Permissions'} style={{ borderRadius: 12, marginBottom: 16 }}>
+        {locked && <div style={{ color: '#faad14', fontSize: 12, marginBottom: 4 }}>Permissions of super admins and of your own account can't be changed</div>}
+        {permRow('Allow sign-in', 'enabled')}
         <Divider style={{ margin: '2px 0' }} />
-        {permRow('浏览论坛 / 新闻', 'canBrowse')}
-        {permRow('发言（评论）', 'canComment')}
-        {permRow('发帖', 'canPost')}
-        {permRow('创建专题', 'canCreateTopic', '默认允许；创建后本人自动成为题主')}
+        {permRow('Browse forum / news', 'canBrowse')}
+        {permRow('Comment', 'canComment')}
+        {permRow('Post', 'canPost')}
+        {permRow('Create topics', 'canCreateTopic', 'Allowed by default. Whoever creates a topic becomes its owner')}
         <div style={{ display: 'flex', alignItems: 'center', padding: '9px 0' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontWeight: 600 }}>专题数量上限</span>
+            <span style={{ fontWeight: 600 }}>Topic limit</span>
             <span style={{ color: '#999', fontSize: 12, marginLeft: 8 }}>
-              留空跟随系统默认（{data.topicLimitDefault ?? 2} 个）；已建 {data.topicOwned ?? 0} 个
+              {`Leave blank for the system default (${data.topicLimitDefault ?? 2}). Created so far: ${data.topicOwned ?? 0}`}
             </span>
           </div>
           <InputNumber
@@ -189,7 +190,7 @@ export default function UserManageDetail() {
             max={99}
             precision={0}
             value={data.topicLimit ?? null}
-            placeholder={`默认 ${data.topicLimitDefault ?? 2}`}
+            placeholder={`Default ${data.topicLimitDefault ?? 2}`}
             disabled={locked}
             style={{ width: 110 }}
             onChange={(v) => setData((d) => ({ ...d, topicLimit: v }))}
@@ -200,14 +201,14 @@ export default function UserManageDetail() {
       </Card>
 
       {/* 功能模块 */}
-      <Card title="功能模块" style={{ borderRadius: 12 }} extra={<span style={{ color: '#999', fontSize: 12 }}>关掉则该用户导航里整块隐藏、深链也进不去</span>}>
+      <Card title="Features" style={{ borderRadius: 12 }} extra={<span style={{ color: '#999', fontSize: 12 }}>When off, it disappears from this user's navigation and direct links stop working too</span>}>
         {/* NBA 和其余几项现在是同一套语义：默认开放，在这里关掉才是封禁。
             游客仍然看不到（这一档要求必须登录，防爬虫）。 */}
-        {permRow('NBA 数据', 'featData', '默认开放，登录即可用；在此关掉则封禁该用户。游客不可见。含联盟概览 / 数据概览 / 联盟排行 / 历史数据 / 球员对比')}
-        {permRow('新闻', 'featNews')}
-        {permRow('百家说', 'featForum')}
-        {permRow('私信', 'featPm')}
-        {permRow('日程', 'featSchedule')}
+        {permRow('NBA Data', 'featData', 'On by default for anyone signed in. Turning it off here blocks this user. Visitors never see it. Covers League / Stats / League Rankings / History / Compare')}
+        {permRow('News', 'featNews')}
+        {permRow('Chat Everything', 'featForum')}
+        {permRow('Messages', 'featPm')}
+        {permRow('Schedule', 'featSchedule')}
       </Card>
     </>
   )

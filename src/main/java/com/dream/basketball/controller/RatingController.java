@@ -66,28 +66,28 @@ public class RatingController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if (!StringUtils.equals(news.getAuthorId(), me.getUserId())) {
-            return new Result<>(1, "只有楼主可以开启打分", null);
+            return new Result<>(1, "Only the OP can open a rating", null);
         }
         String sub = StringUtils.trimToEmpty(subject);
         if (sub.isEmpty()) {
-            return new Result<>(1, "请填写打分对象", null);
+            return new Result<>(1, "Enter what to rate", null);
         }
         if (sub.length() > SUBJECT_MAX) {
-            return new Result<>(1, "打分对象不能超过 " + SUBJECT_MAX + " 字", null);
+            return new Result<>(1, "What you rate can be up to " + SUBJECT_MAX + " characters", null);
         }
         if (StringUtils.isNotBlank(commentId)) {
             DreamNewsComment c = dreamNewsCommentService.getById(commentId);
             if (c == null || !StringUtils.equals(c.getNewsId(), newsId)
                     || !"1".equals(c.getLevel()) || !StringUtils.equals(c.getUserId(), me.getUserId())) {
-                return new Result<>(1, "只能在你自己发的一级楼上开启打分", null);
+                return new Result<>(1, "You can only open a rating on your own top-level comment", null);
             }
         }
         Integer already = itemMapper.selectCount(new QueryWrapper<ForumRatingItem>().eq("NEWS_ID", newsId));
         if (already != null && already >= ITEMS_PER_POST_MAX) {
-            return new Result<>(1, "该帖打分项已达上限", null);
+            return new Result<>(1, "This post has reached its rating limit", null);
         }
         ForumRatingItem item = new ForumRatingItem();
         item.setItemId(UUID.randomUUID().toString());
@@ -98,7 +98,7 @@ public class RatingController {
         item.setCreateBy(me.getUserId());
         item.setCreateTime(new Date());
         itemMapper.insert(item);
-        return new Result<>(0, "已开启打分", item.getItemId());
+        return new Result<>(0, "Rating opened", item.getItemId());
     }
 
     /**
@@ -111,14 +111,14 @@ public class RatingController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if (!StringUtils.equals(news.getAuthorId(), me.getUserId())) {
-            return new Result<>(1, "只有楼主可以开启打分", null);
+            return new Result<>(1, "Only the OP can open a rating", null);
         }
         String sub = StringUtils.trimToEmpty(subject);
         if (sub.isEmpty() || sub.length() > SUBJECT_MAX) {
-            return new Result<>(1, "打分对象需为 1-" + SUBJECT_MAX + " 字", null);
+            return new Result<>(1, "What you rate must be 1 to " + SUBJECT_MAX + " characters", null);
         }
         DreamNewsComment c = new DreamNewsComment();
         c.setNewsId(newsId);
@@ -140,21 +140,21 @@ public class RatingController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumRatingItem item = StringUtils.isBlank(itemId) ? null : itemMapper.selectById(itemId);
         if (item == null) {
-            return new Result<>(1, "打分项不存在", null);
+            return new Result<>(1, "Rating not found", null);
         }
         if (score == null || score < 1 || score > 5) {
-            return new Result<>(1, "分数需为 1-5 星", null);
+            return new Result<>(1, "Scores must be 1 to 5 stars", null);
         }
         DreamNews news = dreamNewsService.getById(item.getNewsId());
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if ("1".equals(news.getLocked())) {
-            return new Result<>(1, "该帖已被锁定，暂不能打分", null);
+            return new Result<>(1, "This post is locked. Rating is off", null);
         }
         if (StringUtils.isNotBlank(news.getTopicId())
                 && !topicPerms.canView(me, topicPerms.getTopic(news.getTopicId()))) {
-            return new Result<>(1, "你没有权限查看该专题的内容", null);
+            return new Result<>(1, "You don't have permission to view this topic", null);
         }
         ForumRatingVote v = voteMapper.selectOne(new QueryWrapper<ForumRatingVote>()
                 .eq("ITEM_ID", itemId).eq("USER_ID", me.getUserId()));
@@ -176,7 +176,7 @@ public class RatingController {
         Map<String, Object> agg = aggregate(Collections.singletonList(itemId)).get(itemId);
         Map<String, Object> out = agg == null ? new HashMap<>() : agg;
         out.put("myScore", score);
-        return new Result<>(0, "已打分", out);
+        return new Result<>(0, "Rated", out);
     }
 
     /** 该帖全部打分项 + 聚合 + 我的分（公开；私密专题帖要有浏览权）。 */
@@ -185,16 +185,16 @@ public class RatingController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         if (StringUtils.isNotBlank(news.getTopicId())
                 && !topicPerms.canView(me, topicPerms.getTopic(news.getTopicId()))) {
-            return new Result<>(1, "你没有权限查看该专题的内容", null);
+            return new Result<>(1, "You don't have permission to view this topic", null);
         }
         List<ForumRatingItem> items = itemMapper.selectList(new QueryWrapper<ForumRatingItem>()
                 .eq("NEWS_ID", newsId).orderByAsc("CREATE_TIME"));
         if (items.isEmpty()) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         List<String> ids = new ArrayList<>();
         for (ForumRatingItem it : items) {
@@ -223,7 +223,7 @@ public class RatingController {
             m.put("myScore", mine.get(it.getItemId()));
             out.add(m);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 删打分项（超管或楼主）：连带删票。 */
@@ -233,17 +233,17 @@ public class RatingController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumRatingItem item = StringUtils.isBlank(itemId) ? null : itemMapper.selectById(itemId);
         if (item == null) {
-            return new Result<>(1, "打分项不存在", null);
+            return new Result<>(1, "Rating not found", null);
         }
         DreamNews news = dreamNewsService.getById(item.getNewsId());
         boolean isSuper = Role.fromUserRole(me.getUserRole()) == Role.SUPER_MANAGER;
         boolean isAuthor = news != null && StringUtils.equals(news.getAuthorId(), me.getUserId());
         if (!isSuper && !isAuthor) {
-            return new Result<>(1, "无权删除该打分项", null);
+            return new Result<>(1, "You can't delete this rating", null);
         }
         voteMapper.delete(new QueryWrapper<ForumRatingVote>().eq("ITEM_ID", itemId));
         itemMapper.deleteById(itemId);
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     /** 批量聚合：itemId → {avg(1位小数), count, dist{1..5:人数}} */

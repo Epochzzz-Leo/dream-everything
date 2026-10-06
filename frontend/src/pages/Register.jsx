@@ -5,14 +5,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { authApi } from '../api/auth'
 import AuthShell from '../components/AuthShell'
 import useAuthWide from '../hooks/useAuthWide'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 注册页（公开）。字段与后端一致：loginName（固定登录名）/ userNickname（显示昵称）/ password。
  * 后端对登录名和昵称各自查重，重复会被拒。注册不需要验证码。
  */
 export default function Register() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const wide = useAuthWide()
   const [submitting, setSubmitting] = useState(false)
@@ -26,7 +24,7 @@ export default function Register() {
         userNickname: values.userNickname,
         password: values.password,
       })
-      message.success(t("注册成功，请登录"))
+      message.success('Registered. Please sign in')
       navigate('/login')
     } catch (e) {
       // 错误已由 http 拦截器弹出
@@ -38,31 +36,31 @@ export default function Register() {
   const iconStyle = { color: '#b3b3b3' }
 
   return (
-    <AuthShell title={t("创建账号")} subtitle={t("注册加入百家说，一起发帖聊天")}>
+    <AuthShell title="Create an account" subtitle="Join Chat Everything to post and chat">
       <Form onFinish={onFinish} size={wide ? 'large' : 'middle'}>
-        <Form.Item name="loginName" rules={[{ required: true, message: t("请输入登录名") }]}>
-          <Input variant="filled" prefix={<UserOutlined style={iconStyle} />} placeholder={t("登录名（用于登录，注册后不可改）")} autoComplete="off" />
+        <Form.Item name="loginName" rules={[{ required: true, message: 'Please enter your login name' }]}>
+          <Input variant="filled" prefix={<UserOutlined style={iconStyle} />} placeholder="Login name (used to sign in, cannot be changed later)" autoComplete="off" />
         </Form.Item>
-        <Form.Item name="userNickname" rules={[{ required: true, message: t("请输入昵称") }]}>
-          <Input variant="filled" prefix={<IdcardOutlined style={iconStyle} />} placeholder={t("昵称（对外展示，之后可改）")} autoComplete="off" />
+        <Form.Item name="userNickname" rules={[{ required: true, message: 'Please enter a nickname' }]}>
+          <Input variant="filled" prefix={<IdcardOutlined style={iconStyle} />} placeholder="Nickname (shown publicly, can be changed later)" autoComplete="off" />
         </Form.Item>
-        <Form.Item name="password" rules={[{ required: true, message: t("请输入密码") }]}>
-          <Input.Password variant="filled" prefix={<LockOutlined style={iconStyle} />} placeholder={t("密码")} autoComplete="off" />
+        <Form.Item name="password" rules={[{ required: true, message: 'Please enter your password' }]}>
+          <Input.Password variant="filled" prefix={<LockOutlined style={iconStyle} />} placeholder="Password" autoComplete="off" />
         </Form.Item>
         <Form.Item
           name="confirm"
           dependencies={['password']}
           rules={[
-            { required: true, message: t("请再次输入密码") },
+            { required: true, message: 'Please confirm your password' },
             ({ getFieldValue }) => ({
               validator: (_, value) =>
                 !value || getFieldValue('password') === value
                   ? Promise.resolve()
-                  : Promise.reject(new Error(t("两次密码不一致"))),
+                  : Promise.reject(new Error('Passwords do not match')),
             }),
           ]}
         >
-          <Input.Password variant="filled" prefix={<LockOutlined style={iconStyle} />} placeholder={t("确认密码")} autoComplete="off" />
+          <Input.Password variant="filled" prefix={<LockOutlined style={iconStyle} />} placeholder="Confirm password" autoComplete="off" />
         </Form.Item>
         <Button
           type="primary"
@@ -72,10 +70,10 @@ export default function Register() {
           loading={submitting}
           style={{ fontWeight: 700, boxShadow: '0 6px 16px rgba(250,84,28,.3)' }}
         >
-          {t("注 册")}
+          Sign up
         </Button>
         <div style={{ marginTop: wide ? 20 : 14, textAlign: 'center', color: '#8c8c8c', fontSize: wide ? 14 : 13 }}>
-          {t("已有账号？")}<Link to="/login" style={{ fontWeight: 600 }}>{t("去登录")}</Link>
+          {'Already have an account? '}<Link to="/login" style={{ fontWeight: 600 }}>Sign in</Link>
         </div>
       </Form>
     </AuthShell>

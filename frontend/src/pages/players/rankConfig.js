@@ -1,5 +1,4 @@
-
-import i18n from '../../i18n'/** 球员数据模块共享配置：赛季选项、数字格式化、单项排行榜配置、NBA 队名映射 */
+/** 球员数据模块共享配置：赛季选项、数字格式化、单项排行榜配置、NBA 队名映射 */
 
 // 第 N 赛季 = (SEASON_BASE+N)-(SEASON_BASE+1+N)：第 1 赛季即 1976-77（锚点 1976 = ABA 合并元年，覆盖 50 年）
 export const SEASON_BASE = 1975
@@ -8,7 +7,7 @@ export const SEASON_BASE = 1975
 export const CAREER_SEASON = 99
 
 export const seasonYearLabel = (n) =>
-  Number(n) === CAREER_SEASON ? i18n.t("生涯场均") : i18n.t("{{v0}}-{{v1}} 赛季", { v0: SEASON_BASE + Number(n), v1: SEASON_BASE + 1 + Number(n) })
+  Number(n) === CAREER_SEASON ? 'Career avg' : `${SEASON_BASE + Number(n)}-${SEASON_BASE + 1 + Number(n)} Season`
 
 /**
  * 只有年份、不带「赛季」两个字：手机上窄的地方用（赛季选择器的胶囊、球队页横幅）。
@@ -16,12 +15,12 @@ export const seasonYearLabel = (n) =>
  * " Season"，replace 剥不掉，就会显示成 "1976-1977 Season" 撑破胶囊。
  */
 export const seasonYears = (n) =>
-  Number(n) === CAREER_SEASON ? i18n.t('生涯') : `${SEASON_BASE + Number(n)}-${SEASON_BASE + 1 + Number(n)}`
+  Number(n) === CAREER_SEASON ? 'Career' : `${SEASON_BASE + Number(n)}-${SEASON_BASE + 1 + Number(n)}`
 
 // 数据表的赛季列用：只留年份后两位，如 1986-1987 → 86-87（生涯档=生涯）
 export const seasonShort = (n) =>
   Number(n) === CAREER_SEASON
-    ? i18n.t("生涯")
+    ? 'Career'
     : `${String(SEASON_BASE + Number(n)).slice(-2)}-${String(SEASON_BASE + 1 + Number(n)).slice(-2)}`
 
 // 最新赛季（第 50 季 = 2025-2026；同步工具每天维护这一季，ESPN 年份 − 1976 = 赛季号）
@@ -32,15 +31,12 @@ export const LATEST_SEASON = 50
  * 锚点没动过——公式仍是 (1975+n)-(1976+n)，所以 1976-77 依旧是第 1 季、2025-26 依旧是第 50 季，
  * 1976 年之前自然落到 0 和负数（1975-76 = 0，1946-47 = -29）。这样回补 30 个老赛季
  * 不用改动已有的 13 万行，也不用重建 STATS_ID。负数只是内部键，界面上永远显示年份。
+ *
+ * 这里原来还导出过一份 seasonOptions（80 个赛季的下拉选项），全站没有任何地方引用，
+ * 而且它在模块加载时就调 seasonYearLabel 把文字算死了，切语言不会跟着变——删掉了。
+ * 赛季选择统一走 components/SeasonPicker。
  */
 export const EARLIEST_SEASON = -29
-
-export const seasonOptions = [
-  // 全部 80 个赛季，最新在前
-  ...Array.from({ length: LATEST_SEASON - EARLIEST_SEASON + 1 },
-    (_, i) => ({ value: LATEST_SEASON - i, label: seasonYearLabel(LATEST_SEASON - i) })),
-  { value: CAREER_SEASON, label: '生涯场均' },
-]
 
 /**
  * 全站统一的「没有数据」占位符。
@@ -247,10 +243,10 @@ export const qualifiedFor = (rows, field, row, po = false) =>
  * 这是筛选不是分桶，两边都出现反而合理；NA 哪一档都不进。
  */
 export const POSITION_GROUPS = [
-  { value: 'all', label: '全部' },
-  { value: 'G', label: '后卫' },
-  { value: 'F', label: '前锋' },
-  { value: 'C', label: '中锋' },
+  { value: 'all', label: 'All' },
+  { value: 'G', label: 'Guards' },
+  { value: 'F', label: 'Forwards' },
+  { value: 'C', label: 'Centers' },
 ]
 
 export const inPositionGroup = (row, group) =>
@@ -274,34 +270,34 @@ export const withValue = (rows, field) => (rows || []).filter((r) => r?.[field] 
  * 打铁三项在后端是算式（出手 − 命中），不是真列。
  */
 export const CAREER_TOTAL_STATS = [
-  { key: 'g', label: '出场数' },
-  { key: 'mp', label: '时间' },
-  { key: 'pts', label: '得分' },
-  { key: 'trb', label: '篮板' },
-  { key: 'orb', label: '前场篮板' },
-  { key: 'drb', label: '后场篮板' },
-  { key: 'ast', label: '助攻' },
-  { key: 'tov', label: '失误' },
-  { key: 'stl', label: '抢断' },
-  { key: 'blk', label: '盖帽' },
-  { key: 'pf', label: '犯规' },
-  { key: 'fga', label: '出手' },
-  { key: 'fg', label: '进球' },
-  { key: 'fgMiss', label: '打铁' },
-  { key: 'fg3a', label: '三分出手' },
-  { key: 'fg3', label: '三分命中' },
-  { key: 'fg3Miss', label: '三分打铁' },
-  { key: 'fta', label: '罚球次数' },
-  { key: 'ft', label: '罚球命中' },
-  { key: 'ftMiss', label: '罚球打铁' },
-  { key: 'tplDbl', label: '三双' },
+  { key: 'g', label: 'GP' },
+  { key: 'mp', label: 'MIN' },
+  { key: 'pts', label: 'PTS' },
+  { key: 'trb', label: 'REB' },
+  { key: 'orb', label: 'ORB' },
+  { key: 'drb', label: 'DRB' },
+  { key: 'ast', label: 'AST' },
+  { key: 'tov', label: 'TOV' },
+  { key: 'stl', label: 'STL' },
+  { key: 'blk', label: 'BLK' },
+  { key: 'pf', label: 'PF' },
+  { key: 'fga', label: 'FGA' },
+  { key: 'fg', label: 'FGM' },
+  { key: 'fgMiss', label: 'Misses' },
+  { key: 'fg3a', label: '3PA' },
+  { key: 'fg3', label: '3PM' },
+  { key: 'fg3Miss', label: '3P misses' },
+  { key: 'fta', label: 'FTA' },
+  { key: 'ft', label: 'FTM' },
+  { key: 'ftMiss', label: 'FT misses' },
+  { key: 'tplDbl', label: 'Triple-doubles' },
 ]
 
 /** 整数带千分位（生涯总数动辄五位数，不分节读不出来） */
 export const fmtTotal = (v) => (v == null ? '-' : Number(v).toLocaleString('en-US'))
 
 /** 不达标的原因，决定标签文案 */
-export const unqualifiedReason = (field) => (PCT_QUALIFY[field] ? i18n.t("出手不足") : i18n.t("场次不足"))
+export const unqualifiedReason = (field) => (PCT_QUALIFY[field] ? 'Not enough attempts' : 'Not enough games')
 
 /** 名次 = 池子里比他强的人数 + 1；asc 项（失误/犯规）越少越前 */
 export const rankIn = (rows, field, value, asc, po = false) => {
@@ -338,56 +334,60 @@ export const fmtReb = (total, off, def) =>
 // 零宽空格，窄列只在队码边界换行；标签类宽松场合可传 ' → '。
 export const fmtTeamChain = (v, sep = '\u2192\u200b') => String(v || '').split('->').join(sep)
 
-// \u961f\u7801 \u2192 \u4e2d\u6587\u961f\u540d\uff08\u6570\u636e\u8868\u4e00\u5f8b\u663e\u793a\u4e2d\u6587\uff1b\u751f\u6daf\u6c47\u603b\u884c\u7684\u5360\u4f4d\u7b26 '/' \u4e0e\u8ba4\u4e0d\u51fa\u7684\u961f\u7801\u539f\u6837\u8f93\u51fa\uff09
 /**
  * 已消失的历史球队（1947-1955 为主）。这些队没有任何现役球队继承其历史，所以不能并进
  * NBA_TEAM_NAMES——那份是"现役 30 队"，球队卡片墙直接遍历它，混进来会多出 15 张死卡片。
- * 这里只供显示用（teamZh），点进去没有球队页是符合事实的：这些队真的不存在了。
+ * 这里只供 teamName 显示队名用，点进去没有球队页是符合事实的：这些队真的不存在了。
+ * 老球队必须带城市：Waterloo Hawks / Atlanta Hawks、Denver Nuggets (1949) / 现在的 Nuggets，
+ * 只看队名分不开。
  */
 export const DEFUNCT_TEAM_NAMES = {
-  BLB: '巴尔的摩子弹', WSC: '华盛顿国会', CHS: '芝加哥雄鹿', INO: '印城奥林匹亚',
-  STB: '圣路易斯轰炸机', PRO: '普罗维登斯压路机', PIT: '匹兹堡铁人', DTF: '底特律猎鹰',
-  SHE: '谢博伊根红皮', CLR: '克利夫兰反抗者', WAT: '滑铁卢老鹰', INJ: '印城喷气机',
-  DNN: '丹佛掘金(1949)', TRH: '多伦多哈士奇', AND: '安德森包装工',
+  BLB: 'Baltimore Bullets', WSC: 'Washington Capitols', CHS: 'Chicago Stags', INO: 'Indianapolis Olympians',
+  STB: 'St. Louis Bombers', PRO: 'Providence Steamrollers', PIT: 'Pittsburgh Ironmen', DTF: 'Detroit Falcons',
+  SHE: 'Sheboygan Red Skins', CLR: 'Cleveland Rebels', WAT: 'Waterloo Hawks', INJ: 'Indianapolis Jets',
+  DNN: 'Denver Nuggets (1949)', TRH: 'Toronto Huskies', AND: 'Anderson Packers',
 }
 
 /**
- * 球员显示名：英文界面用 NAME_EN，中文界面用本地化的 PLAYER_NAME。
+ * 球员显示名：一律先用 NAME_EN（B-R 的英文原名），没有才退回 PLAYER_NAME。
  *
- * 这是 dream_player 表里现成的两列（NAME_EN 4907 行全满，是 B-R 的原名），不是翻译文件——
- * 球员名是数据，一行一个，不可能也不该进 en.json。所有显示球员名的地方都走这里，
- * 数据表的「球员」列、榜单卡、对比页、比赛详情……缺一处，英文界面上就会冒出一个中文名。
- * 老数据没汉化的行 PLAYER_NAME 可能等于 NAME_EN，两种语言显示一样，正确。
+ * 不再按界面语言挑：网站改成只保留英文（2026-10-06 站长定的），名字这类数据
+ * 直接显示英文原名，不经过翻译、也不判断语言。
+ * 这是 dream_player 表里现成的两列（NAME_EN 4907 行全满）：球员名是数据，一行一个，
+ * 不是界面文字。所有显示球员名的地方都走这里，
+ * 数据表的「球员」列、榜单卡、对比页、比赛详情……漏一处，页面上就会冒出一个中文名。
+ * nba_career_totals（历史总榜）的查询也把英文原名别名成了 nameEn，同样适用。
  */
 export const displayName = (r) => {
   if (!r) return ''
-  if (i18n.language === 'en' && r.nameEn) return r.nameEn
-  return r.playerName || r.nameEn || ''
+  return r.nameEn || r.playerName || ''
 }
 
-export const teamZh = (code) => {
+/**
+ * 队码 → 队名，所有显示队名的地方（表格球队列、交易链、榜单卡、队标 title）都走这里。
+ * 现役队查 NBA_TEAM_NAMES，老球队查 DEFUNCT_TEAM_NAMES；
+ * 两张表都认不出的队码（或生涯汇总行的 '/'）原样返回。
+ */
+export const teamName = (code) => {
   const c = String(code ?? '').trim().toUpperCase()
-  // 队名表里存的是中文，中文同时是 i18n 的 key：这里包一层，所有显示队名的地方
-  // （表格球队列、交易链、榜单卡、队标 title）就都跟着语言走了，不用一处处改。
-  // 认不出的队码（或生涯汇总行的 '/'）原样返回——t() 对没有翻译的 key 就是原样返回。
-  return i18n.t(NBA_TEAM_NAMES[c] || DEFUNCT_TEAM_NAMES[c] || String(code ?? ''))
+  return NBA_TEAM_NAMES[c] || DEFUNCT_TEAM_NAMES[c] || String(code ?? '')
 }
 
-// \u4ea4\u6613\u94fe\u7684\u4e2d\u6587\u7248\uff1a'CHI->BOS' \u2192 '\u516c\u725b\u2192\u51ef\u5c14\u7279\u4eba'\uff08\u7bad\u5934\u540e\u540c\u6837\u57ab\u96f6\u5bbd\u7a7a\u683c\uff0c\u7a84\u5217\u53ea\u5728\u961f\u540d\u8fb9\u754c\u65ad\u884c\uff09
-export const fmtTeamChainZh = (v, sep = '\u2192\u200b') =>
-  String(v || '').split('->').map((s) => teamZh(s)).join(sep)
+// 交易链逐站换成队名：'CHI->BOS' → 'Bulls→Celtics'（箭头后同样垫零宽空格，窄列只在队名边界断行）
+export const fmtTeamChainNames = (v, sep = '\u2192\u200b') =>
+  String(v || '').split('->').map((s) => teamName(s)).join(sep)
 
 // 季后赛成绩 → Tag 颜色（球队排行/球队页共用）
 export const PLAYOFF_TAG = {
-  总冠军: 'gold', 总决赛: 'volcano', 分区决赛: 'purple', 半决赛: 'geekblue', 首轮: 'cyan', 未进季后赛: 'default',
+  Champion: 'gold', Finals: 'volcano', 'Conf. Finals': 'purple', Semifinals: 'geekblue', 'First Round': 'cyan', 'Missed playoffs': 'default',
 }
 
 // 由「轮次 + 出战场次」反推季后赛胜负：每赢一轮 +4 胜（夺冠=16 胜），
 // 剩余场次先记为止步轮的胜场（最多 3），其余是此前各轮输掉的场次。
 export const playoffRecord = (result, games) => {
-  const roundsWon = { 首轮: 0, 半决赛: 1, 分区决赛: 2, 总决赛: 3, 总冠军: 4 }[result]
+  const roundsWon = { 'First Round': 0, Semifinals: 1, 'Conf. Finals': 2, Finals: 3, Champion: 4 }[result]
   if (roundsWon == null || !games) return null
-  if (result === '总冠军') return { wins: 16, losses: games - 16 }
+  if (result === 'Champion') return { wins: 16, losses: games - 16 }
   const rem = Math.max(0, games - 4 * roundsWon - 4)
   const wins = 4 * roundsWon + Math.min(3, rem)
   return { wins, losses: games - wins }
@@ -405,26 +405,33 @@ export const teamRegion = (code) => {
 
 // 东西部与分区（球队排行的范围筛选用）
 export const NBA_STRUCTURE = {
-  东部: {
-    大西洋赛区: ['BOS', 'BKN', 'NYK', 'PHI', 'TOR'],
-    中部赛区: ['CHI', 'CLE', 'DET', 'IND', 'MIL'],
-    东南赛区: ['ATL', 'CHA', 'MIA', 'ORL', 'WAS'],
+  East: {
+    Atlantic: ['BOS', 'BKN', 'NYK', 'PHI', 'TOR'],
+    Central: ['CHI', 'CLE', 'DET', 'IND', 'MIL'],
+    Southeast: ['ATL', 'CHA', 'MIA', 'ORL', 'WAS'],
   },
-  西部: {
-    西北赛区: ['DEN', 'MIN', 'OKC', 'POR', 'UTA'],
-    太平洋赛区: ['GSW', 'LAC', 'LAL', 'PHX', 'SAC'],
-    西南赛区: ['DAL', 'HOU', 'MEM', 'NOP', 'SAS'],
+  West: {
+    Northwest: ['DEN', 'MIN', 'OKC', 'POR', 'UTA'],
+    Pacific: ['GSW', 'LAC', 'LAL', 'PHX', 'SAC'],
+    Southwest: ['DAL', 'HOU', 'MEM', 'NOP', 'SAS'],
   },
 }
 
-// NBA 30 队简写 → 中文名（球队卡片显示用；数据里的队码已规范化对齐）
+/**
+ * NBA 现役 30 队：队码 → 队名（数据里的队码已规范化对齐）。卡片墙、对比页选队都遍历它的 key，
+ * 显示队名统一走 teamName。
+ *
+ * 只要队名（Lakers），不带城市：队名要塞进 66-78px 的表格列、「Lakers→Celtics」这种交易链和榜单卡里，
+ * 带上城市（Minnesota Timberwolves）几乎处处都会折行。30 个队名本身互不重复，不会认错。
+ * （2026-10-06 网站改成只有英文：原来这里是中文队名，另有一张英文表，两张合成了这一张。）
+ */
 export const NBA_TEAM_NAMES = {
-  ATL: '老鹰', BOS: '凯尔特人', BKN: '篮网', CHA: '黄蜂', CHI: '公牛',
-  CLE: '骑士', DAL: '独行侠', DEN: '掘金', DET: '活塞', GSW: '勇士',
-  HOU: '火箭', IND: '步行者', LAC: '快船', LAL: '湖人', MEM: '灰熊',
-  MIA: '热火', MIL: '雄鹿', MIN: '森林狼', NOP: '鹈鹕', NYK: '尼克斯',
-  OKC: '雷霆', ORL: '魔术', PHI: '76人', PHX: '太阳', POR: '开拓者',
-  SAC: '国王', SAS: '马刺', TOR: '猛龙', UTA: '爵士', WAS: '奇才',
+  ATL: 'Hawks', BOS: 'Celtics', BKN: 'Nets', CHA: 'Hornets', CHI: 'Bulls',
+  CLE: 'Cavaliers', DAL: 'Mavericks', DEN: 'Nuggets', DET: 'Pistons', GSW: 'Warriors',
+  HOU: 'Rockets', IND: 'Pacers', LAC: 'Clippers', LAL: 'Lakers', MEM: 'Grizzlies',
+  MIA: 'Heat', MIL: 'Bucks', MIN: 'Timberwolves', NOP: 'Pelicans', NYK: 'Knicks',
+  OKC: 'Thunder', ORL: 'Magic', PHI: '76ers', PHX: 'Suns', POR: 'Trail Blazers',
+  SAC: 'Kings', SAS: 'Spurs', TOR: 'Raptors', UTA: 'Jazz', WAS: 'Wizards',
 }
 
 /**
@@ -433,27 +440,27 @@ export const NBA_TEAM_NAMES = {
  * asc=越小越好（失误率、防守效率）。
  */
 export const ADVANCED_STATS = [
-  { field: 'playerPerReal', label: 'PER', note: '联盟平均 15' },
-  { field: 'playerTsPct', label: '真实命中率', pct: true },
-  { field: 'playerUsgPct', label: '使用率', rate: true },
-  { field: 'playerOffEff', label: '进攻效率', digits: 0, note: '每百回合得分' },
-  { field: 'playerDefEff', label: '防守效率', digits: 0, order: 'asc', asc: true, note: '越低越好' },
-  { field: 'playerNetEff', label: '净效率', digits: 0 },
-  { field: 'playerBpm', label: 'BPM', note: '每百回合高于联盟平均' },
-  { field: 'playerObpm', label: '进攻BPM' },
-  { field: 'playerDbpm', label: '防守BPM' },
-  { field: 'playerVorp', label: 'VORP', note: '相对替补级球员的价值' },
-  { field: 'playerWs', label: '胜利贡献' },
-  { field: 'playerOws', label: '进攻胜利贡献' },
-  { field: 'playerDws', label: '防守胜利贡献' },
+  { field: 'playerPerReal', label: 'PER', note: 'League avg 15' },
+  { field: 'playerTsPct', label: 'True Shooting %', pct: true },
+  { field: 'playerUsgPct', label: 'USG%', rate: true },
+  { field: 'playerOffEff', label: 'ORtg', digits: 0, note: 'Points per 100 poss.' },
+  { field: 'playerDefEff', label: 'DRtg', digits: 0, order: 'asc', asc: true, note: 'Lower is better' },
+  { field: 'playerNetEff', label: 'Net Rtg', digits: 0 },
+  { field: 'playerBpm', label: 'BPM', note: 'Per 100 poss. above league avg' },
+  { field: 'playerObpm', label: 'OBPM' },
+  { field: 'playerDbpm', label: 'DBPM' },
+  { field: 'playerVorp', label: 'VORP', note: 'Value over replacement' },
+  { field: 'playerWs', label: 'Win Shares' },
+  { field: 'playerOws', label: 'Off. Win Shares' },
+  { field: 'playerDws', label: 'Def. Win Shares' },
   { field: 'playerWs48', label: 'WS/48', digits: 3 },
-  { field: 'playerOrbPct', label: '前板率', rate: true },
-  { field: 'playerDrbPct', label: '后板率', rate: true },
-  { field: 'playerTrbPct', label: '篮板率', rate: true },
-  { field: 'playerAstPct', label: '助攻率', rate: true },
-  { field: 'playerStlPct', label: '抢断率', rate: true },
-  { field: 'playerBlkPct', label: '盖帽率', rate: true },
-  { field: 'playerTovPct', label: '失误率', rate: true, order: 'asc', asc: true, note: '越低越好' },
+  { field: 'playerOrbPct', label: 'ORB%', rate: true },
+  { field: 'playerDrbPct', label: 'DRB%', rate: true },
+  { field: 'playerTrbPct', label: 'REB%', rate: true },
+  { field: 'playerAstPct', label: 'AST%', rate: true },
+  { field: 'playerStlPct', label: 'STL%', rate: true },
+  { field: 'playerBlkPct', label: 'BLK%', rate: true },
+  { field: 'playerTovPct', label: 'TOV%', rate: true, order: 'asc', asc: true, note: 'Lower is better' },
 ]
 
 /**
@@ -462,9 +469,9 @@ export const ADVANCED_STATS = [
  * 所以单列一份。
  */
 export const DRILL_ONLY_STATS = [
-  { field: 'playerAvgFga', label: '场均投篮出手' },
-  { field: 'playerAvgTpa', label: '场均三分出手' },
-  { field: 'playerAvgFta', label: '场均罚球出手' },
+  { field: 'playerAvgFga', label: 'FGA' },
+  { field: 'playerAvgTpa', label: '3PA' },
+  { field: 'playerAvgFta', label: 'FTA' },
 ]
 
 /** 高阶数据缺失时的占位。生涯汇总行没有高阶指标（B-R 只按赛季发布，不发生涯合计），
@@ -484,24 +491,24 @@ export const fmtAdv = (v, s) => {
  * digits=小数位（默认 1），order 默认 desc（防守效率越低越好用 asc），note 显示在卡片标题旁。
  */
 export const RANKING_STATS = [
-  { field: 'playerAvgScore', label: '得分' },
-  { field: 'playerAvgReb', label: '篮板' },
-  { field: 'playerAvgOffReb', label: '前场篮板' },
-  { field: 'playerAvgDefReb', label: '后场篮板' },
-  { field: 'playerAvgAss', label: '助攻' },
-  { field: 'playerAvgSteal', label: '抢断' },
-  { field: 'playerAvgBlock', label: '盖帽' },
-  { field: 'playerAvgFgm', label: '场均投篮命中', note: '每场命中球数' },
-  { field: 'playerAvgTpm', label: '场均三分命中', note: '每场命中三分数' },
-  { field: 'playerAccuracy', label: '投篮%', pct: true },
-  { field: 'playerThreeAccuracy', label: '三分%', pct: true },
-  { field: 'playerFreethrowAccuracy', label: '罚球%', pct: true },
-  { field: 'playingTime', label: '上场时间' },
-  { field: 'playerAppearance', label: '出场', digits: 0 },
-  { field: 'playerPer', label: '效率值', note: '得分+板+助+断+帽−打铁−失误' },
-  { field: 'playerAvgTurnover', label: '失误', note: '场均最多' },
-  { field: 'playerAvgPf', label: '犯规', note: '场均最多' },
+  { field: 'playerAvgScore', label: 'PTS' },
+  { field: 'playerAvgReb', label: 'REB' },
+  { field: 'playerAvgOffReb', label: 'ORB' },
+  { field: 'playerAvgDefReb', label: 'DRB' },
+  { field: 'playerAvgAss', label: 'AST' },
+  { field: 'playerAvgSteal', label: 'STL' },
+  { field: 'playerAvgBlock', label: 'BLK' },
+  { field: 'playerAvgFgm', label: 'FGM', note: 'Field goals made per game' },
+  { field: 'playerAvgTpm', label: '3PM', note: 'Threes made per game' },
+  { field: 'playerAccuracy', label: 'FG%', pct: true },
+  { field: 'playerThreeAccuracy', label: '3P%', pct: true },
+  { field: 'playerFreethrowAccuracy', label: 'FT%', pct: true },
+  { field: 'playingTime', label: 'MIN' },
+  { field: 'playerAppearance', label: 'GP', digits: 0 },
+  { field: 'playerPer', label: 'PER', note: 'PTS+REB+AST+STL+BLK−misses−TOV' },
+  { field: 'playerAvgTurnover', label: 'TOV', note: 'highest average' },
+  { field: 'playerAvgPf', label: 'PF', note: 'highest average' },
   // 正负值靠逐场累加（赛季级别的数据源没有）。常规赛逐场入库后 1997 起每季都排得出来，
   // 1996 及更早整季没有这项数据，那些年份这张卡是空的——不是没人合格，是数据源就没有。
-  { field: 'playerAvgPn', label: '正负值', note: '1997 赛季起' },
+  { field: 'playerAvgPn', label: '+/-', note: 'since 1997' },
 ]

@@ -32,8 +32,6 @@ import { lolSectionRenderer } from '../../components/lolSections'
 import LolModuleEntry from '../../components/LolModuleEntry'
 import { onPostPublished } from '../../utils/postBus'
 import TopicFilesEntry from '../../components/TopicFilesEntry'
-import { useTranslation } from 'react-i18next'
-import i18n from '../../i18n'
 
 /**
  * 帖子列表（公开，P5-2 内容流改版），按频道复用：
@@ -64,12 +62,12 @@ const timeAgo = (v) => {
   if (!v) return ''
   const d = dayjs(v)
   const mins = dayjs().diff(d, 'minute')
-  if (mins < 1) return i18n.t("刚刚")
-  if (mins < 60) return i18n.t("{{mins}} 分钟前", { mins })
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins} min ago`
   const hrs = dayjs().diff(d, 'hour')
-  if (hrs < 24) return i18n.t("{{hrs}} 小时前", { hrs })
+  if (hrs < 24) return `${hrs} h ago`
   const days = dayjs().diff(d, 'day')
-  if (days < 30) return i18n.t("{{days}} 天前", { days })
+  if (days < 30) return `${days} d ago`
   return d.format('YYYY-MM-DD')
 }
 
@@ -84,7 +82,6 @@ const hotOf = (p) => (p.goodNum ?? 0) * 2 + (p.commentNum ?? 0) * 3
 
 /** 单条帖子卡：头像 + 标题/摘要/元信息 + 首图缩略图 */
 function PostCard({ post, topicOwnerIds, categoryName }) {
-  const { t } = useTranslation()
   const { dn } = useAuth() // 备注名：我给谁备注过，全站看到的就是备注名
   const isMobile = useIsMobile()
   const navigate = useNavigate()
@@ -124,7 +121,7 @@ function PostCard({ post, topicOwnerIds, categoryName }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* 作者行：头像旁对齐——名字 + 身份标识（超管/题主）+ 头衔 + 时间 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#999', flexWrap: 'wrap' }}>
-          <span onClick={toProfile} style={{ color: '#333', fontWeight: 600, fontSize: 13, cursor: toProfile ? 'pointer' : undefined }}>{dn(post.authorId, post.author) || t("匿名")}</span>
+          <span onClick={toProfile} style={{ color: '#333', fontWeight: 600, fontSize: 13, cursor: toProfile ? 'pointer' : undefined }}>{dn(post.authorId, post.author) || 'Anonymous'}</span>
           {post.authorSuperManager && <SuperAdminBadge />}
           {topicOwnerIds?.includes(post.authorId) && <TopicOwnerBadge />}
           <UserTitles titles={post.authorTitles} size="sm" />
@@ -132,14 +129,14 @@ function PostCard({ post, topicOwnerIds, categoryName }) {
         </div>
         {/* 标题（含置顶/精华/锁定/隐藏标） */}
         <div className="post-title" style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.4, marginTop: 6, transition: 'color .2s', ...clamp(1) }}>
-          {post.top === '1' && <Tag color="red" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{t("置顶", { context: 'state' })}</Tag>}
-          {post.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{t("精华", { context: 'state' })}</Tag>}
-          {post.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{t("锁定")}</Tag>}
-          {post.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{t("已隐藏")}</Tag>}
+          {post.top === '1' && <Tag color="red" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Pinned</Tag>}
+          {post.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Featured</Tag>}
+          {post.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Locked</Tag>}
+          {post.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Hidden</Tag>}
           {/* 草稿只会出现在作者自己的列表里（后端过滤），所以这里不用再判断身份 */}
-          {post.draft === '1' && <Tag icon={<EditOutlined />} color="gold" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{t("草稿")}</Tag>}
+          {post.draft === '1' && <Tag icon={<EditOutlined />} color="gold" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Draft</Tag>}
           {categoryName && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{categoryName}</Tag>}
-          {post.title || t("(无标题)")}
+          {post.title || '(untitled)'}
         </div>
         {excerpt && (
           <div style={{ fontSize: 13.5, color: '#8c8c8c', marginTop: 6, lineHeight: 1.7, ...clamp(isMobile ? 3 : 2) }}>
@@ -168,7 +165,6 @@ function PostCard({ post, topicOwnerIds, categoryName }) {
 
 /** 右栏热榜：热度 Top5 */
 function HotRail({ rows, official }) {
-  const { t } = useTranslation()
   const hot = useMemo(
     () =>
       (rows || [])
@@ -179,7 +175,7 @@ function HotRail({ rows, official }) {
   )
   return (
     <Card
-      title={<span><FireOutlined style={{ color: '#f5222d', marginRight: 6 }} />{official ? t("热门新闻") : t("热帖榜")}</span>}
+      title={<span><FireOutlined style={{ color: '#f5222d', marginRight: 6 }} />{official ? 'Hot news' : 'Hot Posts'}</span>}
       loading={rows === null}
       style={{ borderRadius: 14 }}
       styles={{ body: { padding: '6px 18px 10px' } }}
@@ -198,7 +194,7 @@ function HotRail({ rows, official }) {
               {i + 1}
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: i < 3 ? 600 : 400, ...clamp(1) }}>{p.title || t("(无标题)")}</div>
+              <div style={{ fontSize: 13, fontWeight: i < 3 ? 600 : 400, ...clamp(1) }}>{p.title || '(untitled)'}</div>
               <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
                 <LikeOutlined /> {p.goodNum ?? 0} · <MessageOutlined /> {p.commentNum ?? 0}
               </div>
@@ -206,7 +202,7 @@ function HotRail({ rows, official }) {
           </Link>
         ))
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无内容")} />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nothing here yet" />
       )}
     </Card>
   )
@@ -219,7 +215,6 @@ function HotRail({ rows, official }) {
  * 均复用同一套卡片流 + 热榜。列表接口 ES 全量返回，前端搜索/排序/分页。
  */
 export default function NewsList({ channel = 'forum', topic = null, onApplied, nbaSection = null, lolSection = null }) {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user, dn } = useAuth()
@@ -231,8 +226,8 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
 
   const [rows, setRows] = useState(null)
   const [kw, setKw] = useState('')
-  // 视图：最新 / 最热 / 精华 / 只看题主（后两个是过滤，题主仅专题模式有）
-  const [view, setView] = useState('最新')
+  // 视图：latest 最新 / hot 最热 / featured 精华 / owner 只看题主（后两个是过滤，题主仅专题模式有）
+  const [view, setView] = useState('latest')
   const [page, setPage] = useState(1)
   const [shown, setShown] = useState(MOBILE_PAGE) // 移动端已展开的条数（上拉加载）
   const [memberOpen, setMemberOpen] = useState(false)
@@ -260,7 +255,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
   }, [channel, isTopic, topicId])
 
   useEffect(() => {
-    setRows(null); setKw(''); setView('最新'); setPage(1); setCat('all'); setShown(MOBILE_PAGE)
+    setRows(null); setKw(''); setView('latest'); setPage(1); setCat('all'); setShown(MOBILE_PAGE)
     fetchRows()
   }, [fetchRows])
 
@@ -286,9 +281,9 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
     // 类别：题主配的那几项，帖子记的是 id（列表已全量在手，纯前端筛）
     if (cat !== 'all') hit = hit.filter((p) => (p.categoryId || '') === cat)
     // 精华：只看加精帖；只看题主：前端按专题 owner 的 authorId 过滤（列表已全量在手）
-    if (view === '精华') hit = hit.filter((p) => p.essence === '1')
-    if (view === '只看题主' && topic?.ownerIds?.length) hit = hit.filter((p) => topic.ownerIds.includes(p.authorId))
-    const sorted = view === '最热'
+    if (view === 'featured') hit = hit.filter((p) => p.essence === '1')
+    if (view === 'owner' && topic?.ownerIds?.length) hit = hit.filter((p) => topic.ownerIds.includes(p.authorId))
+    const sorted = view === 'hot'
       ? [...hit].sort((a, b) => hotOf(b) - hotOf(a) || dayjs(b.publishDate).valueOf() - dayjs(a.publishDate).valueOf())
       : hit // 后端已按（置顶优先 + 发布时间倒序）排好
     // 置顶帖始终浮到最前（不论哪个视图）
@@ -303,11 +298,11 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
     if (!used.length) return []
     const none = count('')
     return [
-      { value: 'all', label: t("全部"), count: rows.length },
+      { value: 'all', label: 'All', count: rows.length },
       ...used.map((c) => ({ value: c.id, label: c.name, count: count(c.id) })),
-      ...(none ? [{ value: '', label: t("未分类"), count: none }] : []),
+      ...(none ? [{ value: '', label: 'Uncategorized', count: none }] : []),
     ]
-  }, [isTopic, postCats, rows, t])
+  }, [isTopic, postCats, rows])
 
   // 桌面端翻页器；移动端换成"越滑越多"的切片，两者取的是同一份 filtered
   const paged = isMobile ? filtered?.slice(0, shown) : filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -443,7 +438,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
         <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: isMobile ? 18 : 23, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8, textShadow: bannerUrl ? '0 1px 6px rgba(0,0,0,.45)' : undefined }}>
-              {isTopic ? topic.name : official ? t("官方新闻") : t("百家说")}
+              {isTopic ? topic.name : official ? 'Official News' : 'Chat Everything'}
               {/* 和专题列表卡片同一个组件：状态标记是一排裸图标，不是彩色 Tag。
                   横幅压在背景图上，所以走 light */}
               {isTopic && <TopicBadges topic={topic} light style={{ fontSize: 13 }} />}
@@ -451,7 +446,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                   类别列表点开才拉——弹窗里的「专题类别」下拉要用，但普通访客用不上 */}
               {isTopic && topic.canManage && (
                 <EditOutlined
-                  title={t("编辑专题")}
+                  title="Edit topic"
                   onClick={() => {
                     setEditOpen(true)
                     topicApi.categoryList().then((r) => setCats(Array.isArray(r) ? r : [])).catch(() => setCats([]))
@@ -461,7 +456,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
               )}
             </div>
             <div style={{ opacity: 0.88, marginTop: 6, fontSize: 13, maxWidth: 620, textShadow: bannerUrl ? '0 1px 6px rgba(0,0,0,.45)' : undefined }}>
-              {isTopic ? (topic.description || t("按专题组织的讨论区")) : official ? t("权威发布 · 人人可评") : t("见你所见，想你所想")}
+              {isTopic ? (topic.description || 'Discussions organized by topic') : official ? 'Official releases · open to comments' : 'See what you see, think what you think'}
             </div>
           </div>
           {/* 订阅和成员管理收成图标，和标题旁的编辑图标同一套：横幅上原来并排两个
@@ -471,7 +466,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
               缩成图标就找不到了 */}
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexShrink: 0, marginTop: 2 }}>
             {isTopic && topic.joined && (
-              <Tooltip title={topic.subscribed ? t("已订阅，点一下取消") : t("订阅后进侧栏「订阅的专题」")}>
+              <Tooltip title={topic.subscribed ? 'Subscribed. Click to unsubscribe' : 'Subscribe to keep it in the sidebar'}>
                 <span
                   onClick={async () => {
                     try {
@@ -487,7 +482,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
               </Tooltip>
             )}
             {isTopic && topic.canManage && (
-              <Tooltip title={t("成员管理")}>
+              <Tooltip title="Members">
                 <Badge count={topic.pendingCount || 0} size="small" offset={[-2, 2]}>
                   <span
                     onClick={() => setMemberOpen(true)}
@@ -527,13 +522,13 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
             <Input
               allowClear
               prefix={<SearchOutlined style={{ color: '#aaa' }} />}
-              placeholder={t("搜索标题 / 作者 / 标签")}
+              placeholder="Search title / author / tags"
               value={kw}
               onChange={(e) => { setKw(e.target.value); setPage(1) }}
               style={{ maxWidth: 260, height: 34, borderRadius: 17, background: '#f5f5f5' }}
             />
             {/* 篇数紧跟搜索框：它说明的是"搜出来多少"，离搜索框越近越好读（与百家说首页一致） */}
-            {filtered != null && <span style={{ fontSize: 13, color: '#999', whiteSpace: 'nowrap' }}>{filtered.length} {t("篇")}</span>}
+            {filtered != null && <span style={{ fontSize: 13, color: '#999', whiteSpace: 'nowrap' }}>{((filtered.length) === 1 ? `${filtered.length} post` : `${filtered.length} posts`)}</span>}
           </div>
 
           {/* 第二层：帖子类别筛选（题主配的那份），类别多了会自己换行 */}
@@ -548,10 +543,10 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
               value={view}
               onChange={(v) => { setView(v); setPage(1) }}
               options={[
-                { label: t("最新"), value: '最新', icon: <ClockCircleOutlined /> },
-                { label: t("最热"), value: '最热', icon: <FireOutlined /> },
-                { label: t("精华", { context: 'state' }), value: '精华', icon: <StarOutlined /> },
-                ...(isTopic && topic?.ownerIds?.length ? [{ label: t("题主"), value: '只看题主', icon: <CrownOutlined /> }] : []),
+                { label: 'Latest', value: 'latest', icon: <ClockCircleOutlined /> },
+                { label: 'Hot', value: 'hot', icon: <FireOutlined /> },
+                { label: 'Featured', value: 'featured', icon: <StarOutlined /> },
+                ...(isTopic && topic?.ownerIds?.length ? [{ label: 'Owner', value: 'owner', icon: <CrownOutlined /> }] : []),
               ]}
             />
             {isTopic && <TopicChatEntry topic={topic} />}
@@ -573,7 +568,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           ) : (
             <Card style={{ borderRadius: 14 }}>
               {/* 发布入口只留右栏卡片那个，空状态不再重复放按钮 */}
-              <Empty description={kw ? t("没有匹配的内容") : official ? t("还没有新闻") : t("还没有帖子，来发第一帖")} />
+              <Empty description={kw ? 'No matches' : official ? 'No news yet' : 'No posts yet. Write the first one'} />
             </Card>
           )}
 
@@ -582,7 +577,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           {isMobile ? (
             paged?.length ? (
               <div ref={sentinelRef} style={{ padding: '18px 0 4px', textAlign: 'center', fontSize: 12, color: '#bbb' }}>
-                {hasMore ? t("加载中…") : t("没有更多了 · 共 {{length}} 篇", { length: filtered.length })}
+                {hasMore ? 'Loading…' : ((filtered.length) === 1 ? `That's all · ${filtered.length} post` : `That's all · ${filtered.length} posts`)}
               </div>
             ) : null
           ) : (filtered?.length ?? 0) > PAGE_SIZE && (
@@ -605,9 +600,9 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
             {/* 发帖引导卡只在桌面右栏出现；移动端有固定底部按钮，避免页尾再重复一个 */}
             {canPost && !isMobile && (
               <Card style={{ borderRadius: 14 }} styles={{ body: { padding: '18px 20px' } }}>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{official ? t("发布新闻") : t("有想说的？")}</div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>{official ? 'Publish news' : 'Something to say?'}</div>
                 <div style={{ fontSize: 13, color: '#8c8c8c', margin: '6px 0 14px' }}>
-                  {official ? t("面向全站的权威发布（管理员）") : t("畅聊一切，发一帖让大家看到你的想法！")}
+                  {official ? 'Official site-wide releases (admins)' : 'Talk about anything. Post and let everyone see what you think!'}
                 </div>
                 <Button
                   type="primary"
@@ -616,14 +611,14 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                   onClick={goPost}
                   style={official ? { background: '#2f54eb', borderColor: '#2f54eb' } : undefined}
                 >
-                  {official ? t("发布新闻") : user ? t("发帖") : t("登录后发帖")}
+                  {official ? 'Publish news' : user ? 'Post' : 'Sign in to post'}
                 </Button>
               </Card>
             )}
             {isTopic && !canPost && !topic.canManage && (
               <Card style={{ borderRadius: 14 }} styles={{ body: { padding: '16px 20px' } }}>
                 <div style={{ color: '#8c8c8c', fontSize: 13, marginBottom: 12 }}>
-                  {topic.canComment ? t("你还没有发帖权限，可申请开通。") : t("你还没有发帖/发言权限，可向 owner 申请开通。")}
+                  {topic.canComment ? 'You can\'t post here yet. You can apply for access.' : 'You can\'t post or comment here yet. Ask the owner for access.'}
                 </div>
                 <TopicApplyButton topic={topic} onApplied={onApplied} block />
               </Card>
@@ -631,7 +626,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
             {/* 官方新闻整站关掉时，这条互指的链接也别渲染，免得点进去被弹回来 */}
             {(official || NEWS_MODULE_ENABLED) && (
               <Link to={official ? '/news' : '/official'} style={{ color: '#888', fontSize: 13, textAlign: 'center' }}>
-                {t('去{{v}}逛逛', { v: official ? t('百家说') : t('官方新闻') })} <RightOutlined style={{ fontSize: 10 }} />
+                {`Visit ${official ? 'Chat Everything' : 'Official News'}`} <RightOutlined style={{ fontSize: 10 }} />
               </Link>
             )}
           </div>
@@ -658,7 +653,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           {canPost && (
             <div
               onClick={goPost}
-              title={official ? t("发布新闻") : user ? t("发帖") : t("登录后发帖")}
+              title={official ? 'Publish news' : user ? 'Post' : 'Sign in to post'}
               style={{
                 width: 52, height: 52, borderRadius: 26,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -679,7 +674,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           {showRefreshFab && (
             <div
               onClick={() => window.location.reload()}
-              title={t("刷新页面")}
+              title="Reload page"
               style={{
                 width: 52, height: 52, borderRadius: 26,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',

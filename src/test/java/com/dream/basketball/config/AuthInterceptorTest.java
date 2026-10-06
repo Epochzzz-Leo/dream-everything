@@ -143,7 +143,7 @@ class AuthInterceptorTest {
         assertFalse(interceptor.preHandle(request, response,
                 handler(DummyController.class, "adminEndpoint")));
         assertEquals(403, response.getStatus());
-        assertTrue(response.getContentAsString().contains("权限不足"));
+        assertTrue(response.getContentAsString().contains("No permission"));
     }
 
     @Test
@@ -285,7 +285,7 @@ class AuthInterceptorTest {
         assertFalse(interceptor.preHandle(request, response,
                 handler(DummyController.class, "nbaManagerEndpoint")));
         assertEquals(403, response.getStatus());
-        assertTrue(response.getContentAsString().contains("权限不足"));
+        assertTrue(response.getContentAsString().contains("No permission"));
     }
 
     @Test

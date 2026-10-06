@@ -7,7 +7,6 @@ import { useAuth } from '../auth/AuthContext'
 import useIsMobile from '../hooks/useIsMobile'
 import { HistoryChips, SearchResults } from './SearchResults'
 import { dropHistory, flatten, pushHistory, readHistory } from './searchModel'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 全局搜索的**入口**。两种形态：
@@ -27,7 +26,6 @@ import { useTranslation } from 'react-i18next'
  * 仍然会闪一下光标，看着像是坏了。用 div 画成输入框的样子就没有这个问题。
  */
 export default function GlobalSearch({ variant = 'pill' }) {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
   const { canUse } = useAuth()
@@ -165,7 +163,7 @@ export default function GlobalSearch({ variant = 'pill' }) {
       >
         <SearchOutlined style={{ color: '#aaa', fontSize: 15 }} />
         <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {t("想看点什么？")}
+          What are you looking for?
         </span>
       </div>
     )
@@ -190,7 +188,7 @@ export default function GlobalSearch({ variant = 'pill' }) {
       >
         <SearchOutlined style={{ color: hoverTrigger ? '#fa541c' : '#aaa', transition: 'color .2s' }} />
         {/* 胶囊只有 220px，英文整句放不下：这里用短文案，再加单行省略兜底 */}
-        {!isMobile && <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t("想看点什么？", { context: 'pill' })}</span>}
+        {!isMobile && <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Search…</span>}
         {!isMobile && <span style={kbd}>/</span>}
       </div>
 
@@ -215,7 +213,7 @@ export default function GlobalSearch({ variant = 'pill' }) {
           value={kw}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder={t("想看点什么？")}
+          placeholder="What are you looking for?"
           prefix={<SearchOutlined style={{ color: '#fa541c', fontSize: 18, marginRight: 6 }} />}
           style={{ padding: '14px 18px', fontSize: 16, borderBottom: '1px solid #f0f0f0', borderRadius: 0 }}
         />
@@ -225,7 +223,7 @@ export default function GlobalSearch({ variant = 'pill' }) {
               <HistoryChips history={history} onPick={runHistory} onClear={() => setHistory(dropHistory())} />
             ) : (
               <div style={{ textAlign: 'center', color: '#bbb', padding: '28px 0', fontSize: 13 }}>
-                {t("输入关键词搜索帖子、球员、资讯、用户")}
+                Type to search posts, players, news and users
               </div>
             )
           ) : (

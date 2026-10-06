@@ -6,30 +6,31 @@
  * 赛后想吐槽的往往正是前者。
  */
 export const KIND_LABEL = {
-  DNP: '替补未上场',
-  INACTIVE: '未激活',
+  DNP: 'Did not play (bench)',
+  INACTIVE: 'Inactive',
 }
 
 /** 短标签，贴在名字后面用 */
 export const KIND_TAG = {
-  DNP: '未上场',
-  INACTIVE: '未激活',
+  DNP: 'DNP',
+  INACTIVE: 'Inactive',
 }
 
 /**
- * B-R 的原因文案 → 中文。
+ * B-R 的原因文案 → 统一的短说法（原来是翻成中文；2026-10-06 网站只留英文后改成整理大小写和措辞）。
  *
- * 只翻常见的那几条，其余原样显示。把 B-R 的全部措辞抄一份进来既抄不全
+ * 只处理常见的那几条，其余原样显示。把 B-R 的全部措辞抄一份进来既抄不全
  * （伤病描述是自由文本），抄进来的那一刻也开始过期了。
+ * 'DNP' 这个结果会被比赛页拿去比较（等于 DNP 就不再重复显示原因），改它要一起改那两处。
  */
 const REASON_MAP = [
-  [/coach'?s decision/i, '教练决定'],
-  [/did not dress/i, '未着装'],
-  [/not with team/i, '不随队'],
-  [/suspend/i, '禁赛'],
-  [/personal/i, '个人原因'],
-  [/did not play/i, '未上场'],
-  [/inactive/i, '未激活'],
+  [/coach'?s decision/i, 'Coach\'s decision'],
+  [/did not dress/i, 'Did not dress'],
+  [/not with team/i, 'Not with team'],
+  [/suspend/i, 'Suspended'],
+  [/personal/i, 'Personal reasons'],
+  [/did not play/i, 'DNP'],
+  [/inactive/i, 'Inactive'],
 ]
 
 export const reasonText = (raw) => {

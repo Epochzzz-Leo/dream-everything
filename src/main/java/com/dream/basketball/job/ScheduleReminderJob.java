@@ -16,7 +16,7 @@ import java.util.*;
 
 /**
  * Schedule job — ONE daily 8am run (Melbourne clock) doing two things:
- * - digest per assignee ("你今天负责 N 件事：…"): single-day tasks on their day,
+ * - digest per assignee ("You have N things to do today: …"): single-day tasks on their day,
  *   deadline (multi-day) tasks on their DEADLINE day; skips done; REMINDED='1' = idempotent.
  * - overtime notice: an event whose deadline moment (END_DATE||EVENT_DATE + END_TIME||23:59)
  *   has passed and is STILL not done at this 8am gets a one-shot 超时 message
@@ -89,12 +89,12 @@ public class ScheduleReminderJob {
             StringBuilder digest = new StringBuilder();
             for (ScheduleEvent e : entry.getValue()) {
                 if (digest.length() > 0) {
-                    digest.append("、");
+                    digest.append(", ");
                 }
                 if (StringUtils.isNotBlank(e.getEndDate())) {
                     // 截止任务：今天到期
-                    digest.append("「").append(e.getTitle()).append("」")
-                            .append("(今天").append(StringUtils.isBlank(e.getEndTime()) ? "" : " " + e.getEndTime()).append("截止)");
+                    digest.append('"').append(e.getTitle()).append('"')
+                            .append(" (due today").append(StringUtils.isBlank(e.getEndTime()) ? "" : " at " + e.getEndTime()).append(')');
                 } else {
                     if (StringUtils.isNotBlank(e.getEventTime())) {
                         digest.append(e.getEventTime());
@@ -103,14 +103,15 @@ public class ScheduleReminderJob {
                         }
                         digest.append(" ");
                     }
-                    digest.append("「").append(e.getTitle()).append("」");
+                    digest.append('"').append(e.getTitle()).append('"');
                 }
             }
-            String text = "你今天负责 " + entry.getValue().size() + " 件事：" + digest;
+            int count = entry.getValue().size();
+            String text = "You have " + count + (count == 1 ? " thing" : " things") + " to do today: " + digest;
             if (text.length() > 240) {
                 text = text.substring(0, 240) + "…";
             }
-            userInformationService.saveUserInformation("", "日程提醒", entry.getKey(),
+            userInformationService.saveUserInformation("", "Schedule reminder", entry.getKey(),
                     Constants.SCHEDULE_REMIND, today, "", "", "", text, "");
         }
         List<String> ids = new ArrayList<>();
@@ -135,9 +136,9 @@ public class ScheduleReminderJob {
         }
         List<String> ids = new ArrayList<>();
         for (ScheduleEvent e : expiring) {
-            String text = "「" + e.getTitle() + "」的" + ("day".equals(e.getRecur()) ? "每日循环" : "每周循环")
-                    + "将于明天（" + tomorrow + "）结束，如需继续请前往日程页点「延续」";
-            userInformationService.saveUserInformation("", "日程提醒", e.getOwnerId(),
+            String text = "The " + ("day".equals(e.getRecur()) ? "daily" : "weekly") + " repeat of \"" + e.getTitle()
+                    + "\" ends tomorrow (" + tomorrow + "). To keep it going, open Schedule and tap Extend";
+            userInformationService.saveUserInformation("", "Schedule reminder", e.getOwnerId(),
                     Constants.SCHEDULE_EXPIRY, tomorrow, "", "", "", text, "");
             ids.add(e.getEventId());
         }
@@ -174,9 +175,9 @@ public class ScheduleReminderJob {
                 continue;
             }
             String receiver = StringUtils.isNotBlank(e.getAssigneeId()) ? e.getAssigneeId() : e.getOwnerId();
-            String text = "「" + e.getTitle() + "」已超时未完成（截止 " + deadlineDate
-                    + (StringUtils.isBlank(e.getEndTime()) ? "" : " " + e.getEndTime()) + "）";
-            userInformationService.saveUserInformation("", "日程提醒", receiver,
+            String text = "\"" + e.getTitle() + "\" is overdue (due " + deadlineDate
+                    + (StringUtils.isBlank(e.getEndTime()) ? "" : " " + e.getEndTime()) + ")";
+            userInformationService.saveUserInformation("", "Schedule reminder", receiver,
                     Constants.SCHEDULE_OVERDUE, deadlineDate, "", "", "", text, "");
             notified.add(e.getEventId());
         }

@@ -119,7 +119,7 @@ public class LolSyncService {
         JSONObject acct = riot.accountByRiotId(gameName, tagLine);
         String puuid = acct.getString("puuid");
         if (StringUtils.isBlank(puuid)) {
-            throw new IllegalStateException("Riot 没返回 puuid");
+            throw new IllegalStateException("Riot didn't return a PUUID");
         }
         // 同一个游戏账号不允许被两个人认领。这里主动查一次是为了给出人话提示，
         // 光靠唯一索引的话用户看到的是一条数据库异常
@@ -129,7 +129,7 @@ public class LolSyncService {
             if (StringUtils.equals(exist.getUserId(), userId)) {
                 return exist;                       // 重复绑定自己的号：当成幂等操作
             }
-            throw new IllegalStateException("这个游戏账号已经被其他成员绑定了");
+            throw new IllegalStateException("Another member has already linked this game account");
         }
         LolAccount a = new LolAccount();
         a.setAccountId(UUID.randomUUID().toString());
@@ -180,7 +180,7 @@ public class LolSyncService {
     public SyncReport runOnce() {
         SyncReport r = new SyncReport();
         if (!riot.isConfigured()) {
-            r.skipped = "RIOT_API_KEY 没配置";
+            r.skipped = "RIOT_API_KEY is not configured";
             return r;
         }
         List<LolAccount> accounts = accountMapper.selectList(
@@ -609,7 +609,7 @@ public class LolSyncService {
             } catch (RiotApiClient.RiotException e) {
                 if (e.isForbidden()) {
                     // key 或主机的问题，这一轮别再往下打了
-                    r.errors.add("段位补齐中止: " + e.getMessage());
+                    r.errors.add("Rank backfill stopped: " + e.getMessage());
                     log.error("LoL 补段位被拒绝（主机 {}）：{}", e.getHost(), e.getMessage());
                     break;
                 }
@@ -715,7 +715,7 @@ public class LolSyncService {
             }
             String nick = nickByPuuid.get(pu);
             out.put(pu, StringUtils.isNotBlank(nick)
-                    ? nick : StringUtils.defaultString(p.getString("championName"), "他"));
+                    ? nick : StringUtils.defaultString(p.getString("championName"), "Player"));
         }
         return out;
     }

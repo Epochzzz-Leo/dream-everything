@@ -43,7 +43,7 @@ IDS_CACHE = Path(__file__).parent / 'br_ids_cache.json'
 FIRST_YEAR, LAST_YEAR = 1977, 2026
 SEASON_BASE = 1976                      # season_num = year - 1976
 DELAY = 3.5                             # B-R tolerates ~20 req/min; stay under it
-ROUND_NAME = {1: '首轮', 2: '半决赛', 3: '分区决赛', 4: '总决赛'}
+ROUND_NAME = {1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals'}
 TABLE = 'player_playoff_round_stats'
 
 

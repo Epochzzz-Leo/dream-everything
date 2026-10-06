@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { EditableProTable } from '@ant-design/pro-components'
 import { Button, Input, Pagination, Popconfirm, Space, Spin, Upload, message } from 'antd'
 import { Link } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { playerApi } from '../../api/player'
-import { useTranslation } from 'react-i18next'
 
 const PAGE_SIZE = 20
-const fmtDate = (v) => (v ? new Date(v).toLocaleDateString('zh-CN') : '-')
+// 生日按英文习惯显示（Dec 30, 1984）。原来写死 toLocaleDateString('zh-CN')，英文界面上也是「1984/12/30」
+const fmtDate = (v) => (v ? dayjs(v).format('MMM D, YYYY') : '-')
 const isTemp = (id) => typeof id === 'string' && id.startsWith('new-')
 
 /**
@@ -18,7 +19,6 @@ const isTemp = (id) => typeof id === 'string' && id.startsWith('new-')
  * 不跟「保存本页」绑在一起。
  */
 export default function PlayerManage() {
-  const { t } = useTranslation()
   const [rows, setRows] = useState([])
   const [editableKeys, setEditableKeys] = useState([])
   const [loading, setLoading] = useState(false)
@@ -47,7 +47,7 @@ export default function PlayerManage() {
     // 只提交当前页；临时行清空 id，交给后端补 UUID
     const payload = rows.map((r) => (isTemp(r.playerId) ? { ...r, playerId: '' } : r))
     await playerApi.savePlayers(payload)
-    message.success(t("本页已保存"))
+    message.success('Page saved')
     reload()
   }
   // 本地新增一行：不落库，给个 new- 临时 id 占 rowKey
@@ -63,7 +63,7 @@ export default function PlayerManage() {
       return
     }
     await playerApi.deletePlayer(row.playerId)
-    message.success(t("已删除"))
+    message.success('Deleted')
     reload()
   }
 
@@ -74,7 +74,7 @@ export default function PlayerManage() {
     try {
       const res = await playerApi.uploadPhoto(file, row.playerId)
       setRows((rs) => rs.map((r) => (r.playerId === row.playerId ? { ...r, photo: res?.url } : r)))
-      message.success(t("照片已更新"))
+      message.success('Photo updated')
     } finally {
       setUploadingId(null)
     }
@@ -82,14 +82,14 @@ export default function PlayerManage() {
   const onRemovePhoto = async (row) => {
     await playerApi.deletePhoto(row.playerId)
     setRows((rs) => rs.map((r) => (r.playerId === row.playerId ? { ...r, photo: null } : r)))
-    message.success(t("照片已移除"))
+    message.success('Photo removed')
   }
 
   const columns = [
-    { title: t("球员"), dataIndex: 'playerName', formItemProps: { rules: [{ required: true, message: t("必填") }] } },
-    { title: t("号码"), dataIndex: 'playerNumber' },
+    { title: 'Player', dataIndex: 'playerName', formItemProps: { rules: [{ required: true, message: 'Required' }] } },
+    { title: 'No.', dataIndex: 'playerNumber' },
     {
-      title: t("照片"), dataIndex: 'photo', width: 190, editable: false,
+      title: 'Photo', dataIndex: 'photo', width: 190, editable: false,
       render: (_, row) => (
         <Space size={8}>
           {row.photo ? (
@@ -109,7 +109,7 @@ export default function PlayerManage() {
             </span>
           )}
           {isTemp(row.playerId) ? (
-            <span style={{ color: '#bbb' }}>{t("先保存")}</span> // 还没有 id，传上去没处挂
+            <span style={{ color: '#bbb' }}>Save first</span> // 还没有 id，传上去没处挂
           ) : uploadingId === row.playerId ? (
             <Spin size="small" />
           ) : (
@@ -118,30 +118,30 @@ export default function PlayerManage() {
               showUploadList={false}
               beforeUpload={(file) => { onUploadPhoto(row, file); return false }} // 自己发请求，不用 antd 的默认上传
             >
-              <a>{row.photo ? t("更换") : t("上传")}</a>
+              <a>{row.photo ? 'Change' : 'Upload'}</a>
             </Upload>
           )}
           {row.photo && !isTemp(row.playerId) && (
-            <Popconfirm key="rm" title={t("移除该球员照片？")} onConfirm={() => onRemovePhoto(row)}>
-              <a style={{ color: '#ff4d4f' }}>{t("移除")}</a>
+            <Popconfirm key="rm" title="Remove this player's photo?" onConfirm={() => onRemovePhoto(row)}>
+              <a style={{ color: '#ff4d4f' }}>Remove</a>
             </Popconfirm>
           )}
         </Space>
       ),
     },
-    { title: t("生日"), dataIndex: 'playerBirthday', editable: false, render: (_, r) => fmtDate(r.playerBirthday) },
+    { title: 'Birthday', dataIndex: 'playerBirthday', editable: false, render: (_, r) => fmtDate(r.playerBirthday) },
     {
-      title: t("操作"), valueType: 'option', width: 170, editable: false,
+      title: 'Actions', valueType: 'option', width: 170, editable: false,
       render: (_, row) => [
         isTemp(row.playerId)
-          ? <span key="stats" style={{ color: '#bbb' }}>{t("生涯数据")}</span> // 先保存才有 id
-          : <Link key="stats" to={`/admin/players/${row.playerId}/stats`}>{t("生涯数据")}</Link>,
+          ? <span key="stats" style={{ color: '#bbb' }}>Career stats</span> // 先保存才有 id
+          : <Link key="stats" to={`/admin/players/${row.playerId}/stats`}>Career stats</Link>,
         <Popconfirm
           key="del"
-          title={isTemp(row.playerId) ? t("移除这一未保存行？") : t("删除该球员及其所有赛季数据？")}
+          title={isTemp(row.playerId) ? 'Discard this unsaved row?' : 'Delete this player and all season data?'}
           onConfirm={() => onDelete(row)}
         >
-          <a style={{ color: '#ff4d4f' }}>{t("删除")}</a>
+          <a style={{ color: '#ff4d4f' }}>Delete</a>
         </Popconfirm>,
       ],
     },
@@ -151,7 +151,7 @@ export default function PlayerManage() {
     <>
       <EditableProTable
         rowKey="playerId"
-        headerTitle={t("球员管理")}
+        headerTitle="Player Admin"
         loading={loading}
         value={rows}
         onChange={setRows}
@@ -163,12 +163,12 @@ export default function PlayerManage() {
           <Input.Search
             key="search"
             allowClear
-            placeholder={t("搜索球员名")}
+            placeholder="Search player"
             style={{ width: 200 }}
             onSearch={(v) => { setPage(1); setSearchName(v.trim() || undefined) }}
           />,
-          <Button key="add" onClick={onAddRow}>{t("新增一行")}</Button>,
-          <Button key="save" type="primary" onClick={onSaveAll}>{t("保存本页")}</Button>,
+          <Button key="add" onClick={onAddRow}>Add row</Button>,
+          <Button key="save" type="primary" onClick={onSaveAll}>Save page</Button>,
         ]}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 4px' }}>
@@ -177,7 +177,7 @@ export default function PlayerManage() {
           pageSize={PAGE_SIZE}
           total={total}
           showSizeChanger={false}
-          showTotal={(total) => t("共 {{total}} 名球员", { total })}
+          showTotal={(total) => `${total} players`}
           onChange={setPage}
         />
       </div>

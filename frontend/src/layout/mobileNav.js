@@ -10,10 +10,10 @@ import {
  */
 
 export const TABS = [
-  { key: 'forum', path: '/news', label: '百家说', icon: ReadOutlined },
-  { key: 'schedule', path: '/schedule', label: '日程', icon: CalendarOutlined },
-  { key: 'pm', path: '/messages', label: '私信', icon: MessageOutlined },
-  { key: 'mine', path: '/mine', label: '我', icon: UserOutlined },
+  { key: 'forum', path: '/news', label: 'Chat Everything', icon: ReadOutlined },
+  { key: 'schedule', path: '/schedule', label: 'Schedule', icon: CalendarOutlined },
+  { key: 'pm', path: '/messages', label: 'Messages', icon: MessageOutlined },
+  { key: 'mine', path: '/mine', label: 'Me', icon: UserOutlined },
 ]
 
 /**

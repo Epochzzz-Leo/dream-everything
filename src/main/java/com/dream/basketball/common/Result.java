@@ -21,11 +21,11 @@ public class Result<T> {
     }
 
     public static <T> Result<T> ok() {
-        return new Result<>(0, "成功", null);
+        return new Result<>(0, "OK", null);
     }
 
     public static <T> Result<T> ok(T data) {
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     public static <T> Result<T> ok(String msg, T data) {

@@ -51,11 +51,11 @@ NAME2CODE = {
 }
 ROUND_LABEL = [
     ('Finals', None),  # handled specially (winner champion / loser finals)
-    ('Conference Finals', '分区决赛'),
-    ('Conference Semifinals', '半决赛'),
-    ('Conference First Round', '首轮'),
-    ('Semifinals', '半决赛'),   # pre-conference naming variants
-    ('First Round', '首轮'),
+    ('Conference Finals', 'Conf. Finals'),
+    ('Conference Semifinals', 'Semifinals'),
+    ('Conference First Round', 'First Round'),
+    ('Semifinals', 'Semifinals'),   # pre-conference naming variants
+    ('First Round', 'First Round'),
 ]
 
 
@@ -116,15 +116,15 @@ def rounds_map(year):
         # 「含 Finals 且不含 Conference」判定会被当成总冠军——所以改成看有没有前缀。
         head = rnd.replace('NBA', '').strip()
         if head == 'Finals':
-            res[w] = '总冠军'
-            res[l] = '总决赛'
+            res[w] = 'Champion'
+            res[l] = 'Finals'
             champ = True
         elif 'Conference Finals' in rnd or 'Division Finals' in rnd:
-            res.setdefault(l, '分区决赛')
+            res.setdefault(l, 'Conf. Finals')
         elif 'Semifinals' in rnd:
-            res.setdefault(l, '半决赛')
+            res.setdefault(l, 'Semifinals')
         elif 'First Round' in rnd:
-            res.setdefault(l, '首轮')
+            res.setdefault(l, 'First Round')
     if not champ:
         raise RuntimeError(f'{year}: parsed {len(series)} series but found no championship series')
     return res
@@ -133,9 +133,9 @@ def rounds_map(year):
 def apply(year, dry=False):
     season_num = year - 1976
     res = rounds_map(year)
-    champ = [c for c, r in res.items() if r == '总冠军']
+    champ = [c for c, r in res.items() if r == 'Champion']
     print(f'{year} (season {season_num}): {len(res)} playoff teams, champion={champ}')
-    lines = [f"UPDATE team_season SET PLAYOFF_RESULT='未进季后赛' WHERE SEASON_NUM={season_num};"]
+    lines = [f"UPDATE team_season SET PLAYOFF_RESULT='Missed playoffs' WHERE SEASON_NUM={season_num};"]
     for code, r in res.items():
         lines.append(f"UPDATE team_season SET PLAYOFF_RESULT='{r}' WHERE SEASON_NUM={season_num} "
                      f"AND TEAM_CODE='{sync.esc(code)}';")

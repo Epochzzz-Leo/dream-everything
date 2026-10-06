@@ -4,7 +4,6 @@ import { CheckCircleOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { topicApi } from '../api/topic'
 import { useAuth } from '../auth/AuthContext'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 申请加入/申请权限按钮（自决显隐 + 上下文文案）：
@@ -15,7 +14,6 @@ import { useTranslation } from 'react-i18next'
  * 具体给哪些权限由 owner 审批时勾选决定，这里只发起申请（可带留言）。
  */
 export default function TopicApplyButton({ topic, onApplied, banner, block, size }) {
-  const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -38,21 +36,21 @@ export default function TopicApplyButton({ topic, onApplied, banner, block, size
           ? { background: 'rgba(255,255,255,.16)', borderColor: 'rgba(255,255,255,.42)', color: '#fff', marginInlineEnd: 0 }
           : undefined}
       >
-        {t("申请审核中")}
+        Request pending
       </Tag>
     )
   }
 
-  const label = needView ? t("申请加入")
-    : needComment && needPost ? t("申请发言 / 发帖权限")
-      : needPost ? t("申请发帖权限")
-        : t("申请发言权限")
+  const label = needView ? 'Request to join'
+    : needComment && needPost ? 'Request comment / post access'
+      : needPost ? 'Request post access'
+        : 'Request comment access'
 
   const submit = async () => {
     setSaving(true)
     try {
       await topicApi.apply(topic.topicId, msg.trim())
-      message.success(t("已提交申请，等待审批"))
+      message.success('Request sent. Waiting for approval')
       setOpen(false)
       setMsg('')
       onApplied?.()
@@ -73,13 +71,13 @@ export default function TopicApplyButton({ topic, onApplied, banner, block, size
         onClick={() => (user ? setOpen(true) : navigate('/login'))}
         style={banner ? { flexShrink: 0 } : undefined}
       >
-        {user ? label : t("登录后申请")}
+        {user ? label : 'Sign in to apply'}
       </Button>
-      <Modal open={open} onCancel={() => setOpen(false)} onOk={submit} confirmLoading={saving} okText={t("提交申请")} cancelText={t("取消")} title={`${label}「${topic?.name || ''}」`}>
+      <Modal open={open} onCancel={() => setOpen(false)} onOk={submit} confirmLoading={saving} okText="Send request" cancelText="Cancel" title={`${label} "${topic?.name || ''}"`}>
         <Input.TextArea
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
-          placeholder={t("给专题 owner 留句话，说明你想要的权限（可选）")}
+          placeholder="Leave the owner a note about the access you want (optional)"
           maxLength={200}
           autoSize={{ minRows: 3, maxRows: 5 }}
         />

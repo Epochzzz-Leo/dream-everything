@@ -3,7 +3,6 @@ import { Alert, Modal, Spin, message } from 'antd'
 import dayjs from 'dayjs'
 import { chatApi } from '../api/chat'
 import DayRangePicker from './DayRangePicker'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 按日期清理群聊记录（题主/管理者）。
@@ -15,7 +14,6 @@ import { useTranslation } from 'react-i18next'
  * 删除不可逆，所以先调预览接口把「要删多少条、其中多少个文件」摆出来再让人确认。
  */
 export default function ChatPurgeModal({ topicId, open, onClose, onDone }) {
-  const { t } = useTranslation()
   const [range, setRange] = useState(null)
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -41,7 +39,8 @@ export default function ChatPurgeModal({ topicId, open, onClose, onDone }) {
     setBusy(true)
     try {
       const r = await chatApi.purge(topicId, range[0].format('YYYY-MM-DD'), range[1].format('YYYY-MM-DD'))
-      message.success(t("已清理 {{v0}} 条消息、{{v1}} 个文件", { v0: r?.messages ?? 0, v1: r?.files ?? 0 }))
+      // 两个数量各自要分单复数（1 message / 2 files），一个 key 装不下，拆成两个短语再拼进整句
+      message.success(`Cleaned up ${((r?.messages ?? 0) === 1 ? `${r?.messages ?? 0} message` : `${r?.messages ?? 0} messages`)} and ${((r?.files ?? 0) === 1 ? `${r?.files ?? 0} file` : `${r?.files ?? 0} files`)}`)
       onDone?.()
       onClose()
     } catch { /* 拦截器已提示 */ } finally {
@@ -54,16 +53,16 @@ export default function ChatPurgeModal({ topicId, open, onClose, onDone }) {
       open={open}
       onCancel={onClose}
       onOk={submit}
-      okText={t("确认清理")}
-      cancelText={t("取消")}
+      okText="Clean up"
+      cancelText="Cancel"
       okButtonProps={{ danger: true, disabled: !preview?.count }}
       confirmLoading={busy}
-      title={t("清理群聊记录")}
+      title="Clean up chat history"
       width={460}
       destroyOnClose
     >
       <div style={{ fontSize: 13, color: '#8c8c8c', marginBottom: 12 }}>
-        {t("选一段日期，把这段时间里的消息删除（**含结束日当天**），消息里的图片和附件也会一并删掉。 建议先「导出备份」再清理。")}
+        Pick a date range to delete its messages (including the whole end day). Images and attachments in them are deleted too. Export a backup first.
       </div>
       <DayRangePicker
         value={range}
@@ -76,12 +75,12 @@ export default function ChatPurgeModal({ topicId, open, onClose, onDone }) {
           style={{ marginTop: 12 }}
           type={preview.count ? 'warning' : 'info'}
           message={preview.count
-            ? t("将删除 {{count}} 条消息，其中 {{files}} 条带图片或附件", { count: preview.count, files: preview.files })
-            : t("这段时间里没有消息")}
+            ? ((preview.count) === 1 ? `${preview.count} message will be deleted (${preview.files} with images or attachments)` : `${preview.count} messages will be deleted (${preview.files} with images or attachments)`)
+            : 'No messages in this range'}
         />
       )}
       {preview?.count > 0 && (
-        <div style={{ marginTop: 10, fontSize: 12, color: '#cf1322' }}>{t("删除不可恢复。")}</div>
+        <div style={{ marginTop: 10, fontSize: 12, color: '#cf1322' }}>This cannot be undone.</div>
       )}
     </Modal>
   )

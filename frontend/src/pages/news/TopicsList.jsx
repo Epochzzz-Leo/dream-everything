@@ -14,7 +14,6 @@ import CategoryManageModal from '../../components/CategoryManageModal'
 import ChatUsageModal from '../../components/ChatUsageModal'
 import CategoryFilter from '../../components/CategoryFilter'
 import useIsMobile from '../../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 专题列表（百家说首页）：论坛内容按专题组织。
@@ -27,7 +26,6 @@ const BRAND = '#fa541c'
 const clamp = (n) => ({ display: '-webkit-box', WebkitLineClamp: n, WebkitBoxOrient: 'vertical', overflow: 'hidden' })
 
 export default function TopicsList() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const isMobile = useIsMobile()
@@ -69,13 +67,13 @@ export default function TopicsList() {
     // 类别一个没用上、收藏也一个没有，就别出这排按钮了（等于只有「全部」，纯占地方）
     if (!used.length && !favCount) return []
     return [
-      { value: 'all', label: t("全部"), count: topics.length },
+      { value: 'all', label: 'All', count: topics.length },
       // 收藏排在类别前面：它是"我的东西"，比按类别翻更常用
-      ...(favCount ? [{ value: 'fav', label: t("已收藏"), count: favCount }] : []),
+      ...(favCount ? [{ value: 'fav', label: 'Saved', count: favCount }] : []),
       ...used.map((c) => ({ value: c.categoryId, label: c.name, count: count(c.categoryId) })),
-      ...(none ? [{ value: '', label: t("未分类"), count: none }] : []),
+      ...(none ? [{ value: '', label: 'Uncategorized', count: none }] : []),
     ]
-  }, [topics, cats, t])
+  }, [topics, cats])
 
   const shown = useMemo(() => {
     if (!topics) return null
@@ -97,23 +95,25 @@ export default function TopicsList() {
     if (!topics.some(isFav)) setCat('all')
   }, [topics])
 
-  const enter = (t) => {
-    if (t.locked) return message.info(t("该专题为私密专题，你没有浏览权限"))
-    navigate(`/news/topic/${t.topicId}`)
+  // 参数原来叫 t，盖住了当时的翻译函数 t，函数体里的 t("…") 成了「把专题对象当函数调」，
+  // 一点就抛 TypeError（2026-09-06 引入：私密专题点了没提示，删除和置顶后列表不刷新）。2026-10-06 改名修复
+  const enter = (topic) => {
+    if (topic.locked) return message.info('This topic is private and you don\'t have access')
+    navigate(`/news/topic/${topic.topicId}`)
   }
 
-  const del = async (t) => {
-    try { await topicApi.remove(t.topicId); message.success(t("已删除")); load() } catch { /* 已提示 */ }
+  const del = async (topic) => {
+    try { await topicApi.remove(topic.topicId); message.success('Deleted'); load() } catch { /* 已提示 */ }
   }
 
   // 置顶是每人各自的：只改自己看到的顺序，别人那里不动。
   // 侧栏的订阅区读同一份顺序，所以顶完顺手通知它刷新。
-  const togglePin = async (t) => {
+  const togglePin = async (topic) => {
     try {
-      await topicApi.pin(t.topicId, !t.pinned)
-      message.success(t.pinned ? t("已取消置顶") : t("已置顶"))
+      await topicApi.pin(topic.topicId, !topic.pinned)
+      message.success(topic.pinned ? 'Unpinned' : 'Pinned')
       // 站在「已收藏」筛选里取消最后一个收藏，会剩一片空——退回全部更合理
-      if (cat === 'fav' && t.pinned && !t.subscribed) setCat('all')
+      if (cat === 'fav' && topic.pinned && !topic.subscribed) setCat('all')
       load()
       window.dispatchEvent(new Event('subs-changed'))
     } catch { /* 已提示 */ }
@@ -131,25 +131,25 @@ export default function TopicsList() {
         <div style={ring(120, { bottom: -50, right: 300 })} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: isMobile ? 18 : 23, fontWeight: 800 }}>{t("百家说")}</div>
-            <div style={{ opacity: 0.88, marginTop: 6, fontSize: 13 }}>{t("见你所见，想你所想")}</div>
+            <div style={{ fontSize: isMobile ? 18 : 23, fontWeight: 800 }}>Chat Everything</div>
+            <div style={{ opacity: 0.88, marginTop: 6, fontSize: 13 }}>See what you see, think what you think</div>
           </div>
           {/* 横幅上的按钮统一走 .banner-btn（玻璃质感），别用 antd 默认那套白底灰边 */}
           {user?.isSuperManager && (
             <Button className="banner-btn" size={isMobile ? 'middle' : 'large'} icon={<AppstoreOutlined />} onClick={() => setCatOpen(true)}>
-              {t("管理类别")}
+              Categories
             </Button>
           )}
           {/* 群聊占用只有超管看得到；清理动作在各专题的群聊页里，由题主自己做 */}
           {user?.isSuperManager && (
             <Button className="banner-btn" size={isMobile ? 'middle' : 'large'} icon={<DatabaseOutlined />} onClick={() => setUsageOpen(true)}>
-              {t("群聊存储")}
+              Chat storage
             </Button>
           )}
           {/* 人人可建（默认允许，超管可按用户关闭；每人限 5 个，后端校验） */}
           {user && (
             <Button className="banner-btn" size={isMobile ? 'middle' : 'large'} icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-              {t("新建专题")}
+              New topic
             </Button>
           )}
         </div>
@@ -162,13 +162,13 @@ export default function TopicsList() {
         <Input
           allowClear
           prefix={<SearchOutlined style={{ color: '#aaa' }} />}
-          placeholder={t("搜索专题名 / 简介 / 类别")}
+          placeholder="Search name / description / category"
           value={kw}
           onChange={(e) => setKw(e.target.value)}
           style={{ maxWidth: 260, height: 34, borderRadius: 17, background: '#f5f5f5' }}
         />
         {/* 数量紧跟搜索框，专题页里的「x 篇」同理 */}
-        {shown != null && <span style={{ fontSize: 13, color: '#999', whiteSpace: 'nowrap' }}>{shown.length} {t("个专题")}</span>}
+        {shown != null && <span style={{ fontSize: 13, color: '#999', whiteSpace: 'nowrap' }}>{((shown.length) === 1 ? `${shown.length} topic` : `${shown.length} topics`)}</span>}
         <span style={{ flex: 1 }} />
       </div>
 
@@ -254,11 +254,11 @@ export default function TopicsList() {
                         {/* 图标不加 drop-shadow：`filter` 会让元素单独成一个合成层，
                             而卡片顶部那截渐变已经压到 .58，白图标本来就看得清 */}
                         {user && (tp.pinned
-                          ? <PushpinFilled title={t("取消置顶")} style={{ color: art ? '#ffa940' : BRAND, cursor: 'pointer' }} onClick={() => togglePin(tp)} />
-                          : <PushpinOutlined title={t("置顶")} style={{ color: art ? '#fff' : '#bbb', cursor: 'pointer' }} onClick={() => togglePin(tp)} />)}
+                          ? <PushpinFilled title="Unpin" style={{ color: art ? '#ffa940' : BRAND, cursor: 'pointer' }} onClick={() => togglePin(tp)} />
+                          : <PushpinOutlined title="Pin" style={{ color: art ? '#fff' : '#bbb', cursor: 'pointer' }} onClick={() => togglePin(tp)} />)}
                         {tp.canManage && <EditOutlined style={{ color: art ? '#fff' : '#999', cursor: 'pointer' }} onClick={() => setEditTopic(tp)} />}
                         {tp.canManage && user?.isSuperManager && (
-                          <Popconfirm title={t("删除该专题？")} description={t("专题下有帖子时无法删除")} onConfirm={() => del(tp)} okText={t("删除")} cancelText={t("取消")}>
+                          <Popconfirm title="Delete this topic?" description="A topic with posts cannot be deleted" onConfirm={() => del(tp)} okText="Delete" cancelText="Cancel">
                             <DeleteOutlined style={{ color: art ? '#fff' : '#bbb', cursor: 'pointer' }} />
                           </Popconfirm>
                         )}
@@ -267,22 +267,22 @@ export default function TopicsList() {
                   </div>
 
                   <div style={{ fontSize: 13, color: art ? 'rgba(255,255,255,.9)' : '#8c8c8c', textShadow: shadow, margin: '8px 0 12px', minHeight: 36, lineHeight: 1.55, ...clamp(2) }}>
-                    {tp.description || t("暂无简介")}
+                    {tp.description || 'No description'}
                   </div>
 
                   <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', fontSize: 12, color: art ? 'rgba(255,255,255,.9)' : '#999', textShadow: shadow, minHeight: 32 }}>
                     {/* 原来这儿写的是题主名——谁开的版跟"值不值得点进去"没什么关系，
                         换成参与人数（发过帖或留过言的去重人数），图标不变 */}
                     <TeamOutlined style={{ marginRight: 5 }} />
-                    <span style={{ whiteSpace: 'nowrap' }}>{tp.participantCount ?? 0} {t("人正在讨论")}</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>{tp.participantCount ?? 0} participating</span>
                     <span style={{ margin: '0 8px', color: art ? 'rgba(255,255,255,.5)' : '#ddd' }}>·</span>
-                    <span>{tp.postCount ?? 0} {t("帖")}</span>
+                    <span>{((tp.postCount ?? 0) === 1 ? `${tp.postCount ?? 0} post` : `${tp.postCount ?? 0} posts`)}</span>
                     {/* 群聊未读：和左上角那个红点分开——那个是新帖/新评论，这个是群聊，
                         位置和图标都不同才分得清。点它直接进群聊，省得"进专题→再点群聊"两步 */}
                     {tp.chatUnread > 0 && (
                       <span
                         onClick={(e) => { e.stopPropagation(); navigate(`/news/topic/${tp.topicId}/chat`) }}
-                        title={t("群聊有 {{chatUnread}} 条新消息", { chatUnread: tp.chatUnread })}
+                        title={((tp.chatUnread) === 1 ? `${tp.chatUnread} new chat message` : `${tp.chatUnread} new chat messages`)}
                         style={{
                           display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 10,
                           padding: '1px 8px', borderRadius: 999, background: '#fff1f0',
@@ -301,7 +301,7 @@ export default function TopicsList() {
                         <TopicApplyButton topic={tp} onApplied={load} size="small" />
                       </span>
                     ) : (
-                      <span style={{ color: art ? '#ffc069' : BRAND, fontWeight: 600, textShadow: shadow }}>{t("进入")} <RightOutlined style={{ fontSize: 10 }} /></span>
+                      <span style={{ color: art ? '#ffc069' : BRAND, fontWeight: 600, textShadow: shadow }}>Enter <RightOutlined style={{ fontSize: 10 }} /></span>
                     )}
                   </div>
                   </div>
@@ -313,11 +313,11 @@ export default function TopicsList() {
         </Row>
       ) : (
         <Card style={{ borderRadius: 14 }}>
-          <Empty description={kw ? t("没有匹配的专题")
-            : cat === 'all' ? t("还没有专题")
-              : cat === 'fav' ? t("还没有收藏的专题——进专题点「订阅」，或在卡片上点图钉置顶")
-                : t("这个类别下还没有专题")}>
-            {user && cat === 'all' && !kw && <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>{t("新建专题")}</Button>}
+          <Empty description={kw ? 'No matching topics'
+            : cat === 'all' ? 'No topics yet'
+              : cat === 'fav' ? 'No favorites yet. Open a topic and tap "Subscribe", or pin one with the pushpin on its card'
+                : 'No topics in this category yet'}>
+            {user && cat === 'all' && !kw && <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>New topic</Button>}
           </Empty>
         </Card>
       )}

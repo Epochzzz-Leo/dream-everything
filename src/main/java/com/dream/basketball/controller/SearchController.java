@@ -59,7 +59,7 @@ public class SearchController {
         Map<String, Object> data = new HashMap<>();
         String kw = keyword == null ? "" : keyword.trim();
         if (StringUtils.isBlank(kw) || kw.length() > 50) {
-            return new Result<>(0, "成功", data);
+            return new Result<>(0, "OK", data);
         }
 
         // 只搜「对本人开放的功能」范围内的内容：某模块被超管关掉，其内容不进搜索结果（否则搜到却点不动）。
@@ -168,7 +168,7 @@ public class SearchController {
         }
         data.put("users", users);
 
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /**
@@ -191,14 +191,14 @@ public class SearchController {
         DreamUser me = com.dream.basketball.utils.SecUtil.getLoginUserToSession(request);
         // 被限制浏览的用户：论坛内容一条都不给
         if (me != null && !userPerms.canBrowse(me.getUserId())) {
-            return new Result<>(0, "成功", out);
+            return new Result<>(0, "OK", out);
         }
         DreamUser meFresh = me == null ? null : userMapper.selectById(me.getUserId());
         boolean isSuper = meFresh != null
                 && com.dream.basketball.config.Role.fromUserRole(meFresh.getUserRole()) == com.dream.basketball.config.Role.SUPER_MANAGER;
         // 百家说被关掉的用户看不到热帖榜（和 /global 里 featForum 的判断同一套）
         if (!(meFresh == null || isSuper || !"0".equals(meFresh.getFeatForum()))) {
-            return new Result<>(0, "成功", out);
+            return new Result<>(0, "OK", out);
         }
 
         java.util.Set<String> exclude = topicPerms.privateTopicIds();
@@ -247,7 +247,7 @@ public class SearchController {
             m.put("topicName", topicName.get(r.getTopicId()));
             out.add(m);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /**
@@ -260,7 +260,7 @@ public class SearchController {
         List<Map<String, Object>> users = new ArrayList<>();
         String kw = keyword == null ? "" : keyword.trim();
         if (kw.length() > 50) {
-            return new Result<>(0, "成功", users);
+            return new Result<>(0, "OK", users);
         }
         QueryWrapper<DreamUser> qw = new QueryWrapper<>();
         if (StringUtils.isNotBlank(kw)) {
@@ -293,7 +293,7 @@ public class SearchController {
             m.put("avatar", u.getAvatar());
             users.add(m);
         }
-        return new Result<>(0, "成功", users);
+        return new Result<>(0, "OK", users);
     }
 
     /**
@@ -312,9 +312,9 @@ public class SearchController {
         boolean isSuper = meFresh != null
                 && com.dream.basketball.config.Role.fromUserRole(meFresh.getUserRole()) == com.dream.basketball.config.Role.SUPER_MANAGER;
         if (kw.length() > 50 || !(isSuper || com.dream.basketball.config.Feature.NBA_DATA.granted(meFresh))) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
-        return new Result<>(0, "成功", playerMapper.searchMentionPlayers(kw, 8));
+        return new Result<>(0, "OK", playerMapper.searchMentionPlayers(kw, 8));
     }
 
     /** 当前登录用户的备注里，备注名命中 kw 的那些目标用户 id（未登录/空词返回空集）。 */

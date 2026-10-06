@@ -6,7 +6,6 @@ import { fmtNum, fmtPct, displayName, seasonYears } from './rankConfig'
 import { compactColumns, sumColWidth } from './statColumns'
 import { TeamNames } from '../../components/TeamLogo'
 import useIsMobile from '../../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 历史荣誉：某个奖项从 1946-47 至今的逐季获奖者，外加"谁拿得最多"。
@@ -18,34 +17,37 @@ import { useTranslation } from 'react-i18next'
  *    80 个赛季全都有，1947 年的得分王也算得出来。
  */
 
+// since 只存年份，整句「官方评选结果，{{year}} 起评选。…」在渲染处是一个 key：
+// 原来存的是「1955-56 起评选」这个短语、再原样塞进句子里，没翻，英文句子中间夹着中文
 const VOTED = [
-  { key: 'mvp', label: 'MVP', since: '1955-56 起评选' },
-  { key: 'dpoy', label: '最佳防守球员', since: '1982-83 起评选' },
-  { key: 'fmvp', label: '总决赛 MVP', since: '1968-69 起评选' },
-  { key: 'roy', label: '最佳新秀', since: '1952-53 起评选' },
-  { key: 'smoy', label: '最佳第六人', since: '1982-83 起评选' },
-  { key: 'mip', label: '最快进步球员', since: '1985-86 起评选' },
+  { key: 'mvp', label: 'MVP', since: '1955-56' },
+  { key: 'dpoy', label: 'Defensive Player of the Year', since: '1982-83' },
+  { key: 'fmvp', label: 'Finals MVP', since: '1968-69' },
+  { key: 'roy', label: 'Rookie of the Year', since: '1952-53' },
+  { key: 'smoy', label: 'Sixth Man of the Year', since: '1982-83' },
+  { key: 'mip', label: 'Most Improved Player', since: '1985-86' },
 ]
 
+// col 是数值那一列的表头，每项单独写。原来是从中文 label 里把「王」字剥掉现算的（「命中王」→「命中」），
+// 剥出来的几个词双语词典里没有，英文界面上表头一直是中文
 const CROWNS = [
-  { key: 'playerAvgScore', label: '得分王' },
-  { key: 'playerAvgReb', label: '篮板王' },
-  { key: 'playerAvgAss', label: '助攻王' },
-  { key: 'playerAvgSteal', label: '抢断王' },
-  { key: 'playerAvgBlock', label: '盖帽王' },
-  { key: 'playerAvgTpm', label: '三分王' },
-  { key: 'playerAvgFgm', label: '命中王' },
-  { key: 'playingTime', label: '时间王' },
-  { key: 'playerAccuracy', label: '投篮命中率王', pct: true },
-  { key: 'playerThreeAccuracy', label: '三分命中率王', pct: true },
-  { key: 'playerFreethrowAccuracy', label: '罚球命中率王', pct: true },
+  { key: 'playerAvgScore', label: 'Scoring Leader', col: 'PTS' },
+  { key: 'playerAvgReb', label: 'Rebounding Leader', col: 'REB' },
+  { key: 'playerAvgAss', label: 'Assists Leader', col: 'AST' },
+  { key: 'playerAvgSteal', label: 'Steals Leader', col: 'STL' },
+  { key: 'playerAvgBlock', label: 'Blocks Leader', col: 'BLK' },
+  { key: 'playerAvgTpm', label: '3-Pointers Leader', col: '3P' },
+  { key: 'playerAvgFgm', label: 'Field Goals Leader', col: 'FGM' },
+  { key: 'playingTime', label: 'Minutes Leader', col: 'MIN' },
+  { key: 'playerAccuracy', label: 'FG% Leader', col: 'FG%', pct: true },
+  { key: 'playerThreeAccuracy', label: '3P% Leader', col: '3P%', pct: true },
+  { key: 'playerFreethrowAccuracy', label: 'FT% Leader', col: 'FT%', pct: true },
 ]
 
 const ALL = [...VOTED, ...CROWNS]
 const MEDAL = ['#f5b301', '#9aa0a6', '#b87333']
 
 export default function AwardHistory() {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [award, setAward] = useState('mvp')
   const [rows, setRows] = useState(null)
@@ -65,7 +67,8 @@ export default function AwardHistory() {
   const tally = (rows || []).reduce((acc, r) => {
     const k = r.playerId || r.playerName
     if (!k) return acc
-    acc[k] = acc[k] || { playerId: r.playerId, playerName: r.playerName, n: 0, seasons: [] }
+    // nameEn 一起带上：下面 displayName(p) 先取英文原名
+    acc[k] = acc[k] || { playerId: r.playerId, playerName: r.playerName, nameEn: r.nameEn, n: 0, seasons: [] }
     acc[k].n += 1
     acc[k].seasons.push(r.seasonNum)
     return acc
@@ -76,31 +79,32 @@ export default function AwardHistory() {
 
   const columns = [
     {
-      title: t("赛季"), dataIndex: 'seasonNum', width: 96, fixed: 'left',
+      title: 'Season', dataIndex: 'seasonNum', width: 96, fixed: 'left',
       render: (n) => seasonYears(n),
     },
     {
-      title: t("球员"), dataIndex: 'playerName', width: 130,
-      render: (name, r) => (r.playerId
-        ? <Link to={`/players/${r.playerId}?seasonNum=${r.seasonNum}`}>{name}</Link>
-        : name || '-'),
+      // 名字走 displayName（英文原名优先），原来直接显示 playerName
+      title: 'Player', dataIndex: 'playerName', width: 130,
+      render: (_, r) => (r.playerId
+        ? <Link to={`/players/${r.playerId}?seasonNum=${r.seasonNum}`}>{displayName(r)}</Link>
+        : displayName(r) || '-'),
     },
-    { title: t("球队"), dataIndex: 'playerTeam', width: 84, render: (v) => <TeamNames value={v} /> },
-    { title: t("出场"), dataIndex: 'games', width: 56 },
+    { title: 'Team', dataIndex: 'playerTeam', width: 84, render: (v) => <TeamNames value={v} /> },
+    { title: 'GP', dataIndex: 'games', width: 56 },
     ...(isCrown
-      ? [{ title: t(stat.label.replace('王', '')), dataIndex: 'val', width: 76, render: (v) => <b style={{ color: '#fa541c' }}>{fmtVal(v)}</b> }]
+      ? [{ title: stat.col, dataIndex: 'val', width: 76, render: (v) => <b style={{ color: '#fa541c' }}>{fmtVal(v)}</b> }]
       : [
-          { title: t("得分"), dataIndex: 'pts', width: 56, render: (v) => fmtNum(v) },
-          { title: t("篮板"), dataIndex: 'reb', width: 56, render: (v) => fmtNum(v) },
-          { title: t("助攻"), dataIndex: 'ast', width: 56, render: (v) => fmtNum(v) },
+          { title: 'PTS', dataIndex: 'pts', width: 56, render: (v) => fmtNum(v) },
+          { title: 'REB', dataIndex: 'reb', width: 56, render: (v) => fmtNum(v) },
+          { title: 'AST', dataIndex: 'ast', width: 56, render: (v) => fmtNum(v) },
         ]),
     // 最佳防守球员多给三列：光看得分篮板助攻，看不出这个人凭什么拿防守奖。
     // 防守效率是 DRtg（对手每 100 回合得分），越低越好，所以标题里点一下方向
     ...(award === 'dpoy'
       ? [
-          { title: t("盖帽"), dataIndex: 'blk', width: 56, render: (v) => fmtNum(v) },
-          { title: t("抢断"), dataIndex: 'stl', width: 56, render: (v) => fmtNum(v) },
-          { title: t("防守效率"), dataIndex: 'defEff', width: 84, render: (v) => (v == null ? '-' : fmtNum(v, 0)) },
+          { title: 'BLK', dataIndex: 'blk', width: 56, render: (v) => fmtNum(v) },
+          { title: 'STL', dataIndex: 'stl', width: 56, render: (v) => fmtNum(v) },
+          { title: 'DRtg', dataIndex: 'defEff', width: 84, render: (v) => (v == null ? '-' : fmtNum(v, 0)) },
         ]
       : []),
   ]
@@ -114,24 +118,26 @@ export default function AwardHistory() {
           value={award}
           onChange={setAward}
           options={[
-            ...VOTED.map((a) => ({ label: t(a.label), value: a.key })),
-            ...CROWNS.map((a) => ({ label: t(a.label), value: a.key })),
+            ...VOTED.map((a) => ({ label: a.label, value: a.key })),
+            ...CROWNS.map((a) => ({ label: a.label, value: a.key })),
           ]}
           style={{ maxWidth: '100%', overflowX: 'auto' }}
         />
       </div>
       <div style={{ color: '#888', fontSize: 13, marginBottom: 12 }}>
         {isCrown
-          ? t("统计王按当季**过资格线的人里该项第一名**计算（资格线 = 球队场次的 70%），所以 1946-47 至今每一季都有；并列全部保留。")
-          : t("官方评选结果，{{since}}。更早的年份、以及当年还没设立这个奖的年份都不会出现在下面。", { since: stat.since })}
-        {award === 'fmvp' && t("数据是**总决赛那一轮**的场均，不是常规赛也不是整个季后赛。分轮次数据只到 1976-77，更早的 8 届只有获奖记录，数据留空。")}
-        {award === 'dpoy' && t("防守效率是 DRtg（他在场时对手每 100 回合得分），越低越好。")}
+          ? 'Statistical leaders are the top qualified player in each category that season (qualification = 70% of team games), so every season since 1946-47 has one; ties are all kept.'
+          : `Official award results, awarded since ${stat.since}. Earlier years, and years before the award existed, are not listed.`}
+        {/* 原来的说明带着 Markdown 的 **…**，这里没有任何地方解析 Markdown，星号原样显示了出来
+            （「**Finals round only**」），现在去掉了 */}
+        {award === 'fmvp' && 'Stats are per-game averages for the Finals round only, not the regular season or the whole playoffs. Round-by-round data goes back to 1976-77; the 8 earlier winners have the award only, with no stats.'}
+        {award === 'dpoy' && 'Defensive rating is DRtg (opponent points per 100 possessions while on court); lower is better.'}
       </div>
 
       {rows === null ? <Spin style={{ display: 'block', margin: '60px auto' }} /> : (
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={8}>
-            <Card title={t("{{label}} · 获得次数最多", { label: t(stat.label) })} styles={{ body: { padding: '8px 16px' } }}>
+            <Card title={`${stat.label} · Most wins`} styles={{ body: { padding: '8px 16px' } }}>
               {top.length ? top.map((p, i) => (
                 <div
                   key={p.playerId || p.playerName}
@@ -146,11 +152,11 @@ export default function AwardHistory() {
                   </span>
                   <Tag color={i < 3 ? 'gold' : 'default'} style={{ marginInlineEnd: 0 }}>×{p.n}</Tag>
                 </div>
-              )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无数据")} />}
+              )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No data" />}
             </Card>
           </Col>
           <Col xs={24} lg={16}>
-            <Card title={t("{{label}} · 逐季", { label: t(stat.label) })} extra={<span style={{ color: '#bbb', fontSize: 12 }}>{rows.length} {t("季")}</span>} styles={{ body: { padding: 0 } }}>
+            <Card title={`${stat.label} · By season`} extra={<span style={{ color: '#bbb', fontSize: 12 }}>{((rows.length) === 1 ? `${rows.length} season` : `${rows.length} seasons`)}</span>} styles={{ body: { padding: 0 } }}>
               {rows.length ? (
                 <Table
                   className="clean-table stat-compact"
@@ -163,7 +169,7 @@ export default function AwardHistory() {
                   pagination={{ pageSize: 50, showSizeChanger: false, size: 'small', showLessItems: isMobile }}
                   scroll={{ x: sumColWidth(cols) }}
                 />
-              ) : <Empty description={t("这个奖项暂无历史数据")} style={{ padding: 40 }} />}
+              ) : <Empty description="No history for this award yet" style={{ padding: 40 }} />}
             </Card>
           </Col>
         </Row>

@@ -10,7 +10,6 @@ import { userInformationApi } from '../../api/userInformation'
 import { topicApi } from '../../api/topic'
 import PushToggle from '../../components/PushToggle'
 import AnnouncementEditModal from '../../components/AnnouncementEditModal'
-import { useTranslation } from 'react-i18next'
 
 const BRAND = '#fa541c'
 
@@ -67,7 +66,6 @@ function Divider() {
  * 所以布局用的是普通卡片流，宽屏下不会散架。
  */
 export default function Mine() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, logout, canUse } = useAuth()
   const [unread, setUnread] = useState(0)
@@ -85,8 +83,8 @@ export default function Mine() {
   if (!user) {
     return (
       <Card style={{ borderRadius: 14 }}>
-        <Empty description={t("登录后这里是你的消息、订阅和设置")}>
-          <Button type="primary" onClick={() => navigate('/login')}>{t("去登录")}</Button>
+        <Empty description="Sign in to see your notifications, subscriptions and settings">
+          <Button type="primary" onClick={() => navigate('/login')}>Sign in</Button>
         </Empty>
       </Card>
     )
@@ -109,7 +107,7 @@ export default function Mine() {
               {user.userNickname}
             </div>
             <div style={{ fontSize: 12, color: '#999', marginTop: 3 }}>
-              {user.isSuperManager ? t("超级管理员") : t("查看我的主页")}
+              {user.isSuperManager ? 'Super admin' : 'View my profile'}
             </div>
           </div>
           <RightOutlined style={{ fontSize: 12, color: '#ccc' }} />
@@ -120,7 +118,7 @@ export default function Mine() {
       <Group>
         <Row
           icon={<BellOutlined />}
-          label={t("我的消息")}
+          label="Notifications"
           extra={unread > 0 ? <Badge count={unread} size="small" style={{ marginRight: 4 }} /> : null}
           onClick={() => navigate('/me')}
         />
@@ -128,15 +126,15 @@ export default function Mine() {
         {/* 推送开关就地放在这儿，不是跳走：它是个开关不是一个页面。
             浏览器不支持或服务端没配密钥时 PushToggle 自己返回 null，
             这一行就只剩标题，不会出现一个点不动的空开关 */}
-        <Row icon={<NotificationOutlined />} label={t("手机推送")} extra={<PushToggle compact />} arrow={false} />
+        <Row icon={<NotificationOutlined />} label="Push notifications" extra={<PushToggle compact />} arrow={false} />
       </Group>
 
       {/* 订阅的专题：原来在侧栏，搬到这里 */}
       <Group>
-        <Row icon={<PushpinFilled />} label={t("订阅的专题 ({{length}})", { length: subs.length })} arrow={false} />
+        <Row icon={<PushpinFilled />} label={`Subscribed topics (${subs.length})`} arrow={false} />
         {subs.length === 0 ? (
           <div style={{ padding: '0 16px 14px 44px', fontSize: 12, color: '#bbb', lineHeight: 1.6 }}>
-            {t("还没有订阅。进已加入的专题点「订阅」，就会常驻在这里")}
+            Nothing subscribed yet. Open a topic you have joined and tap "Subscribe" to keep it here
           </div>
         ) : (
           subs.map((s) => (
@@ -167,28 +165,28 @@ export default function Mine() {
           免得留一张空白卡片 */}
       {hasModules && (
         <Group>
-          {canUse('featNews') && <Row icon={<ReadOutlined />} label={t("新闻")} onClick={() => navigate('/official')} />}
+          {canUse('featNews') && <Row icon={<ReadOutlined />} label="News" onClick={() => navigate('/official')} />}
         </Group>
       )}
 
       {/* 超管 */}
       {user.isSuperManager && (
         <Group>
-          <Row icon={<DatabaseOutlined />} label={t("球员管理")} onClick={() => navigate('/admin/players')} />
+          <Row icon={<DatabaseOutlined />} label="Player Admin" onClick={() => navigate('/admin/players')} />
           <Divider />
-          <Row icon={<UsergroupAddOutlined />} label={t("用户管理")} onClick={() => navigate('/admin/users')} />
+          <Row icon={<UsergroupAddOutlined />} label="User Admin" onClick={() => navigate('/admin/users')} />
           <Divider />
-          <Row icon={<NotificationOutlined />} label={t("全站公告")} onClick={() => setAnnounceOpen(true)} />
+          <Row icon={<NotificationOutlined />} label="Site Announcement" onClick={() => setAnnounceOpen(true)} />
         </Group>
       )}
 
       <Group>
         <Row
           icon={<LogoutOutlined />}
-          label={t("登出")}
+          label="Sign out"
           danger
           arrow={false}
-          onClick={async () => { await logout(); message.success(t("已登出")); navigate('/login') }}
+          onClick={async () => { await logout(); message.success('Signed out'); navigate('/login') }}
         />
       </Group>
 

@@ -20,15 +20,18 @@ import DailyGames from '../pages/games/DailyGames'
  * 而 `setSearchParams({date})` 会**整个替换**查询串，把分区参数一起抹掉。
  *
  * 第一项 `null` 是回到帖子流——没有它就只能靠浏览器返回键退出 NBA 分区。
+ *
+ * label 是英文，TopicSectionTabs 原样显示（2026-10-06 网站只保留英文，开黑那份 LOL_SECTIONS 同时改了）。
+ * 七个名字沿用原来英文界面上的说法（讨论区 → Discussion …），用户看到的文字没有变。
  */
 export const NBA_SECTIONS = [
-  { key: null, label: '讨论区', icon: <CommentOutlined />, render: null },
-  { key: 'league', label: '联盟概览', icon: <HomeOutlined />, render: () => <Home /> },
-  { key: 'players', label: '数据概览', icon: <TeamOutlined />, render: () => <PlayersHome /> },
-  { key: 'rankings', label: '联盟排行', icon: <TrophyOutlined />, render: () => <LeagueRankings /> },
-  { key: 'games', label: '每日赛场', icon: <ScheduleOutlined />, render: () => <DailyGames /> },
-  { key: 'history', label: '历史数据', icon: <HistoryOutlined />, render: () => <HistoryHome /> },
-  { key: 'compare', label: '球员对比', icon: <SwapOutlined />, render: () => <PlayerCompare /> },
+  { key: null, label: 'Discussion', icon: <CommentOutlined />, render: null },
+  { key: 'league', label: 'League', icon: <HomeOutlined />, render: () => <Home /> },
+  { key: 'players', label: 'Stats', icon: <TeamOutlined />, render: () => <PlayersHome /> },
+  { key: 'rankings', label: 'League Rankings', icon: <TrophyOutlined />, render: () => <LeagueRankings /> },
+  { key: 'games', label: 'Daily Games', icon: <ScheduleOutlined />, render: () => <DailyGames /> },
+  { key: 'history', label: 'History', icon: <HistoryOutlined />, render: () => <HistoryHome /> },
+  { key: 'compare', label: 'Compare', icon: <SwapOutlined />, render: () => <PlayerCompare /> },
 ]
 
 /**

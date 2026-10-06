@@ -1,9 +1,8 @@
 import { fmtNum as f } from './rankConfig'
-import i18n from '../../i18n'
 
 /** 荣誉小字：进攻类=得分/篮板/助攻；防守类=抢断/盖帽/篮板 */
-const offSub = (r) => i18n.t("{{v0}}分 {{v1}}板 {{v2}}助", { v0: f(r.playerAvgScore), v1: f(r.playerAvgReb), v2: f(r.playerAvgAss) })
-const defSub = (r) => i18n.t("{{v0}}断 {{v1}}帽 {{v2}}板", { v0: f(r.playerAvgSteal), v1: f(r.playerAvgBlock), v2: f(r.playerAvgReb) })
+const offSub = (r) => `${f(r.playerAvgScore)} PTS ${f(r.playerAvgReb)} REB ${f(r.playerAvgAss)} AST`
+const defSub = (r) => `${f(r.playerAvgSteal)} STL ${f(r.playerAvgBlock)} BLK ${f(r.playerAvgReb)} REB`
 
 // 空名次垫底（数据源只给获奖者名次；手工补 2-10 名后自然按名次排）
 const byMvp = (a, b) => (a.mvpRank ?? 999) - (b.mvpRank ?? 999)
@@ -23,43 +22,43 @@ const pickVoted = (rankOf, by, cap) => (rows) => {
  * key 同时用于完整数据页路由 /rankings/honors/:key。
  */
 export const HONOR_GROUPS = [
-  { key: 'mvp', title: 'MVP 榜', note: '常规赛价值排名', span: 12,
+  { key: 'mvp', title: 'MVP', note: 'Regular season MVP voting', span: 12,
     pick: pickVoted((r) => r.mvpRank, byMvp, 10), pickFull: pickVoted((r) => r.mvpRank, byMvp, 0),
     sub: offSub, rankOf: (r) => r.mvpRank },
-  { key: 'dpoy', title: 'DPOY 榜', note: '最佳防守球员排名', span: 12,
+  { key: 'dpoy', title: 'DPOY', note: 'Defensive Player voting', span: 12,
     pick: pickVoted((r) => r.dpoyRank, byDpoy, 10), pickFull: pickVoted((r) => r.dpoyRank, byDpoy, 0),
     sub: defSub, rankOf: (r) => r.dpoyRank },
   // 入阵是"当选"不是"名次"——阵容卡不带名次角标（无 rankOf），只按投票名次排个顺
-  { key: 'all1', title: '最佳一阵', span: 8,
-    pick: (rows) => rows.filter((r) => r.allDbaTeam === '一阵').sort(byMvp), sub: offSub },
-  { key: 'all2', title: '最佳二阵', span: 8,
-    pick: (rows) => rows.filter((r) => r.allDbaTeam === '二阵').sort(byMvp), sub: offSub },
-  { key: 'all3', title: '最佳三阵', span: 8,
-    pick: (rows) => rows.filter((r) => r.allDbaTeam === '三阵').sort(byMvp), sub: offSub },
+  { key: 'all1', title: 'All-NBA 1st', span: 8,
+    pick: (rows) => rows.filter((r) => r.allDbaTeam === '1st Team').sort(byMvp), sub: offSub },
+  { key: 'all2', title: 'All-NBA 2nd', span: 8,
+    pick: (rows) => rows.filter((r) => r.allDbaTeam === '2nd Team').sort(byMvp), sub: offSub },
+  { key: 'all3', title: 'All-NBA 3rd', span: 8,
+    pick: (rows) => rows.filter((r) => r.allDbaTeam === '3rd Team').sort(byMvp), sub: offSub },
   // 现实中最佳防守阵容只评一/二阵，不存在三阵
-  { key: 'def1', title: '最佳防守一阵', span: 12,
-    pick: (rows) => rows.filter((r) => r.allDefTeam === '一阵').sort(byDpoy), sub: defSub },
-  { key: 'def2', title: '最佳防守二阵', span: 12,
-    pick: (rows) => rows.filter((r) => r.allDefTeam === '二阵').sort(byDpoy), sub: defSub },
+  { key: 'def1', title: 'All-Defensive 1st', span: 12,
+    pick: (rows) => rows.filter((r) => r.allDefTeam === '1st Team').sort(byDpoy), sub: defSub },
+  { key: 'def2', title: 'All-Defensive 2nd', span: 12,
+    pick: (rows) => rows.filter((r) => r.allDefTeam === '2nd Team').sort(byDpoy), sub: defSub },
 ]
 
 // 生涯荣誉柜 / 赛季资料卡共用的荣誉元数据（gold=顶级荣誉金卡）
 export const CAREER_AWARDS = [
-  { key: 'champion', label: '总冠军', icon: '🏆', gold: true },
-  { key: 'fmvp', label: '总决赛 FMVP', icon: '🏅', gold: true },
-  { key: 'mvp', label: '常规赛 MVP', icon: '👑', gold: true },
-  { key: 'dpoy', label: '最佳防守球员', icon: '🛡️', gold: true },
-  { key: 'smoy', label: '最佳第六人', icon: '🪑' },
-  { key: 'mip', label: '最快进步球员', icon: '📈' },
-  { key: 'roy', label: '最佳新秀', icon: '🌱' },
-  { key: 'scoring', label: '得分王', icon: '🔥' },
-  { key: 'rebounds', label: '篮板王', icon: '💪' },
-  { key: 'assists', label: '助攻王', icon: '🎯' },
-  { key: 'steals', label: '抢断王', icon: '⚡' },
-  { key: 'blocks', label: '盖帽王', icon: '🚫' },
-  { key: 'all1', label: '最佳一阵', icon: '⭐' },
-  { key: 'all2', label: '最佳二阵', icon: '✨' },
-  { key: 'all3', label: '最佳三阵', icon: '🌟' },
-  { key: 'def1', label: '防守一阵', icon: '🔒' },
-  { key: 'def2', label: '防守二阵', icon: '🔐' },
+  { key: 'champion', label: 'Champion', icon: '🏆', gold: true },
+  { key: 'fmvp', label: 'Finals MVP', icon: '🏅', gold: true },
+  { key: 'mvp', label: 'MVP', icon: '👑', gold: true },
+  { key: 'dpoy', label: 'Defensive Player of the Year', icon: '🛡️', gold: true },
+  { key: 'smoy', label: 'Sixth Man of the Year', icon: '🪑' },
+  { key: 'mip', label: 'Most Improved Player', icon: '📈' },
+  { key: 'roy', label: 'Rookie of the Year', icon: '🌱' },
+  { key: 'scoring', label: 'Scoring Leader', icon: '🔥' },
+  { key: 'rebounds', label: 'Rebounding Leader', icon: '💪' },
+  { key: 'assists', label: 'Assists Leader', icon: '🎯' },
+  { key: 'steals', label: 'Steals Leader', icon: '⚡' },
+  { key: 'blocks', label: 'Blocks Leader', icon: '🚫' },
+  { key: 'all1', label: 'All-NBA 1st', icon: '⭐' },
+  { key: 'all2', label: 'All-NBA 2nd', icon: '✨' },
+  { key: 'all3', label: 'All-NBA 3rd', icon: '🌟' },
+  { key: 'def1', label: 'All-Def 1st', icon: '🔒' },
+  { key: 'def2', label: 'All-Def 2nd', icon: '🔐' },
 ]

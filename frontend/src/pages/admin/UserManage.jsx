@@ -26,39 +26,40 @@ export default function UserManage() {
   const navigate = useNavigate()
   const actionRef = useRef()
 
-  // 权限/功能小结：被关掉的用红标列出；全开=一个绿标
+  // 权限/功能小结：被关掉的用红标列出；全开=一个绿标。标签文字同时当 React key
   const summary = (r) => {
     const off = []
-    if (!r.enabled) off.push('禁登录')
-    if (!r.canBrowse) off.push('禁浏览')
-    if (!r.canComment) off.push('禁发言')
-    if (!r.canPost) off.push('禁发帖')
-    if (!r.featData) off.push('无 NBA') // 默认是有的，出现这个标说明被在详情页里关掉了
-    if (!r.featNews) off.push('无新闻')
-    if (!r.featForum) off.push('无百家说')
-    if (!r.featPm) off.push('无私信')
-    if (!off.length) return <Tag color="green" style={{ marginInlineEnd: 0 }}>全部开放</Tag>
-    return off.map((t) => <Tag key={t} color="red" style={{ marginInlineEnd: 4 }}>{t}</Tag>)
+    if (!r.enabled) off.push('No sign-in')
+    if (!r.canBrowse) off.push('No browsing')
+    if (!r.canComment) off.push('No commenting')
+    if (!r.canPost) off.push('No posting')
+    if (!r.featData) off.push('No NBA') // 默认是有的，出现这个标说明被在详情页里关掉了
+    if (!r.featNews) off.push('No News')
+    if (!r.featForum) off.push('No Chat Everything')
+    if (!r.featPm) off.push('No Messages')
+    if (!r.featSchedule) off.push('No Schedule')
+    if (!off.length) return <Tag color="green" style={{ marginInlineEnd: 0 }}>All enabled</Tag>
+    return off.map((label) => <Tag key={label} color="red" style={{ marginInlineEnd: 4 }}>{label}</Tag>)
   }
 
   const columns = [
     {
-      title: '用户', dataIndex: 'userNickname', ellipsis: true,
+      title: 'User', dataIndex: 'userNickname', ellipsis: true,
       render: (_, r) => (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {r.avatar
             ? <Avatar size={28} src={r.avatar} />
             : <Avatar size={28} style={{ background: avatarColor(r.userNickname), fontWeight: 700 }}>{String(r.userNickname || '?')[0].toUpperCase()}</Avatar>}
           <span style={{ fontWeight: 600 }}>{dn(r.userId, r.userNickname)}</span>
-          {r.isSuperManager && <Tag color="red">超管</Tag>}
-          {r.userId === user?.userId && <Tag>我</Tag>}
+          {r.isSuperManager && <Tag color="red">Super admin</Tag>}
+          {r.userId === user?.userId && <Tag>Me</Tag>}
           <UserTitles titles={r.titles} size="sm" />
         </span>
       ),
     },
-    { title: '注册', dataIndex: 'registTime', width: 150, search: false, render: (_, r) => fmt(r.registTime) },
-    { title: '最近登录', dataIndex: 'lastLoginTime', width: 150, search: false, render: (_, r) => fmt(r.lastLoginTime) },
-    { title: '权限 / 功能', search: false, render: (_, r) => summary(r) },
+    { title: 'Registered', dataIndex: 'registTime', width: 150, search: false, render: (_, r) => fmt(r.registTime) },
+    { title: 'Last sign-in', dataIndex: 'lastLoginTime', width: 150, search: false, render: (_, r) => fmt(r.lastLoginTime) },
+    { title: 'Permissions / Features', search: false, render: (_, r) => summary(r) },
     { title: '', width: 40, align: 'center', search: false, render: () => <RightOutlined style={{ color: '#ccc' }} /> },
   ]
 
@@ -66,7 +67,7 @@ export default function UserManage() {
     <ProTable
       actionRef={actionRef}
       rowKey="userId"
-      headerTitle="用户管理"
+      headerTitle="User Admin"
       columns={columns}
       search={{ labelWidth: 'auto' }}
       scroll={{ x: 'max-content' }}

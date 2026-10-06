@@ -12,8 +12,10 @@ import java.util.Set;
  *
  * <h2>⚠️ 这是第二份，另一份在 {@code frontend/src/utils/notification.js}</h2>
  *
- * 加一种消息类型时<b>两边都要改</b>。改了一边忘了另一边，症状是：
+ * 加一种消息类型、改一句措辞时<b>两边都要改</b>。改了一边忘了另一边，症状是：
  * 网页通知念得对、安卓 App 的通知落到 default 分支说一句没头没脑的话（或者反过来）。
+ * 2026-10-06 就查出过一次：赛后短评、开黑对局的四种类型只加进了 JS 那份，
+ * 这里一直走 default，点开还跳到了不存在的帖子页。
  *
  * <h2>为什么不得不有第二份</h2>
  *
@@ -33,6 +35,8 @@ import java.util.Set;
  *
  * <p>取舍是清楚的：多一份要同步维护的规则，换 App 关着时通知能弹出来。
  * 代价的严重程度也清楚：万一漏同步，后果是某类通知的措辞变旧，不是功能坏掉。
+ *
+ * <p>2026-10-06 起网站只有英文，这里的措辞和 notification.js 逐字一致。
  */
 public final class NotificationText {
 
@@ -45,6 +49,12 @@ public final class NotificationText {
     /** 日程类：remind 的 msgId=日期；assign 的 msgId=事件 id、msgIdSecond=日期 */
     private static final Set<String> SCHEDULE_TYPES = new HashSet<>(Arrays.asList(
             "scheduleAssign", "scheduleRemind", "scheduleOverdue", "scheduleExpiry"));
+    /** 每日赛场的短评/回复：msgId=比赛 id，点进去跳那场比赛 */
+    private static final Set<String> GAME_TYPES = new HashSet<>(Arrays.asList("mentionGame", "replyGame"));
+    /** 开黑对局的短评/回复：msgId=Riot 的 matchId，对局详情是战绩流里的浮层，带 ?match= 进去展开 */
+    private static final Set<String> LOL_TYPES = new HashSet<>(Arrays.asList("mentionLol", "replyLol"));
+    /** 挂开黑战绩模块的专题。<b>必须和 frontend/src/config/modules.js 的 LOL_TOPIC_ID 一致</b> */
+    private static final String LOL_TOPIC_ID = "b5d95238-a0db-44ed-9f12-3d112d681345";
 
     private NotificationText() {
     }
@@ -80,6 +90,12 @@ public final class NotificationText {
                     ? StringUtils.trimToEmpty(m.getMsgIdSecond()) : m.getMsgId();
             return "/schedule?date=" + date + "&userInformationId=" + infoId;
         }
+        if (GAME_TYPES.contains(type)) {
+            return "/games/" + m.getMsgId() + "?userInformationId=" + infoId;
+        }
+        if (LOL_TYPES.contains(type)) {
+            return "/news/topic/" + LOL_TOPIC_ID + "/lol/feed?match=" + m.getMsgId() + "&userInformationId=" + infoId;
+        }
         String newsId = COMMENT_TYPES.contains(type) ? m.getMsgIdSecond() : m.getMsgId();
         return "/news/" + newsId + "?userInformationId=" + infoId;
     }
@@ -93,28 +109,33 @@ public final class NotificationText {
     public static String actionTextOf(UserInformation m) {
         String type = StringUtils.trimToEmpty(m.getMsgType());
         String content = StringUtils.trimToEmpty(m.getContent());
-        String quoted = content.isEmpty() ? "" : "「" + stripHtml(content) + "」";
+        String quoted = content.isEmpty() ? "" : "\"" + stripHtml(content) + "\"";
+        String topic = quoted.isEmpty() ? "the topic" : quoted;
         switch (type) {
-            case "goodNews":       return "点赞了您的帖子";
-            case "badNews":        return "点踩了您的帖子";
-            case "commentNews":    return "评论了您的帖子";
-            case "goodComment":    return "点赞了您的评论";
-            case "badComment":     return "点踩了您的评论";
-            case "commentComment": return "回复了您的评论";
-            case "mentionComment": return "在评论里@了您";
-            case "mentionNews":    return "在帖子里@了您";
-            case "mentionChat":    return "在" + (quoted.isEmpty() ? "专题" : quoted) + "的群聊里@了您";
-            case "follow":         return "关注了你";
-            case "topicApply":     return "申请加入你的专题" + quoted;
-            case "topicApproved":  return "通过了你加入" + (quoted.isEmpty() ? "专题" : quoted) + "的申请";
-            case "topicRejected":  return "驳回了你加入" + (quoted.isEmpty() ? "专题" : quoted) + "的申请";
-            case "scheduleAssign": return "给你指派了一条日程";
-            // 这三类的 operatorName 就是「日程提醒」，短语留空避免"日程提醒 日程提醒"
+            case "goodNews":       return "liked your post";
+            case "badNews":        return "disliked your post";
+            case "commentNews":    return "commented on your post";
+            case "goodComment":    return "liked your comment";
+            case "badComment":     return "disliked your comment";
+            case "commentComment": return "replied to your comment";
+            case "mentionComment": return "mentioned you in a comment";
+            case "mentionNews":    return "mentioned you in a post";
+            case "mentionChat":    return "mentioned you in the group chat of " + topic;
+            case "mentionGame":    return "mentioned you in a post-game comment";
+            case "mentionLol":     return "mentioned you in a LoL match comment";
+            case "replyGame":      return "replied to your post-game comment";
+            case "replyLol":       return "replied to your LoL match comment";
+            case "follow":         return "followed you";
+            case "topicApply":     return ("asked to join your topic " + quoted).trim();
+            case "topicApproved":  return "approved your request to join " + topic;
+            case "topicRejected":  return "declined your request to join " + topic;
+            case "scheduleAssign": return "assigned you a schedule item";
+            // 这三类的 operatorName 就是「Schedule reminder」，短语留空避免说两遍
             case "scheduleRemind":
             case "scheduleOverdue":
             case "scheduleExpiry":  return "";
-            case "pm":             return "给你发了一条私信";
-            case "test":           return "推送已经通了";
+            case "pm":             return "sent you a message";
+            case "test":           return "push is working";
             default:               return StringUtils.trimToEmpty(m.getContentMsg());
         }
     }
@@ -125,24 +146,28 @@ public final class NotificationText {
         String content = orPlaceholder(m.getContent());
         String contentMsg = orPlaceholder(m.getContentMsg());
         switch (type) {
-            case "commentNews":    return "评论内容：" + contentMsg;
-            case "commentComment": return "回复内容：" + contentMsg + " ｜ 您的评论：" + content;
+            case "commentNews":    return "Comment: " + contentMsg;
+            case "commentComment": return "Reply: " + contentMsg + " | Your comment: " + content;
             case "goodComment":
-            case "badComment":     return "您的评论：" + content;
-            case "mentionComment": return "评论内容：" + content;
-            case "mentionNews":    return "帖子：" + content;
-            case "mentionChat":    return "群聊消息：" + contentMsg;
-            case "follow":         return "点击去 TA 的主页看看";
-            case "topicApply":     return "点击进入专题，在成员管理里审批";
-            case "topicApproved":  return "点击进入该专题";
-            case "topicRejected":  return "专题：" + content;
-            case "scheduleAssign": return "日程：" + content + " ｜ 点击查看当天日历";
+            case "badComment":     return "Your comment: " + content;
+            case "mentionComment": return "Comment: " + content;
+            case "mentionNews":    return "Post: " + content;
+            case "mentionChat":    return "Chat message: " + contentMsg;
+            case "mentionGame":
+            case "mentionLol":     return "Comment: " + content;
+            case "replyGame":
+            case "replyLol":       return "Reply: " + content;
+            case "follow":         return "Tap to visit their profile";
+            case "topicApply":     return "Tap to open the topic and review it under Members";
+            case "topicApproved":  return "Tap to open the topic";
+            case "topicRejected":  return "Topic: " + content;
+            case "scheduleAssign": return "Schedule: " + content + " | Tap to open that day";
             case "scheduleRemind": return content;
             case "scheduleOverdue": return "⚠️ " + content;
             case "scheduleExpiry":  return "⏳ " + content;
             case "pm":             return contentMsg;
-            case "test":           return "收到这条就说明整条链路是通的";
-            default:               return "原帖：" + content;   // goodNews / badNews
+            case "test":           return "If you got this, the whole chain works";
+            default:               return "Post: " + content;   // goodNews / badNews
         }
     }
 
@@ -151,7 +176,7 @@ public final class NotificationText {
      * 所以最要紧的信息必须在标题里。
      */
     public static String titleOf(UserInformation m) {
-        String who = StringUtils.isBlank(m.getOperatorName()) ? "有人" : m.getOperatorName();
+        String who = StringUtils.isBlank(m.getOperatorName()) ? "Someone" : m.getOperatorName();
         return (who + " " + actionTextOf(m)).trim();
     }
 
@@ -162,6 +187,6 @@ public final class NotificationText {
 
     private static String orPlaceholder(String v) {
         String s = stripHtml(v).trim();
-        return s.isEmpty() ? "(无内容)" : s;
+        return s.isEmpty() ? "(no content)" : s;
     }
 }

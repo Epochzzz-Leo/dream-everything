@@ -87,16 +87,16 @@ public class NewsController extends BaseUtils {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         // 全局限制：被禁止浏览的登录用户看不到论坛/新闻
         if (me != null && !userPerms.canBrowse(me.getUserId())) {
-            return handlerSuccessPageJson(0, "成功", 0, java.util.Collections.emptyList());
+            return handlerSuccessPageJson(0, "OK", 0, java.util.Collections.emptyList());
         }
         // 官方新闻整站关闭中：这个频道不返回任何内容（前端已藏入口，这里挡直连）
         if (!NEWS_MODULE_ENABLED && NEWS_CHANNEL_OFFICIAL.equals(param.getNewsChannel())) {
-            return handlerSuccessPageJson(0, "成功", 0, java.util.Collections.emptyList());
+            return handlerSuccessPageJson(0, "OK", 0, java.util.Collections.emptyList());
         }
         if (StringUtils.isNotBlank(param.getTopicId())) {
             com.dream.basketball.entity.ForumTopic t = topicPerms.getTopic(param.getTopicId());
             if (t == null || !topicPerms.canView(me, t)) {
-                return handlerSuccessPageJson(0, "成功", 0, java.util.Collections.emptyList());
+                return handlerSuccessPageJson(0, "OK", 0, java.util.Collections.emptyList());
             }
         }
         // 这里不能用 PageHelper：帖子列表走 ES（一次全量返回），PageHelper 只拦 MyBatis，
@@ -146,7 +146,7 @@ public class NewsController extends BaseUtils {
                 r.setFavoriteCount(favCounts.getOrDefault(r.getNewsId(), 0));
             }
         }
-        return handlerSuccessPageJson(0, "成功", rows.size(), rows);
+        return handlerSuccessPageJson(0, "OK", rows.size(), rows);
     }
 
     /** 评论列表数据（公开）：一个帖子的全部楼一次返回，不分页（前端自己排序） */
@@ -161,7 +161,7 @@ public class NewsController extends BaseUtils {
         param.setCommentId(commentId);
         param.setCommentRelId(commentRelId);
         List<DreamNewsCommentDto> rows = newsService.getCommentListByParams(param);
-        return handlerSuccessPageJson(0, "成功", rows.size(), rows);
+        return handlerSuccessPageJson(0, "OK", rows.size(), rows);
     }
 
     /** 楼内回复平铺列表（公开）：一层楼的全部子孙回复按时间升序分页，带被回复人当前昵称（回复 @xxx 用） */
@@ -171,7 +171,7 @@ public class NewsController extends BaseUtils {
         List<DreamNewsCommentDto> rows = dreamNewsCommentService.findFlatReplies(rootId);
         int total = (int) new PageInfo<>(rows).getTotal();
         newsService.fillCommenterInfo(rows);
-        return handlerSuccessPageJson(0, "成功", total, rows);
+        return handlerSuccessPageJson(0, "OK", total, rows);
     }
 
     /** 资讯详情（公开，但专题帖要有浏览权）；附带把对应消息通知标记为已读 */
@@ -179,27 +179,27 @@ public class NewsController extends BaseUtils {
     public Object newsShow(String newsId, String level, String userInformationId, String anchorId, HttpServletRequest request) {
         DreamUser viewer = SecUtil.getLoginUserToSession(request);
         if (viewer != null && !userPerms.canBrowse(viewer.getUserId())) {
-            return new Result<>(1, "你已被限制浏览论坛/新闻", null);
+            return new Result<>(1, "You've been restricted from browsing the forum and news", null);
         }
         com.dream.basketball.esEntity.News news = newsService.getNewsShow(newsId);
         // 官方新闻整站关闭中：直接按不存在处理（老链接、收藏夹里的地址都进不去）
         if (!NEWS_MODULE_ENABLED && news != null
                 && NEWS_CHANNEL_OFFICIAL.equals(news.getNewsChannel())) {
-            return new Result<>(1, "该内容暂不可见", null);
+            return new Result<>(1, "This content isn't available right now", null);
         }
         // 专题帖：无浏览权直接拒（防私密专题内容泄露）
         if (news != null && StringUtils.isNotBlank(news.getTopicId())
                 && !topicPerms.canView(SecUtil.getLoginUserToSession(request), topicPerms.getTopic(news.getTopicId()))) {
-            return new Result<>(1, "你没有权限查看该专题的内容", null);
+            return new Result<>(1, "You don't have permission to view this topic", null);
         }
         // 隐藏帖：只有管理者（题主/admin，官方→manager+）能看，普通用户一律当作不存在
         if (news != null && "1".equals(news.getHidden()) && !canManagePost(viewer, news)) {
-            return new Result<>(1, "该帖不存在或已被隐藏", null);
+            return new Result<>(1, "This post doesn't exist or has been hidden", null);
         }
         // 草稿：作者自己以外谁都看不到（管理员也不行——没发出来的东西不该被人读到）
         if (news != null && "1".equals(draftFlagOf(news.getNewsId()))
                 && (viewer == null || !StringUtils.equals(news.getAuthorId(), viewer.getUserId()))) {
-            return new Result<>(1, "该帖不存在", null);
+            return new Result<>(1, "This post doesn't exist", null);
         }
         // 浏览计数（通过所有可见性校验后才计）：PV 每次 +1；UV 靠 news_viewer 去重，登录用户首次浏览才 +1
         if (news != null && StringUtils.isNotBlank(news.getNewsId())) {
@@ -233,7 +233,7 @@ public class NewsController extends BaseUtils {
             data.put("topicOwnerId", t == null ? null : t.getOwnerId());
             data.put("topicOwnerIds", t == null ? null : new java.util.ArrayList<>(topicPerms.ownerIds(t)));
         }
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /**
@@ -246,7 +246,7 @@ public class NewsController extends BaseUtils {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         News news = StringUtils.isNotBlank(newsId) ? newsService.getNewsShow(newsId) : null;
         if (news == null || StringUtils.isBlank(news.getNewsId())) {
-            return handlerResultJson(false, "帖子不存在");
+            return handlerResultJson(false, "Post not found");
         }
         String col;
         if ("top".equals(flag)) {
@@ -258,17 +258,17 @@ public class NewsController extends BaseUtils {
         } else if ("hidden".equals(flag)) {
             col = "HIDDEN";
         } else {
-            return handlerResultJson(false, "参数错误");
+            return handlerResultJson(false, "Invalid parameters");
         }
         if (!canManagePost(me, news)) {
-            return handlerResultJson(false, "无权操作");
+            return handlerResultJson(false, "You don't have permission to do that");
         }
         String v = "1".equals(value) ? "1" : "0";
         com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<com.dream.basketball.entity.DreamNews> uw =
                 new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<com.dream.basketball.entity.DreamNews>().eq("NEWS_ID", newsId);
         uw.set(col, v);
         dreamNewsService.update(uw);
-        return handlerResultJson(true, "已更新");
+        return handlerResultJson(true, "Updated");
     }
 
     /**
@@ -281,14 +281,14 @@ public class NewsController extends BaseUtils {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         News news = StringUtils.isNotBlank(newsId) ? newsService.getNewsShow(newsId) : null;
         if (news == null || StringUtils.isBlank(news.getNewsId())) {
-            return handlerResultJson(false, "帖子不存在");
+            return handlerResultJson(false, "Post not found");
         }
         // 草稿从没发出去过，作者本人必须能删自己的——删已发布的帖是治理动作（题主/管理员），
         // 但把一份没人见过的草稿也锁在治理权限后面，等于作者自己清不掉自己的东西
         boolean ownDraft = "1".equals(draftFlagOf(news.getNewsId()))
                 && StringUtils.equals(news.getAuthorId(), me.getUserId());
         if (!ownDraft && !canManagePost(me, news)) {
-            return handlerResultJson(false, "无权删除该帖");
+            return handlerResultJson(false, "You can't delete this post");
         }
         newsService.deleteNewsListByIds(newsId, News.class);
         dreamNewsService.deleteSyncEs(newsId);
@@ -315,7 +315,7 @@ public class NewsController extends BaseUtils {
             pollVoteMapper.delete(new QueryWrapper<com.dream.basketball.entity.ForumPollVote>().in("ITEM_ID", pollIds));
             pollItemMapper.delete(new QueryWrapper<com.dream.basketball.entity.ForumPollItem>().eq("NEWS_ID", newsId));
         }
-        return handlerResultJson(true, "已删除");
+        return handlerResultJson(true, "Deleted");
     }
 
     /** 能否管理某帖的置顶/精华/封锁/删除：官方→manager+；专题帖→该专题 canManage；无专题的论坛帖→manager+。 */
@@ -339,7 +339,7 @@ public class NewsController extends BaseUtils {
     public Object authorStats(String userId) {
         Map<String, Object> stats = new HashMap<>();
         if (StringUtils.isBlank(userId)) {
-            return new Result<>(0, "成功", stats);
+            return new Result<>(0, "OK", stats);
         }
         List<Map<String, Object>> rows = dreamNewsService.getBaseMapper().selectMaps(
                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.dream.basketball.entity.DreamNews>()
@@ -353,7 +353,7 @@ public class NewsController extends BaseUtils {
         stats.put("essenceCount", num(r.get("essenceCount")));
         stats.put("topCount", num(r.get("topCount")));
         stats.put("likeCount", num(r.get("likeCount")));
-        return new Result<>(0, "成功", stats);
+        return new Result<>(0, "OK", stats);
     }
 
     private long num(Object o) {
@@ -369,7 +369,7 @@ public class NewsController extends BaseUtils {
         data.put("commentRelId", commentRelId);
         data.put("comment", dreamNewsCommentService.getById(commentRelId));
         data.put("anchorId", StringUtils.isNotBlank(anchorId) ? anchorId : NO_ANCHOR);
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     // ===== 写/管理：manager 及以上（P2-5） =====
@@ -379,7 +379,7 @@ public class NewsController extends BaseUtils {
     @DeleteMapping("/delete")
     public Object delete(String newsIds) {
         if (StringUtils.isBlank(newsIds)) {
-            return handlerResultJson(false, "删除失败！");
+            return handlerResultJson(false, "Delete failed");
         }
         newsService.deleteNewsListByIds(newsIds, News.class);
         dreamNewsService.deleteSyncEs(newsIds);
@@ -387,7 +387,7 @@ public class NewsController extends BaseUtils {
         for (String newsId : newsIds.split(",")) {
             FileUtils.deleteUploadFolder(uploadPath, newsId.trim());
         }
-        return handlerResultJson(true, "删除成功！");
+        return handlerResultJson(true, "Deleted");
     }
 
     /**
@@ -412,7 +412,7 @@ public class NewsController extends BaseUtils {
             // Editing: only the original author or a manager may edit; preserve original
             // authorship, publish time, channel and topic (don't let the client reassign them).
             if (!isManager && !StringUtils.equals(existing.getAuthorId(), me.getUserId())) {
-                return handlerResultJson(false, "无权编辑他人的帖子");
+                return handlerResultJson(false, "You can't edit someone else's post");
             }
             news.setAuthor(existing.getAuthor());
             news.setAuthorId(existing.getAuthorId());
@@ -426,7 +426,7 @@ public class NewsController extends BaseUtils {
         } else {
             // 全局限制：被超管禁止发帖的用户不能发新帖
             if (!userPerms.canPost(me.getUserId())) {
-                return handlerResultJson(false, "你已被限制发帖");
+                return handlerResultJson(false, "You've been restricted from posting");
             }
             // New post: force author to the current user (ignore any client-sent value).
             news.setAuthor(me.getUserNickname());
@@ -436,10 +436,10 @@ public class NewsController extends BaseUtils {
             boolean official = StringUtils.equals(NEWS_CHANNEL_OFFICIAL, news.getNewsChannel());
             if (official) {
                 if (!NEWS_MODULE_ENABLED) {
-                    return handlerResultJson(false, "官方新闻已暂时关闭");
+                    return handlerResultJson(false, "Official News is closed for now");
                 }
                 if (!isManager) {
-                    return handlerResultJson(false, "只有管理员可以发布官方新闻！");
+                    return handlerResultJson(false, "Only admins can publish official news");
                 }
                 news.setNewsChannel(NEWS_CHANNEL_OFFICIAL);
                 news.setTopicId(null); // official news has no topic
@@ -447,10 +447,10 @@ public class NewsController extends BaseUtils {
                 news.setNewsChannel(NEWS_CHANNEL_FORUM);
                 com.dream.basketball.entity.ForumTopic topic = topicPerms.getTopic(news.getTopicId());
                 if (topic == null) {
-                    return handlerResultJson(false, "请选择要发布到的专题");
+                    return handlerResultJson(false, "Choose a topic to post in");
                 }
                 if (!topicPerms.canPost(me, topic)) {
-                    return handlerResultJson(false, "你在该专题没有发帖权限");
+                    return handlerResultJson(false, "You don't have permission to post in this topic");
                 }
             }
         }
@@ -475,7 +475,7 @@ public class NewsController extends BaseUtils {
         // @-mention 通知：只给"这次新增"的被 @ 者发（编辑时老正文里已有的 @ 不重复打扰），排除作者本人。
         // 无联想输入下正文 @ 是纯文本：先 autoLink 成 mention span 再统一解析（老帖的联想 span 也一并覆盖）
         if (asDraft) {
-            return new Result<>(0, "草稿已保存", news.getNewsId());
+            return new Result<>(0, "Draft saved", news.getNewsId());
         }
         java.util.Map<String, String> nickToId = new HashMap<>();
         for (DreamUser nu : userMapper.selectList(new QueryWrapper<DreamUser>().select("USER_ID", "USER_NICKNAME"))) {
@@ -497,7 +497,7 @@ public class NewsController extends BaseUtils {
                     com.dream.basketball.utils.Constants.MENTION_NEWS, news.getNewsId(), "", "", "", "", "");
         }
         // 返回 newsId：发帖时前端要用它关联"开启打分"等后续动作
-        return new Result<>(0, "操作成功！", news.getNewsId());
+        return new Result<>(0, "Done", news.getNewsId());
     }
 
     /** 该专题配过的帖子类别里有这个 id 才留，否则返回 null（=未分类）。 */
@@ -533,7 +533,7 @@ public class NewsController extends BaseUtils {
         String url = FileUtils.upload(file, uploadPath, newsId);
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);
-        return new Result<>(0, "上传成功", data);
+        return new Result<>(0, "Uploaded", data);
     }
 
     /**
@@ -547,7 +547,7 @@ public class NewsController extends BaseUtils {
         String url = FileUtils.uploadAttachment(file, uploadPath, folder);
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);
-        return new Result<>(0, "上传成功", data);
+        return new Result<>(0, "Uploaded", data);
     }
 
     // ===== 会员互动：登录即可（P2-5） =====
@@ -594,7 +594,7 @@ public class NewsController extends BaseUtils {
     public Object favorite(String newsId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(newsId) || dreamNewsService.getById(newsId) == null) {
-            return handlerResultJson(false, "帖子不存在");
+            return handlerResultJson(false, "Post not found");
         }
         QueryWrapper<com.dream.basketball.entity.NewsFavorite> mineQ =
                 new QueryWrapper<com.dream.basketball.entity.NewsFavorite>()
@@ -616,7 +616,7 @@ public class NewsController extends BaseUtils {
         out.put("favorited", favorited);
         out.put("count", favoriteMapper.selectCount(
                 new QueryWrapper<com.dream.basketball.entity.NewsFavorite>().eq("NEWS_ID", newsId)));
-        return new Result<>(0, favorited ? "已收藏" : "已取消收藏", out);
+        return new Result<>(0, favorited ? "Saved" : "Removed from favorites", out);
     }
 
 }

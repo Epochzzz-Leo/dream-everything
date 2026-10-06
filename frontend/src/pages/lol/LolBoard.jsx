@@ -66,21 +66,22 @@ export default function LolBoard() {
     <>
       <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
         <Segmented value={days} onChange={setDays} options={DAYS_OPTIONS} />
+        {/* 宽度按英文最长的「Ranked Solo/Duo」留 */}
         <Select
           value={queueId}
           onChange={setQueueId}
           options={QUEUE_OPTIONS}
-          style={{ width: 132 }}
+          style={{ width: 150 }}
         />
         <Select
           value={sortBy}
           onChange={setSortBy}
           style={{ width: 118 }}
           options={[
-            { value: 'rate', label: '按胜率' },
-            { value: 'rank', label: '按段位' },
-            { value: 'games', label: '按场次' },
-            { value: 'kda', label: '按 KDA' },
+            { value: 'rate', label: 'By win rate' },
+            { value: 'rank', label: 'By rank' },
+            { value: 'games', label: 'By games' },
+            { value: 'kda', label: 'By KDA' },
           ]}
         />
       </div>
@@ -93,17 +94,21 @@ export default function LolBoard() {
           styles={{ body: { padding: '10px 16px' } }}
         >
           <Space size={isMobile ? 14 : 28} wrap>
-            <Stat label="总场次" value={total} />
-            <Stat label="开黑场次" value={premade} />
-            <Stat label="开黑占比" value={total ? `${Math.round((premade / total) * 100)}%` : '—'} />
+            <Stat label="Total Games" value={total} />
+            <Stat label="Premade Games" value={premade} />
+            <Stat label="Premade Share" value={total ? `${Math.round((premade / total) * 100)}%` : '—'} />
           </Space>
         </Card>
       )}
 
       <Card
-        title="账号榜"
+        title="Account Leaderboard"
         size="small"
-        extra={<span style={{ color: '#999', fontSize: 12 }}>按游戏账号排 · 点账号看资料 · 满 {board?.minGames ?? 5} 场才上榜</span>}
+        extra={(
+          <span style={{ color: '#999', fontSize: 12 }}>
+            {((board?.minGames ?? 5) === 1 ? `One row per game account · tap an account for its profile · ${board?.minGames ?? 5} game to qualify` : `One row per game account · tap an account for its profile · ${board?.minGames ?? 5} games to qualify`)}
+          </span>
+        )}
         style={{ borderRadius: 14, marginBottom: 14 }}
         styles={{ body: { padding: isMobile ? 0 : 8 } }}
       >
@@ -117,16 +122,16 @@ export default function LolBoard() {
             pagination={false}
             scroll={{ x: 'max-content' }}
             dataSource={sorted}
-            locale={{ emptyText: <Empty description={`还没有人满 ${board?.minGames ?? 5} 场`} image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
+            locale={{ emptyText: <Empty description={((board?.minGames ?? 5) === 1 ? `No one has played ${board?.minGames ?? 5} game yet` : `No one has played ${board?.minGames ?? 5} games yet`)} image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
             columns={personColumns(isMobile, (r) => setOpenAcct({ userId: r.userId, puuid: r.puuid }))}
           />
         )}
       </Card>
 
       <Card
-        title="开黑组合"
+        title="Premade Duos"
         size="small"
-        extra={<span style={{ color: '#999', fontSize: 12 }}>同队才算</span>}
+        extra={<span style={{ color: '#999', fontSize: 12 }}>Same team only</span>}
         style={{ borderRadius: 14 }}
         styles={{ body: { padding: isMobile ? 0 : 8 } }}
       >
@@ -140,12 +145,12 @@ export default function LolBoard() {
             pagination={false}
             scroll={{ x: 'max-content' }}
             dataSource={duo}
-            locale={{ emptyText: <Empty description="还没有够场次的固定组合" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
+            locale={{ emptyText: <Empty description="No duo has played enough games together yet" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
             columns={[
               {
                 /* 组合也按**游戏账号**配对：按人配的话，「甲的小号+乙的大号」
                    和「甲的大号+乙的大号」会算成同一对，而那是两种完全不同的组合 */
-                title: '组合',
+                title: 'Duo',
                 key: 'pair',
                 render: (_, r) => (
                   <div style={{ lineHeight: 1.35, textAlign: 'left' }}>
@@ -160,16 +165,16 @@ export default function LolBoard() {
                   </div>
                 ),
               },
-              { title: '场次', dataIndex: 'games', width: 66, align: 'right' },
+              { title: 'Games', dataIndex: 'games', width: 66, align: 'right' },
               {
-                title: '胜率',
+                title: 'Win%',
                 key: 'rate',
                 width: 90,
                 align: 'right',
                 render: (_, r) => (
                   <span style={{ color: rateColor(r.games ? r.wins / r.games : 0), fontWeight: 700 }}>
                     {pct(r.wins, r.games)}
-                    <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 4 }}>{r.wins}胜</span>
+                    <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 4 }}>{((r.wins) === 1 ? `${r.wins}W` : `${r.wins}W`)}</span>
                   </span>
                 ),
               },
@@ -213,7 +218,7 @@ function Stat({ label, value }) {
 function personColumns(isMobile, onOpen) {
   const base = [
     {
-      title: '账号',
+      title: 'Account',
       key: 'who',
       fixed: isMobile ? undefined : 'left',
       width: 168,
@@ -230,7 +235,7 @@ function personColumns(isMobile, onOpen) {
               否则两行各自按自己的宽度居中，起点参差不齐 */}
           <div style={{ minWidth: 0, textAlign: 'left' }}>
             <div style={{ fontWeight: 700, color: '#fa541c', whiteSpace: 'nowrap' }}>
-              {r.gameName || '（未绑定）'}
+              {r.gameName || '(unlinked)'}
               {r.tagLine && <span style={{ color: '#ddd', fontWeight: 400 }}>#{r.tagLine}</span>}
             </div>
             {/* 所属用户：这一列存在的意义就是「这号是谁的」，所以不能省 */}
@@ -242,7 +247,7 @@ function personColumns(isMobile, onOpen) {
       ),
     },
     {
-      title: '段位',
+      title: 'Rank',
       key: 'tier',
       width: 116,
       render: (_, r) => (
@@ -253,19 +258,19 @@ function personColumns(isMobile, onOpen) {
               {r.leaguePoint != null && <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 4 }}>{r.leaguePoint}LP</span>}
             </span>
           )
-          : <span style={{ color: '#ccc', fontSize: 12 }}>未定级</span>
+          : <span style={{ color: '#ccc', fontSize: 12 }}>Unranked</span>
       ),
     },
-    { title: '场次', dataIndex: 'games', width: 62, align: 'right' },
+    { title: 'Games', dataIndex: 'games', width: 62, align: 'right' },
     {
-      title: '胜率',
+      title: 'Win%',
       key: 'rate',
       width: 88,
       align: 'right',
       render: (_, r) => (
         <span style={{ color: rateColor(r.games ? r.wins / r.games : 0), fontWeight: 700 }}>
           {pct(r.wins, r.games)}
-          <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 4 }}>{r.wins}胜</span>
+          <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 4 }}>{((r.wins) === 1 ? `${r.wins}W` : `${r.wins}W`)}</span>
         </span>
       ),
     },
@@ -285,18 +290,18 @@ function personColumns(isMobile, onOpen) {
     },
     // 各种率手机上也照显，不再砍列——这张表本来就是横向滚动的，
     // 砍掉之后手机上看到的和电脑上不是同一个榜，而人们会拿它们互相对
-    { title: '参团率', key: 'kp', width: 84, align: 'right', render: (_, r) => percentCell(r.avgKillPart) },
-    { title: '伤害占比', key: 'ds', width: 92, align: 'right', render: (_, r) => percentCell(r.avgDmgShare) },
-    { title: '承伤占比', key: 'ts', width: 92, align: 'right', render: (_, r) => percentCell(r.avgTakenShare) },
+    { title: 'KP', key: 'kp', width: 84, align: 'right', render: (_, r) => percentCell(r.avgKillPart) },
+    { title: 'Dmg Share', key: 'ds', width: 92, align: 'right', render: (_, r) => percentCell(r.avgDmgShare) },
+    { title: 'Taken Share', key: 'ts', width: 92, align: 'right', render: (_, r) => percentCell(r.avgTakenShare) },
     {
-      title: <Tooltip title="伤害转化：每 1 金币打出多少对英雄伤害">伤转</Tooltip>,
+      title: <Tooltip title="Damage per gold: champion damage dealt for every 1 gold earned">Dmg/Gold</Tooltip>,
       dataIndex: 'avgDmgPerGold',
       width: 74,
       align: 'right',
       render: (v) => (v == null ? '—' : Number(v).toFixed(2)),
     },
-    { title: '场均视野', dataIndex: 'avgVision', width: 92, align: 'right' },
-    { title: '每分补刀', dataIndex: 'csPerMin', width: 92, align: 'right' },
+    { title: 'Vision/Game', dataIndex: 'avgVision', width: 92, align: 'right' },
+    { title: 'CS/Min', dataIndex: 'csPerMin', width: 92, align: 'right' },
   ]
   return base
 }

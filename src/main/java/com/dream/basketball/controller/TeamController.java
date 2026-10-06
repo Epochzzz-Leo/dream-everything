@@ -28,30 +28,30 @@ public class TeamController {
 
     @GetMapping("/rankings")
     public Result<List<TeamSeasonDto>> rankings(Integer seasonNum) {
-        return new Result<>(0, "成功", teamMapper.findTeamRankings(seasonNum == null ? 1 : seasonNum));
+        return new Result<>(0, "OK", teamMapper.findTeamRankings(seasonNum == null ? 1 : seasonNum));
     }
 
     /** 某队队史（逐季战绩/季后赛/全队场均） */
     @GetMapping("/history")
     public Result<List<TeamSeasonDto>> history(String teamCode) {
-        return new Result<>(0, "成功", teamMapper.findTeamHistory(teamCode));
+        return new Result<>(0, "OK", teamMapper.findTeamHistory(teamCode));
     }
 
     /** 某赛季季后赛球队榜（季后赛全队场均，供季后赛内排名） */
     @GetMapping("/playoffRankings")
     public Result<List<TeamSeasonDto>> playoffRankings(Integer seasonNum) {
-        return new Result<>(0, "成功", teamMapper.findTeamPlayoffRankings(seasonNum == null ? 1 : seasonNum));
+        return new Result<>(0, "OK", teamMapper.findTeamPlayoffRankings(seasonNum == null ? 1 : seasonNum));
     }
 
     /** 某队季后赛队史（只含进季后赛的赛季） */
     @GetMapping("/playoffHistory")
     public Result<List<TeamSeasonDto>> playoffHistory(String teamCode) {
-        return new Result<>(0, "成功", teamMapper.findTeamPlayoffHistory(teamCode));
+        return new Result<>(0, "OK", teamMapper.findTeamPlayoffHistory(teamCode));
     }
 
     /** 全部（赛季, 球队, 胜场）记录（分区/分部第一次数由前端结合结构配置计算） */
     @GetMapping("/allRecords")
     public Result<List<TeamSeasonDto>> allRecords() {
-        return new Result<>(0, "成功", teamMapper.findAllTeamRecords());
+        return new Result<>(0, "OK", teamMapper.findAllTeamRecords());
     }
 }

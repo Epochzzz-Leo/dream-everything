@@ -61,7 +61,7 @@ class FileUtilsTest {
                 "<script>alert(1)</script>".getBytes());
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> FileUtils.upload(html, uploadDir.toString(), "news1"));
-        assertTrue(ex.getMessage().contains("不支持的文件类型"));
+        assertTrue(ex.getMessage().contains("Unsupported file type"));
     }
 
     @Test

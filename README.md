@@ -71,7 +71,7 @@ container to deploy and no CORS to manage in production.
 **Backend** Java 17, Spring Boot 2.7, MyBatis-Plus, Spring Session (Redis-backed), WebSocket/STOMP for live
 private messages, RabbitMQ, Elasticsearch, MySQL 8, scheduled jobs, AOP, web push over VAPID
 
-**Frontend** React 19, Vite 8, Ant Design 5, React Router, i18next, service worker (PWA), Capacitor for iOS
+**Frontend** React 19, Vite 8, Ant Design 5, React Router, service worker (PWA), Capacitor for iOS
 
 **Infrastructure** Docker Compose, Cloudflare Tunnel, AWS S3 and IAM, Uptime Kuma, systemd timers,
 Python 3 for the data pipeline
@@ -97,12 +97,15 @@ The stats pages felt slow and I assumed it was SQL. It was not. One endpoint was
 JSON while its query took 17ms, and the tunnel was carrying all of it. Turning on gzip in the app cut that hop to
 roughly 390KB.
 
-**Chinese to English without renaming a thousand strings** (`frontend/src/i18n.js`)
-The Chinese source text is the translation key, so `t('得分')` reads the same as the original code and needs no
-lookup table to understand. To retrofit it across the frontend I wrote an AST codemod rather than editing by
-hand, with rules for the cases a naive pass gets wrong: values compared with `===`, strings that are written to
-the database, CSS inside `<style>` blocks, and local variables that happen to be named `t`. About 1,250 strings
-are translated so far.
+**From Chinese to English only**
+The site started in Chinese. I first made it bilingual with react-i18next, using the Chinese text itself as the
+key, then decided to drop Chinese, so the translation layer came out again. That meant touching about 1,700
+`t()` calls, so I wrote an AST codemod (Babel plus magic-string) that inlines the English text and turns plural
+keys into a singular/plural check. It also deletes the imports it leaves unused. The code was the easy part.
+Values like a playoff result or an All-NBA tier are stored in MySQL and compared in code, so the comparisons, the
+SQL, the NBA sync scripts and 3,260 stored rows have to change in the same release. The migration only touches
+rows that still hold the old value, and I ran it once inside a transaction that rolls back, just to check the
+row counts, before running it for real.
 
 **Permissions**
 Roles, per-user feature switches and per-topic membership are combined in one place, and there is a

@@ -48,7 +48,7 @@ export default function LolMatchDetail({ matchId, open, onClose }) {
   const title = data
     ? (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span>对局详情</span>
+        <span>Match Details</span>
         <Tag>{queueName(data.queueId)}</Tag>
         <span style={{ color: '#999', fontSize: 12, fontWeight: 400 }}>{mmss(data.gameDuration)}</span>
         {data.gameVersion && (
@@ -58,17 +58,18 @@ export default function LolMatchDetail({ matchId, open, onClose }) {
         )}
       </span>
     )
-    : '对局详情'
+    : 'Match Details'
 
   const body = data === null
     ? <Spin style={{ display: 'block', margin: '60px auto' }} />
     : data === false
-      ? <Empty description="这场对局的详细数据没有存下来" />
+      ? <Empty description="Detailed data for this match wasn't saved" />
       : (
         <>
-          {(data.teams || []).map((t) => <TeamBlock key={t.teamId} team={t} rating={rating} />)}
+          {(data.teams || []).map((team) => <TeamBlock key={team.teamId} team={team} rating={rating} />)}
           <div style={{ color: '#bbb', fontSize: 11, marginTop: 4 }}>
-            段位是**当前**段位，不是打这一场时的——对局数据里没有段位字段
+            {/* 原来写的是「**当前**」，JSX 不认 Markdown，页面上一直原样显示星号 */}
+            Ranks shown are <b>current</b> ranks, not the ranks during this match. Match data has no rank field
           </div>
           {/* 整局的打分和短评。放在十人数据**下面**：先看完这一局再评，顺序才对 */}
           <LolMatchRating rating={rating} />
@@ -110,19 +111,19 @@ function TeamBlock({ team, rating }) {
         }}
       >
         <span style={{ fontWeight: 700, color: won ? '#52c41a' : '#ff7875' }}>
-          {won ? '胜方' : '败方'}
+          {won ? 'Winning Team' : 'Losing Team'}
         </span>
         <span style={{ fontVariantNumeric: 'tabular-nums' }}>
           {team.kills}/{team.deaths}/{team.assists}
         </span>
-        <span style={{ color: '#999', fontSize: 12 }}>{k(team.gold)} 经济</span>
-        <span style={{ color: '#999', fontSize: 12 }}>{k(team.dmgChamp)} 输出</span>
+        <span style={{ color: '#999', fontSize: 12 }}>{`${k(team.gold)} gold`}</span>
+        <span style={{ color: '#999', fontSize: 12 }}>{`${k(team.dmgChamp)} damage`}</span>
         {/* 只列拿到过的目标：全列出来的话一排零看着像坏了 */}
-        {o.tower > 0 && <span style={{ color: '#999', fontSize: 12 }}>塔 {o.tower}</span>}
-        {o.dragon > 0 && <span style={{ color: '#999', fontSize: 12 }}>龙 {o.dragon}</span>}
-        {o.baron > 0 && <span style={{ color: '#999', fontSize: 12 }}>大龙 {o.baron}</span>}
-        {o.riftHerald > 0 && <span style={{ color: '#999', fontSize: 12 }}>先锋 {o.riftHerald}</span>}
-        {o.inhibitor > 0 && <span style={{ color: '#999', fontSize: 12 }}>水晶 {o.inhibitor}</span>}
+        {o.tower > 0 && <span style={{ color: '#999', fontSize: 12 }}>{`Towers ${o.tower}`}</span>}
+        {o.dragon > 0 && <span style={{ color: '#999', fontSize: 12 }}>{`Dragons ${o.dragon}`}</span>}
+        {o.baron > 0 && <span style={{ color: '#999', fontSize: 12 }}>{`Barons ${o.baron}`}</span>}
+        {o.riftHerald > 0 && <span style={{ color: '#999', fontSize: 12 }}>{`Heralds ${o.riftHerald}`}</span>}
+        {o.inhibitor > 0 && <span style={{ color: '#999', fontSize: 12 }}>{`Inhibitors ${o.inhibitor}`}</span>}
       </div>
       <Table
         className="stat-compact"
@@ -153,22 +154,30 @@ function TeamBlock({ team, rating }) {
  * 在固定列后面插一列平均分。**不展开也看得见**——十行里谁被骂了谁被夸了
  * 得一眼扫出来，不能逼人一行行点开才知道。
  */
-const columnsWithScore = (rating) => [
-  COLUMNS[0],
-  {
-    title: '评分',
-    key: 'rating',
-    width: 62,
-    align: 'center',
-    render: (_, r) => <PlayerScoreBadge rating={rating} puuid={r.puuid} />,
-  },
-  ...COLUMNS.slice(1),
-]
+const columnsWithScore = (rating) => {
+  const cols = buildColumns()
+  return [
+    cols[0],
+    {
+      title: 'Rating',
+      key: 'rating',
+      width: 62,
+      align: 'center',
+      render: (_, r) => <PlayerScoreBadge rating={rating} puuid={r.puuid} />,
+    },
+    ...cols.slice(1),
+  ]
+}
 
-/** 主表的列。手机和桌面**同一套**，窄屏靠横向滚动 */
-const COLUMNS = [
+/**
+ * 主表的列。手机和桌面**同一套**，窄屏靠横向滚动。
+ *
+ * 写成函数而不是模块顶层常量，是双语时期为了「渲染时才翻译标题」留下的；现在标题就是英文，
+ * 改回常量也行，行为没有区别。
+ */
+const buildColumns = () => [
   {
-    title: '英雄',
+    title: 'Champion',
     key: 'champ',
     fixed: 'left',
     width: 96,
@@ -193,7 +202,7 @@ const COLUMNS = [
      * （「英勇黄铜 I 97LP」），在窄列里会从中间断开，断点还不固定，
      * 看着像排版坏了。各自独占一行之后每行都短，宽度再窄也只是右侧留白。
      */
-    title: '玩家',
+    title: 'Player',
     key: 'who',
     width: 186,
     render: (_, r) => (
@@ -215,7 +224,7 @@ const COLUMNS = [
         )}
         <div style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
           {r.tier ? (
-            <Tooltip title="当前段位，不是这一场时的段位">
+            <Tooltip title="Current rank, not the rank during this match">
               <span style={{ color: tierColor(r.tier), fontWeight: 700 }}>
                 {tierText(r.tier, r.rankDiv)}
                 {r.leaguePoint != null && ` ${r.leaguePoint}LP`}
@@ -224,11 +233,11 @@ const COLUMNS = [
           ) : r.rankPending === '1' ? (
             /* 「还没查到」和「未定级」是两回事，不能都显示成灰字。
                路人的段位是后台按最近出现过的顺序慢慢补的，几千个人要十几个小时 */
-            <Tooltip title="段位还在后台补，最近的对局会先补上">
-              <span style={{ color: '#ddd' }}>段位查询中</span>
+            <Tooltip title="Rank is still being looked up in the background; recent matches go first">
+              <span style={{ color: '#ddd' }}>Rank pending</span>
             </Tooltip>
           ) : (
-            <span style={{ color: '#ddd' }}>未定级</span>
+            <span style={{ color: '#ddd' }}>Unranked</span>
           )}
         </div>
       </div>
@@ -246,9 +255,9 @@ const COLUMNS = [
       </div>
     ),
   },
-  { title: '参团率', key: 'kp', width: 66, align: 'right', render: (_, r) => rate(r.killPart) },
+  { title: 'KP', key: 'kp', width: 66, align: 'right', render: (_, r) => rate(r.killPart) },
   {
-    title: '补刀',
+    title: 'CS',
     key: 'cs',
     width: 74,
     align: 'right',
@@ -256,47 +265,47 @@ const COLUMNS = [
       <div style={{ lineHeight: 1.3, fontVariantNumeric: 'tabular-nums' }}>
         <div>{r.cs}</div>
         <div style={{ color: '#bbb', fontSize: 11 }}>
-          {r.timePlayed ? (r.cs / (r.timePlayed / 60)).toFixed(1) : '—'}/分
+          {`${r.timePlayed ? (r.cs / (r.timePlayed / 60)).toFixed(1) : '—'}/min`}
         </div>
       </div>
     ),
   },
   {
-    title: '经济',
+    title: 'Gold',
     key: 'gold',
     width: 80,
     align: 'right',
     render: (_, r) => (
       <div style={{ lineHeight: 1.3, fontVariantNumeric: 'tabular-nums' }}>
         <div>{k(r.gold)}</div>
-        <div style={{ color: '#bbb', fontSize: 11 }}>{Math.round(r.gpm || 0)}/分</div>
+        <div style={{ color: '#bbb', fontSize: 11 }}>{`${Math.round(r.gpm || 0)}/min`}</div>
       </div>
     ),
   },
   {
-    title: '输出',
+    title: 'Damage',
     key: 'dmg',
     width: 84,
     align: 'right',
     render: (_, r) => (
       <div style={{ lineHeight: 1.3, fontVariantNumeric: 'tabular-nums' }}>
         <div>{k(r.dmgChamp)}</div>
-        <div style={{ color: '#bbb', fontSize: 11 }}>{Math.round(r.dpm || 0)}/分</div>
+        <div style={{ color: '#bbb', fontSize: 11 }}>{`${Math.round(r.dpm || 0)}/min`}</div>
       </div>
     ),
   },
-  { title: '输出占比', key: 'ds', width: 76, align: 'right', render: (_, r) => rate(r.dmgShare) },
+  { title: 'Dmg Share', key: 'ds', width: 76, align: 'right', render: (_, r) => rate(r.dmgShare) },
   {
     // 每 1 金币打出多少对英雄伤害。Riot 没这个字段，是自己算的——
     // 同样 12k 经济，打出 25k 伤害和打出 8k 是两回事
-    title: <Tooltip title="伤害转化：每 1 金币打出多少对英雄伤害">伤转</Tooltip>,
+    title: <Tooltip title="Damage per gold: champion damage dealt for every 1 gold earned">Dmg/Gold</Tooltip>,
     key: 'dpg',
     width: 62,
     align: 'right',
     render: (_, r) => num1(r.dmgPerGold),
   },
   {
-    title: '承伤',
+    title: 'Dmg Taken',
     key: 'taken',
     width: 84,
     align: 'right',
@@ -308,14 +317,14 @@ const COLUMNS = [
     ),
   },
   {
-    title: '视野',
+    title: 'Vision',
     key: 'vision',
     width: 74,
     align: 'right',
     render: (_, r) => (
       <div style={{ lineHeight: 1.3, fontVariantNumeric: 'tabular-nums' }}>
         <div>{r.vision}</div>
-        <div style={{ color: '#bbb', fontSize: 11 }}>{num1(r.vpm)}/分</div>
+        <div style={{ color: '#bbb', fontSize: 11 }}>{`${num1(r.vpm)}/min`}</div>
       </div>
     ),
   },
@@ -341,10 +350,10 @@ const COLUMNS = [
  */
 function PlayerExtra({ p }) {
   const multi = [
-    p.pentaKills > 0 && `五杀 ×${p.pentaKills}`,
-    p.quadraKills > 0 && `四杀 ×${p.quadraKills}`,
-    p.tripleKills > 0 && `三杀 ×${p.tripleKills}`,
-    p.doubleKills > 0 && `双杀 ×${p.doubleKills}`,
+    p.pentaKills > 0 && `Penta Kill ×${p.pentaKills}`,
+    p.quadraKills > 0 && `Quadra Kill ×${p.quadraKills}`,
+    p.tripleKills > 0 && `Triple Kill ×${p.tripleKills}`,
+    p.doubleKills > 0 && `Double Kill ×${p.doubleKills}`,
   ].filter(Boolean)
 
   return (
@@ -352,39 +361,39 @@ function PlayerExtra({ p }) {
       display: 'grid', gap: 10, padding: '2px 0',
       gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
     }}>
-      <Panel title="伤害构成" accent="#e07b39">
+      <Panel title="Damage Breakdown" accent="#e07b39">
         <DamageBar p={p} />
-        <Row label="对防御塔" value={p.dmgTurret} fmt={k} />
-        <Row label="对野怪 / 目标" value={p.dmgObjective} fmt={k} />
+        <Row label="To Turrets" value={p.dmgTurret} fmt={k} />
+        <Row label="To Monsters / Objectives" value={p.dmgObjective} fmt={k} />
       </Panel>
 
-      <Panel title="对线期" accent="#4a8fe0">
-        <Row label="前 10 分钟补刀" value={p.cs10} />
-        <Row label="等级领先对位" value={p.levelLead} signed />
-        <Row label="单杀" value={p.soloKills} />
-        <Row label="一血" value={p.firstBlood === '1' ? 1 : 0} fmt={(v) => (v ? '是' : '否')} />
+      <Panel title="Laning Phase" accent="#4a8fe0">
+        <Row label="CS at 10 Min" value={p.cs10} />
+        <Row label="Level Lead vs. Lane Opponent" value={p.levelLead} signed />
+        <Row label="Solo Kills" value={p.soloKills} />
+        <Row label="First Blood" value={p.firstBlood === '1' ? 1 : 0} fmt={(v) => (v ? 'Yes' : 'No')} />
       </Panel>
 
-      <Panel title="视野" accent="#7c5cd6">
-        <Row label="插眼" value={p.wardsPlaced} />
-        <Row label="排眼" value={p.wardsKilled} />
-        <Row label="控制守卫" value={p.controlWards} />
+      <Panel title="Vision" accent="#7c5cd6">
+        <Row label="Wards Placed" value={p.wardsPlaced} />
+        <Row label="Wards Cleared" value={p.wardsKilled} />
+        <Row label="Control Wards" value={p.controlWards} />
       </Panel>
 
-      <Panel title="目标参与" accent="#d4a017">
-        <Row label="推塔" value={p.turretTakedowns} />
-        <Row label="镀层" value={p.turretPlates} />
-        <Row label="小龙" value={p.dragonTakedowns} />
-        <Row label="大龙" value={p.baronTakedowns} />
+      <Panel title="Objectives" accent="#d4a017">
+        <Row label="Turrets" value={p.turretTakedowns} />
+        <Row label="Turret Plates" value={p.turretPlates} />
+        <Row label="Dragons" value={p.dragonTakedowns} />
+        <Row label="Barons" value={p.baronTakedowns} />
       </Panel>
 
-      <Panel title="战斗 / 生存" accent="#d8443c">
-        <Row label="最高连杀" value={p.killingSpree} />
-        <Row label="控制敌人次数" value={p.immobilizations} />
-        <Row label="治疗队友" value={p.healTeam} fmt={k} />
-        <Row label="护盾队友" value={p.shieldTeam} fmt={k} />
+      <Panel title="Combat / Survival" accent="#d8443c">
+        <Row label="Largest Killing Spree" value={p.killingSpree} />
+        <Row label="Enemies Immobilized" value={p.immobilizations} />
+        <Row label="Healing on Allies" value={p.healTeam} fmt={k} />
+        <Row label="Shielding on Allies" value={p.shieldTeam} fmt={k} />
         {/* 阵亡时长永远非零，用固定色；它也是这一栏里唯一"越小越好"的数 */}
-        <Row label="阵亡时长" value={p.deadTime} fmt={mmss} always />
+        <Row label="Time Dead" value={p.deadTime} fmt={mmss} always />
         {multi.length > 0 && (
           <div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {multi.map((m) => <Tag key={m} color="volcano" style={{ margin: 0, fontSize: 11 }}>{m}</Tag>)}
@@ -402,14 +411,15 @@ function PlayerExtra({ p }) {
  * （Riot 那边的口径差异），除出来会超过 100%，条就画飞了。
  */
 function DamageBar({ p }) {
+  // key 既当 React key 又是显示的文字
   const parts = [
-    { key: '物理', v: p.dmgPhysical || 0, color: '#e07b39' },
-    { key: '魔法', v: p.dmgMagic || 0, color: '#4a8fe0' },
-    { key: '真实', v: p.dmgTrue || 0, color: '#9aa4ae' },
+    { key: 'Physical', v: p.dmgPhysical || 0, color: '#e07b39' },
+    { key: 'Magic', v: p.dmgMagic || 0, color: '#4a8fe0' },
+    { key: 'True', v: p.dmgTrue || 0, color: '#9aa4ae' },
   ]
   const total = parts.reduce((a, b) => a + b.v, 0)
   if (!total) {
-    return <div style={{ color: '#ccc', fontSize: 11, padding: '2px 0 6px' }}>没有对英雄伤害</div>
+    return <div style={{ color: '#ccc', fontSize: 11, padding: '2px 0 6px' }}>No damage to champions</div>
   }
   return (
     <div style={{ marginBottom: 6 }}>

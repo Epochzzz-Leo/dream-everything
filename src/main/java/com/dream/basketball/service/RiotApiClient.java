@@ -135,7 +135,7 @@ public class RiotApiClient {
 
     private String get(String host, String path) {
         if (!isConfigured()) {
-            throw new RiotException(0, host, "RIOT_API_KEY 没配置");
+            throw new RiotException(0, host, "RIOT_API_KEY is not configured");
         }
         pace();
         String url = "https://" + host + ".api.riotgames.com" + path;
@@ -171,7 +171,7 @@ public class RiotApiClient {
                     Thread.sleep(wait);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RiotException(-1, "-", "被中断");
+                    throw new RiotException(-1, "-", "Interrupted");
                 }
             }
             lastRequestAt = System.currentTimeMillis();

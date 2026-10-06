@@ -1,7 +1,6 @@
 import { Component } from 'react'
 import { Button, Typography } from 'antd'
 import { ReloadOutlined, CopyOutlined } from '@ant-design/icons'
-import i18n from '../i18n'
 
 const { Paragraph } = Typography
 
@@ -64,20 +63,20 @@ export default class ErrorBoundary extends Component {
     const detail = `${error.message || error}\n\n${stack}`.slice(0, 4000)
     return (
       <div style={{ padding: 24, maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{i18n.t("这个页面出错了")}</div>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Something went wrong on this page</div>
         <div style={{ color: '#cf1322', fontSize: 14, marginBottom: 16, wordBreak: 'break-word' }}>
           {String(error.message || error)}
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           <Button type="primary" icon={<ReloadOutlined />} onClick={() => window.location.reload()}>
-            {i18n.t("刷新重试")}
+            Reload
           </Button>
           <Button
             icon={<CopyOutlined />}
             onClick={() => navigator.clipboard?.writeText(detail)}
           >
-            {i18n.t("复制错误详情")}
+            Copy error details
           </Button>
         </div>
 

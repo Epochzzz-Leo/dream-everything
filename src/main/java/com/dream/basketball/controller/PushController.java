@@ -51,7 +51,7 @@ public class PushController {
      */
     @GetMapping("/publicKey")
     public Object publicKey() {
-        return new Result<>(0, "成功", sender.applicationServerKey());
+        return new Result<>(0, "OK", sender.applicationServerKey());
     }
 
     /** 我这台设备是否已经订阅过（前端用来决定开关的初始状态）。 */
@@ -64,7 +64,7 @@ public class PushController {
         out.put("subscribed", StringUtils.isNotBlank(endpoint) && subMapper.selectCount(
                 new QueryWrapper<PushSubscription>()
                         .eq("USER_ID", me.getUserId()).eq("ENDPOINT", endpoint)) > 0);
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /**
@@ -78,7 +78,7 @@ public class PushController {
     public Object subscribe(String endpoint, String p256dh, String auth, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isAnyBlank(endpoint, p256dh, auth)) {
-            return new Result<>(1, "订阅信息不完整", null);
+            return new Result<>(1, "Incomplete subscription details", null);
         }
         subMapper.delete(new QueryWrapper<PushSubscription>().eq("ENDPOINT", endpoint));
         PushSubscription s = new PushSubscription();
@@ -91,7 +91,7 @@ public class PushController {
         s.setUserAgent(StringUtils.substring(request.getHeader("User-Agent"), 0, 300));
         s.setCreateTime(new Date());
         subMapper.insert(s);
-        return new Result<>(0, "已开启推送", null);
+        return new Result<>(0, "Push notifications on", null);
     }
 
     /**
@@ -108,7 +108,7 @@ public class PushController {
     public Object registerDevice(String token, String platform, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(token)) {
-            return new Result<>(1, "缺少设备令牌", null);
+            return new Result<>(1, "Missing device token", null);
         }
         deviceMapper.delete(new QueryWrapper<PushDevice>().eq("TOKEN", token));
         PushDevice d = new PushDevice();
@@ -118,7 +118,7 @@ public class PushController {
         d.setPlatform(StringUtils.defaultIfBlank(platform, "android"));
         d.setCreateTime(new Date());
         deviceMapper.insert(d);
-        return new Result<>(0, "已开启推送", null);
+        return new Result<>(0, "Push notifications on", null);
     }
 
     /** 注销一台 App 设备（登出时调）。按令牌删，不影响这个人的其它设备。 */
@@ -127,11 +127,11 @@ public class PushController {
     public Object unregisterDevice(String token, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(token)) {
-            return new Result<>(1, "缺少设备令牌", null);
+            return new Result<>(1, "Missing device token", null);
         }
         deviceMapper.delete(new QueryWrapper<PushDevice>()
                 .eq("USER_ID", me.getUserId()).eq("TOKEN", token));
-        return new Result<>(0, "已关闭推送", null);
+        return new Result<>(0, "Push notifications off", null);
     }
 
     /**
@@ -144,11 +144,11 @@ public class PushController {
     public Object unsubscribe(String endpoint, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(endpoint)) {
-            return new Result<>(1, "缺少 endpoint", null);
+            return new Result<>(1, "Missing endpoint", null);
         }
         subMapper.delete(new QueryWrapper<PushSubscription>()
                 .eq("USER_ID", me.getUserId()).eq("ENDPOINT", endpoint));
-        return new Result<>(0, "已关闭推送", null);
+        return new Result<>(0, "Push notifications off", null);
     }
 
     /**
@@ -173,11 +173,11 @@ public class PushController {
         // 报**成功数**而不是设备数。第一版报的是设备数，于是两台设备全都发失败时
         // 界面照样弹「已发往 2 台设备」，把唯一的线索盖掉了，只能去翻服务器日志
         if (devices == 0) {
-            return new Result<>(1, "这个账号还没有已登记的设备", 0);
+            return new Result<>(1, "This account has no registered devices yet", 0);
         }
         if (ok == 0) {
-            return new Result<>(1, devices + " 台设备全部发送失败，去看服务器日志", 0);
+            return new Result<>(1, (devices == 1 ? "Sending to the 1 device failed" : "Sending to all " + devices + " devices failed") + ". Check the server log", 0);
         }
-        return new Result<>(0, "已送达 " + ok + "/" + devices + " 台设备", ok);
+        return new Result<>(0, "Delivered to " + ok + "/" + devices + (devices == 1 ? " device" : " devices"), ok);
     }
 }

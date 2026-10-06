@@ -52,15 +52,15 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         DreamUser user = SecUtil.getLoginUserToSession(request);
         if (!SecUtil.isLogin(request) || user == null) {
-            reject(response, HttpServletResponse.SC_UNAUTHORIZED, "未登录或会话已过期，请重新登录");
+            reject(response, HttpServletResponse.SC_UNAUTHORIZED, "You're not signed in or your session has expired. Please sign in again");
             return false;
         }
         if (rule != null && !Role.fromUserRole(user.getUserRole()).covers(rule.value())) {
-            reject(response, HttpServletResponse.SC_FORBIDDEN, "权限不足");
+            reject(response, HttpServletResponse.SC_FORBIDDEN, "No permission");
             return false;
         }
         if (feature != null && !featureGranted(feature.value(), user)) {
-            reject(response, HttpServletResponse.SC_FORBIDDEN, "管理员尚未对你开放该模块");
+            reject(response, HttpServletResponse.SC_FORBIDDEN, "An admin hasn't opened this module to you yet");
             return false;
         }
         return true;

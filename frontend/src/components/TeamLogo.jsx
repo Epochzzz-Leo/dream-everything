@@ -1,5 +1,4 @@
-import { teamZh } from '../pages/players/rankConfig'
-import { useTranslation } from 'react-i18next'
+import { teamName } from '../pages/players/rankConfig'
 
 /**
  * NBA 30 队队标。
@@ -19,8 +18,8 @@ const norm = (code) => String(code ?? '').trim().toUpperCase()
 export default function TeamLogo({ code, size = 22, style, title }) {
   const c = norm(code)
   const url = LOGOS[c]
-  // teamZh 会跟着语言翻队名；认不出的队码原样返回
-  const label = title ?? teamZh(c)
+  // 认不出的队码原样返回
+  const label = title ?? teamName(c)
   if (!url) {
     return (
       <span
@@ -57,10 +56,9 @@ export default function TeamLogo({ code, size = 22, style, title }) {
  * 宽高写死成正方形，同一列里的几个标才对得齐。
  */
 export function HomeAwayTag({ home, size = 18, style }) {
-  const { t } = useTranslation()
   return (
     <span
-      title={home ? t("主场") : t("客场")}
+      title={home ? 'Home' : 'Away'}
       style={{
         flexShrink: 0, display: 'inline-block', boxSizing: 'border-box',
         width: size, height: size, borderRadius: 4,
@@ -72,7 +70,7 @@ export function HomeAwayTag({ home, size = 18, style }) {
         ...style,
       }}
     >
-      {home ? t("主") : t("客")}
+      {home ? 'H' : 'A'}
     </span>
   )
 }
@@ -90,7 +88,7 @@ export function TeamChain({ value, size = 15, gap = 4, style }) {
         <span key={`${code}-${i}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
           {i > 0 && <span style={{ color: 'inherit', opacity: 0.55, marginRight: 1 }}>→</span>}
           <TeamLogo code={code} size={size} />
-          {teamZh(code)}
+          {teamName(code)}
         </span>
       ))}
     </span>
@@ -107,7 +105,7 @@ export function TeamNames({ value }) {
   if (!hops.length) return '-'
   return hops.map((code, i) => (
     <span key={`${code}-${i}`} style={{ whiteSpace: 'nowrap' }}>
-      {teamZh(code)}{i < hops.length - 1 ? '→' : ''}
+      {teamName(code)}{i < hops.length - 1 ? '→' : ''}
     </span>
   ))
 }
@@ -123,7 +121,7 @@ export function TeamCell({ value, size = 15 }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
       <TeamLogo code={v} size={size} />
-      {teamZh(v)}
+      {teamName(v)}
     </span>
   )
 }

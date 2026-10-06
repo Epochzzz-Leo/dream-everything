@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Button, Empty, Input, Modal, Popconfirm, Space, message } from 'antd'
 import { DeleteOutlined, DownOutlined, PlusOutlined, UpOutlined } from '@ant-design/icons'
 import { topicApi } from '../api/topic'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 专题类别管理（超管）：百家说首页那排筛选按钮就是这份列表。
@@ -12,7 +11,6 @@ import { useTranslation } from 'react-i18next'
  * 让已归类的专题掉出去。
  */
 export default function CategoryManageModal({ open, onClose, onChanged }) {
-  const { t } = useTranslation()
   const [rows, setRows] = useState([])
   const [adding, setAdding] = useState('')
   const [busy, setBusy] = useState(false)
@@ -39,7 +37,7 @@ export default function CategoryManageModal({ open, onClose, onChanged }) {
     if (!name) return
     apply(async () => {
       const next = await topicApi.saveCategory({ name, sort: rows.length })
-      message.success(t("已添加"))
+      message.success('Added')
       setAdding('')
       return next
     })
@@ -62,9 +60,9 @@ export default function CategoryManageModal({ open, onClose, onChanged }) {
   }
 
   return (
-    <Modal open={open} onCancel={onClose} onOk={onClose} okText={t("完成")} cancelButtonProps={{ style: { display: 'none' } }} title={t("管理专题类别")} width={460} destroyOnClose>
+    <Modal open={open} onCancel={onClose} onOk={onClose} okText="Done" cancelButtonProps={{ style: { display: 'none' } }} title="Topic categories" width={460} destroyOnClose>
       <div style={{ fontSize: 12, color: '#999', margin: '4px 0 14px' }}>
-        {t("百家说首页按这份列表筛专题。删掉一个类别，原来挂在它下面的专题会退回「未分类」，专题本身不受影响。")}
+        The Chat Everything home page filters topics by this list. Deleting a category moves its topics back to "Uncategorized"; the topics themselves are untouched.
       </div>
 
       {rows.length ? (
@@ -80,26 +78,26 @@ export default function CategoryManageModal({ open, onClose, onChanged }) {
               />
               <Button size="small" type="text" icon={<UpOutlined />} disabled={busy || i === 0} onClick={() => move(i, -1)} />
               <Button size="small" type="text" icon={<DownOutlined />} disabled={busy || i === rows.length - 1} onClick={() => move(i, 1)} />
-              <Popconfirm title={t("删除「{{name}}」？", { name: r.name })} description={t("该类别下的专题会退回未分类")} okText={t("删除")} cancelText={t("取消")} okButtonProps={{ danger: true }} onConfirm={() => apply(() => topicApi.deleteCategory(r.categoryId))}>
+              <Popconfirm title={`Delete "${r.name}"?`} description="Its topics go back to Uncategorized" okText="Delete" cancelText="Cancel" okButtonProps={{ danger: true }} onConfirm={() => apply(() => topicApi.deleteCategory(r.categoryId))}>
                 <Button size="small" type="text" danger icon={<DeleteOutlined />} disabled={busy} />
               </Popconfirm>
             </div>
           ))}
         </div>
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("还没有类别")} />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No categories yet" />
       )}
 
       <Space.Compact style={{ width: '100%', marginTop: 14 }}>
         <Input
-          placeholder={t("新类别名称，如：学习、游戏、生活")}
+          placeholder="New category name, e.g. Study, Games, Life"
           maxLength={12}
           value={adding}
           disabled={busy}
           onChange={(e) => setAdding(e.target.value)}
           onPressEnter={add}
         />
-        <Button type="primary" icon={<PlusOutlined />} onClick={add} disabled={busy || !adding.trim()}>{t("添加")}</Button>
+        <Button type="primary" icon={<PlusOutlined />} onClick={add} disabled={busy || !adding.trim()}>Add</Button>
       </Space.Compact>
     </Modal>
   )

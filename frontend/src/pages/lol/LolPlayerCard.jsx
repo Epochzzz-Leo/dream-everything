@@ -142,7 +142,7 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
       <LolUserAvatar name={who.nickname} src={who.avatar} size={26} />
       <span>{who.nickname}</span>
     </span>
-  ) : '玩家资料'
+  ) : 'Player Profile'
 
   const body = (
     <>
@@ -166,7 +166,7 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
                 <b>{a.gameName}</b>
                 <span style={{ color: '#bbb' }}>#{a.tagLine}</span>
                 {a.tier && (
-                  <Tooltip title="当前段位，不是某一场时的段位">
+                  <Tooltip title="Current rank, not the rank in any one match">
                     <span style={{ color: tierColor(a.tier), fontWeight: 700, marginLeft: 6 }}>
                       {tierText(a.tier, a.rankDiv)}
                       {a.leaguePoint != null && ` ${a.leaguePoint}LP`}
@@ -178,7 +178,7 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
           })}
           {accounts.length > 1 && (
             <span style={{ color: '#ccc', fontSize: 11 }}>
-              默认只看最近在玩的号，点账号可切换 / 多选
+              Shows the most recently played account by default. Tap accounts to switch or select several
             </span>
           )}
         </Space>
@@ -187,7 +187,7 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
       {data === null
         ? <Spin style={{ display: 'block', margin: '60px auto' }} />
         : data === false
-          ? <Empty description="拿不到这个人的数据" />
+          ? <Empty description="Couldn't load this player's data" />
           : (
             <Body
               d={data}
@@ -231,10 +231,11 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
 }
 
 function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onOpenMatch }) {
+  // hook 必须在下面那个提前 return 之前调用
   const s = d.summary || {}
   const games = Number(s.games || 0)
   if (!games) {
-    return <Empty description="这段时间没有对局" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+    return <Empty description="No games in this period" image={Empty.PRESENTED_IMAGE_SIMPLE} />
   }
   const wins = Number(s.wins || 0)
 
@@ -244,30 +245,30 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
         display: 'grid', gap: 8, marginBottom: 14,
         gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)',
       }}>
-        <Stat label="场次" value={games} />
-        <Stat label="胜率" value={pct(wins, games)} color={rateColor(wins / games)} />
+        <Stat label="Games" value={games} />
+        <Stat label="Win%" value={pct(wins, games)} color={rateColor(wins / games)} />
         <Stat label="KDA" value={num1(s.avgKda)} />
-        <Stat label="参团率" value={rate(s.avgKillPart)} />
-        <Stat label="伤害占比" value={rate(s.avgDmgShare)} />
-        <Stat label="承伤占比" value={rate(s.avgTakenShare)} />
-        <Stat label="伤转" value={num1(s.avgDmgPerGold)} />
-        <Stat label="场均伤害" value={k(s.avgDmg)} />
-        <Stat label="场均承伤" value={k(s.avgTaken)} />
-        <Stat label="每分补刀" value={num1(s.csPerMin)} />
-        <Stat label="场均视野" value={num1(s.avgVision)} />
-        <Stat label="单场最高击杀" value={s.maxKills ?? '—'} />
-        <Stat label="总击杀" value={s.kills ?? 0} />
-        <Stat label="总死亡" value={s.deaths ?? 0} />
-        <Stat label="总助攻" value={s.assists ?? 0} />
+        <Stat label="KP" value={rate(s.avgKillPart)} />
+        <Stat label="Dmg Share" value={rate(s.avgDmgShare)} />
+        <Stat label="Taken Share" value={rate(s.avgTakenShare)} />
+        <Stat label="Dmg/Gold" value={num1(s.avgDmgPerGold)} />
+        <Stat label="Avg Damage" value={k(s.avgDmg)} />
+        <Stat label="Avg Dmg Taken" value={k(s.avgTaken)} />
+        <Stat label="CS/Min" value={num1(s.csPerMin)} />
+        <Stat label="Vision/Game" value={num1(s.avgVision)} />
+        <Stat label="Most Kills in a Game" value={s.maxKills ?? '—'} />
+        <Stat label="Total Kills" value={s.kills ?? 0} />
+        <Stat label="Total Deaths" value={s.deaths ?? 0} />
+        <Stat label="Total Assists" value={s.assists ?? 0} />
       </div>
 
       {/* 位置是开关：点一个只看那一路，可多选，全不选＝不限。
           这一排的数字**不跟着筛**——它是全景，也是点下去之前的判断依据 */}
       <Section title={
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span>位置分布</span>
+          <span>Positions</span>
           <span style={{ fontWeight: 400, color: '#ccc', fontSize: 11 }}>
-            {poses.length ? '再点一次取消' : '点位置可筛英雄池和战绩'}
+            {poses.length ? 'Tap again to clear' : 'Tap a position to filter champions and matches'}
           </span>
         </span>
       }>
@@ -287,7 +288,7 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                   opacity: poses.length && !on ? 0.5 : 1,
                 }}
               >
-                <span style={{ color: on ? '#fa541c' : '#666' }}>{POSITION_LABEL[p.pos] || '其它'}</span>
+                <span style={{ color: on ? '#fa541c' : '#666' }}>{POSITION_LABEL[p.pos] || 'Other'}</span>
                 <span style={{ fontWeight: 700, marginLeft: 5 }}>{p.games}</span>
                 <span style={{ color: '#bbb', marginLeft: 4 }}>{pct(p.wins, p.games)}</span>
               </Tag>
@@ -307,8 +308,8 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                 value={tab}
                 onChange={setTab}
                 options={[
-                  { value: 'champions', label: `英雄池 (${(d.champions || []).length})` },
-                  { value: 'matches', label: `战绩 (${shown.length})` },
+                  { value: 'champions', label: `Champions (${(d.champions || []).length})` },
+                  { value: 'matches', label: `Matches (${shown.length})` },
                 ]}
               />
               {/* 位置筛选的开关在上面那排，但那排可能已经滚出视野了。
@@ -321,7 +322,7 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                   color="volcano"
                   style={{ margin: 0 }}
                 >
-                  {POSITION_LABEL[p] || '其它'}
+                  {POSITION_LABEL[p] || 'Other'}
                 </Tag>
               ))}
               {champ && (
@@ -331,7 +332,7 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                   color="orange"
                   style={{ margin: 0 }}
                 >
-                  只看 {champ}
+                  {`Only ${champ}`}
                 </Tag>
               )}
             </div>
@@ -351,14 +352,14 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
         )
       })()}
 
-      <Section title="常一起打的人">
+      <Section title="Frequent Teammates">
         {(d.mates || []).length === 0
-          ? <span style={{ color: '#bbb', fontSize: 13 }}>这段时间没有和别的成员同场</span>
+          ? <span style={{ color: '#bbb', fontSize: 13 }}>No games with other members in this period</span>
           : (
             <Space size={10} wrap>
               {d.mates.map((m) => (
                 <span key={m.userId} style={{ fontSize: 13 }}>
-                  <span style={{ color: '#666' }}>{m.nickname || '（未知）'}</span>
+                  <span style={{ color: '#666' }}>{m.nickname || '(unknown)'}</span>
                   <span style={{ fontWeight: 700, marginLeft: 5 }}>{m.games}</span>
                   <span style={{ color: rateColor(m.games ? m.wins / m.games : 0), marginLeft: 4 }}>
                     {pct(m.wins, m.games)}
@@ -382,19 +383,19 @@ function ChampionTable({ rows, active, onPick }) {
       scroll={{ x: 'max-content' }}
       dataSource={rows}
       style={{ marginBottom: 14 }}
-      locale={{ emptyText: '这个位置下没有对局' }}
+      locale={{ emptyText: 'No games in this position' }}
       onRow={(r) => ({ onClick: () => onPick(r.championName), style: { cursor: 'pointer' } })}
       rowClassName={(r) => (r.championName === active ? 'lol-mine' : '')}
       columns={[
-        { title: '英雄', dataIndex: 'championName', width: 108,
+        { title: 'Champion', dataIndex: 'championName', width: 108,
           render: (v) => (
             <span style={{ fontWeight: 600, color: v === active ? '#fa541c' : undefined }}>
               {v}
             </span>
           ) },
-        { title: '场次', dataIndex: 'games', width: 58, align: 'right' },
+        { title: 'Games', dataIndex: 'games', width: 58, align: 'right' },
         {
-          title: '胜率',
+          title: 'Win%',
           key: 'rate',
           width: 132,
           render: (_, r) => (
@@ -413,8 +414,8 @@ function ChampionTable({ rows, active, onPick }) {
           ),
         },
         { title: 'KDA', dataIndex: 'avgKda', width: 62, align: 'right', render: (v) => num1(v) },
-        { title: '伤害占比', dataIndex: 'avgDmgShare', width: 78, align: 'right', render: (v) => rate(v) },
-        { title: '承伤占比', dataIndex: 'avgTakenShare', width: 78, align: 'right', render: (v) => rate(v) },
+        { title: 'Dmg Share', dataIndex: 'avgDmgShare', width: 78, align: 'right', render: (v) => rate(v) },
+        { title: 'Taken Share', dataIndex: 'avgTakenShare', width: 78, align: 'right', render: (v) => rate(v) },
       ]}
     />
   )
@@ -452,36 +453,37 @@ function MatchTable({ rows, onOpen }) {
       dataSource={rows}
       style={{ marginBottom: 14 }}
       onRow={(r) => ({ onClick: () => onOpen(r.matchId), style: { cursor: 'pointer' } })}
-      locale={{ emptyText: '这个筛选下没有对局' }}
+      locale={{ emptyText: 'No games match this filter' }}
       columns={[
         {
-          title: '结果',
+          title: 'Result',
           key: 'win',
           width: 58,
           render: (_, r) => (
             r.earlySurr === '1'
-              ? <span style={{ color: '#999' }}>重开</span>
+              ? <span style={{ color: '#999' }}>Remake</span>
               : <span style={{ color: r.win === '1' ? '#52c41a' : '#ff7875', fontWeight: 700 }}>
-                {r.win === '1' ? '胜' : '负'}
+                {r.win === '1' ? 'W' : 'L'}
               </span>
           ),
         },
         {
-          title: '时间',
+          // 「时间」不带语境的那个 key 是 NBA 表里的上场时间（MIN），这里是开局时刻，单独一个语境
+          title: 'Date',
           key: 'when',
           width: 92,
           render: (_, r) => {
-            const t = new Date(r.gameStart)
+            const when = new Date(r.gameStart)
             return (
               <span style={{ color: '#999', fontSize: 12 }}>
-                {t.getMonth() + 1}/{t.getDate()} {String(t.getHours()).padStart(2, '0')}:{String(t.getMinutes()).padStart(2, '0')}
+                {when.getMonth() + 1}/{when.getDate()} {String(when.getHours()).padStart(2, '0')}:{String(when.getMinutes()).padStart(2, '0')}
               </span>
             )
           },
         },
-        { title: '队列', dataIndex: 'queueId', width: 88, render: (v) => <span style={{ fontSize: 12 }}>{queueName(v)}</span> },
+        { title: 'Queue', dataIndex: 'queueId', width: 88, render: (v) => <span style={{ fontSize: 12 }}>{queueName(v)}</span> },
         {
-          title: '英雄',
+          title: 'Champion',
           key: 'champ',
           width: 104,
           render: (_, r) => (
@@ -507,22 +509,22 @@ function MatchTable({ rows, onOpen }) {
             </span>
           ),
         },
-        { title: '参团', dataIndex: 'killPart', width: 58, align: 'right', render: (v) => rate(v) },
-        { title: '输出占比', dataIndex: 'dmgShare', width: 74, align: 'right', render: (v) => rate(v) },
+        { title: 'KP', dataIndex: 'killPart', width: 58, align: 'right', render: (v) => rate(v) },
+        { title: 'Dmg Share', dataIndex: 'dmgShare', width: 74, align: 'right', render: (v) => rate(v) },
         // 承伤占比是存下来的（分母是全队五个人，路人不在库里），伤转是查询里现算的
-        { title: '承伤占比', dataIndex: 'takenShare', width: 74, align: 'right', render: (v) => rate(v) },
+        { title: 'Taken Share', dataIndex: 'takenShare', width: 74, align: 'right', render: (v) => rate(v) },
         {
-          title: <Tooltip title="伤害转化：每 1 金币打出多少对英雄伤害">伤转</Tooltip>,
+          title: <Tooltip title="Damage per gold: champion damage dealt for every 1 gold earned">Dmg/Gold</Tooltip>,
           dataIndex: 'dmgPerGold',
           width: 62,
           align: 'right',
           render: (v) => num1(v),
         },
-        { title: '补刀', dataIndex: 'cs', width: 54, align: 'right' },
-        { title: '输出', dataIndex: 'dmgChamp', width: 62, align: 'right', render: (v) => k(v) },
-        { title: '承伤', dataIndex: 'dmgTaken', width: 62, align: 'right', render: (v) => k(v) },
-        { title: '视野', dataIndex: 'vision', width: 54, align: 'right' },
-        { title: '时长', dataIndex: 'gameDuration', width: 62, align: 'right', render: (v) => mmss(v) },
+        { title: 'CS', dataIndex: 'cs', width: 54, align: 'right' },
+        { title: 'Damage', dataIndex: 'dmgChamp', width: 62, align: 'right', render: (v) => k(v) },
+        { title: 'Dmg Taken', dataIndex: 'dmgTaken', width: 62, align: 'right', render: (v) => k(v) },
+        { title: 'Vision', dataIndex: 'vision', width: 54, align: 'right' },
+        { title: 'Duration', dataIndex: 'gameDuration', width: 62, align: 'right', render: (v) => mmss(v) },
       ]}
     />
   )

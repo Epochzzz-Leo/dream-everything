@@ -1,7 +1,6 @@
 import { Badge } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TABS, activeTab } from './mobileNav'
-import { useTranslation } from 'react-i18next'
 
 const BRAND = '#fa541c'
 
@@ -26,7 +25,6 @@ export const TAB_BAR_HEIGHT = 52
 export const TOP_BAR_HEIGHT = 50
 
 export default function MobileTabBar({ pmUnread = 0, meUnread = 0 }) {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const active = activeTab(location.pathname)
@@ -69,7 +67,7 @@ export default function MobileTabBar({ pmUnread = 0, meUnread = 0 }) {
             <Badge count={n} size="small" offset={[2, 0]}>
               <Icon style={{ fontSize: 20, color: on ? BRAND : '#8c8c8c' }} />
             </Badge>
-            <span style={{ fontSize: 10, lineHeight: 1, fontWeight: on ? 700 : 400 }}>{t(tab.label)}</span>
+            <span style={{ fontSize: 10, lineHeight: 1, fontWeight: on ? 700 : 400 }}>{tab.label}</span>
           </div>
         )
       })}

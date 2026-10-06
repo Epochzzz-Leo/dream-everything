@@ -5,7 +5,7 @@ import { playerApi } from '../../api/player'
 export const SEASON_TYPE = { REG: 2, PO: 3 }
 
 /** 季后赛轮次编号 → 中文 */
-export const ROUND_LABEL = { 1: '首轮', 2: '半决赛', 3: '分区决赛', 4: '总决赛' }
+export const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /**
  * 该球员有逐场数据的赛季，按类型分好：{ 2: [{seasonNum, games}], 3: [...] }，各自按赛季倒序。

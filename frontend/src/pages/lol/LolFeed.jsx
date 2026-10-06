@@ -62,21 +62,14 @@ export default function LolFeed() {
         // 他的昵称就出现四次。而且昵称和游戏 ID 偶尔会撞名，也要合并掉。
         //
         // 顺带标出这一条是昵称还是游戏 ID——两种都在同一个下拉里，
-        // 不标的话看到一串名字根本分不出搜的是谁
+        // 不标的话看到一串名字根本分不出搜的是谁。
+        // state 里只存原始的 { value, kind }，标签在渲染时再拼
         const seen = new Map()
         for (const o of d || []) {
-          if (o.nickname && !seen.has(o.nickname)) seen.set(o.nickname, '站内昵称')
-          if (o.gameName && !seen.has(o.gameName)) seen.set(o.gameName, '游戏 ID')
+          if (o.nickname && !seen.has(o.nickname)) seen.set(o.nickname, 'Nickname')
+          if (o.gameName && !seen.has(o.gameName)) seen.set(o.gameName, 'Riot ID')
         }
-        setOptions([...seen].map(([value, kind]) => ({
-          value,
-          label: (
-            <span style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-              <span>{value}</span>
-              <span style={{ color: '#bbb', fontSize: 11 }}>{kind}</span>
-            </span>
-          ),
-        })))
+        setOptions([...seen].map(([value, kind]) => ({ value, kind })))
       })
       .catch(() => {})
   }, [])
@@ -97,14 +90,17 @@ export default function LolFeed() {
     <>
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
         {/* 选了具体日期就把时间窗收起来——两个同时摆着会让人以为它们能叠加 */}
-        {!date && <Segmented value={days} onChange={setDays} options={DAYS_OPTIONS} />}
+        {!date && (
+          <Segmented value={days} onChange={setDays} options={DAYS_OPTIONS} />
+        )}
 
-        {/* 队列用下拉而不是像时间窗那样铺成一排：选项有五个，铺开在手机上要占掉一整行 */}
+        {/* 队列用下拉而不是像时间窗那样铺成一排：选项有五个，铺开在手机上要占掉一整行。
+            宽度按英文最长的「Ranked Solo/Duo」留，中文短，只是右边多点空 */}
         <Select
           value={queue}
           onChange={setQueue}
           options={QUEUE_OPTIONS}
-          style={{ width: 120 }}
+          style={{ width: 150 }}
         />
 
         <Button
@@ -113,7 +109,7 @@ export default function LolFeed() {
           type={date ? 'primary' : 'default'}
           style={{ position: 'relative' }}
         >
-          {date || '按日期'}
+          {date || 'By date'}
           {/* 日历藏在按钮底下：DatePicker 换不掉自己的输入框，缩成零尺寸只当弹层锚点。
               有对局的日子会被标出来，标注按**面板显示中的月份**取（见 DateMarkPicker） */}
           <DateMarkPicker
@@ -125,11 +121,19 @@ export default function LolFeed() {
             style={{ position: 'absolute', left: 0, bottom: 0, width: 0, height: 0, padding: 0, border: 'none', visibility: 'hidden' }}
           />
         </Button>
-        {date && <Button type="text" onClick={() => setDate('')}>清除日期</Button>}
+        {date && <Button type="text" onClick={() => setDate('')}>Clear date</Button>}
 
         <AutoComplete
           value={draft}
-          options={options}
+          options={options.map((o) => ({
+            value: o.value,
+            label: (
+              <span style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                <span>{o.value}</span>
+                <span style={{ color: '#bbb', fontSize: 11 }}>{o.kind}</span>
+              </span>
+            ),
+          }))}
           onChange={setDraft}
           onSelect={(v) => setPlayer(v)}
           // label 现在是 JSX，只能按 value 过滤
@@ -137,7 +141,7 @@ export default function LolFeed() {
           style={{ width: isMobile ? '100%' : 220 }}
         >
           <Input
-            placeholder="搜昵称或游戏 ID"
+            placeholder="Search nickname or Riot ID"
             prefix={<SearchOutlined style={{ color: '#aaa' }} />}
             allowClear={{ clearIcon: <CloseCircleFilled style={{ color: '#ccc' }} /> }}
             // 回车或失焦才真的去查：边打边查会为每个字母打一次请求，
@@ -158,18 +162,18 @@ export default function LolFeed() {
           // 大乱斗就是这样：库里有 72 场，但都是去年七八月的，默认的 30 天根本够不着。
           // 只说「没有对局」会让人以为这类数据压根没抓
           queue && !date
-            ? `最近 ${days} 天没有${queueName(queue)}。这类局可能更早，把时间窗放大到近一年试试`
+            ? `No ${queueName(queue)} games in the last ${days} days. They may be older; try Last Year`
             : date || player || queue
-              ? '这个条件下没有对局'
-              : '这段时间没有对局。先去「绑定账号」把 Riot ID 填上'}
+              ? 'No games match these filters'
+              : 'No games in this period. Add your Riot ID under "Link Account" first'}
         />
       ) : (
         <>
           <div style={{ color: '#999', fontSize: 12, marginBottom: 8 }}>
-            {rows.length} 场
+            {((rows.length) === 1 ? `${rows.length} game` : `${rows.length} games`)}
             {date && ` · ${date}`}
             {queue ? ` · ${queueName(queue)}` : ''}
-            {player && ` · 含「${player}」`}
+            {player && ` · ${`with "${player}"`}`}
           </div>
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
             {rows.map((m) => (
@@ -213,13 +217,14 @@ function MatchCard({ m, isMobile, onOpen }) {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 700, color: remake ? '#999' : won ? '#52c41a' : '#ff7875' }}>
-          {remake ? '重开' : won ? '胜' : '负'}
+          {/* 卡片抬头的胜负用 match 语境（Victory / Defeat）；表格里那种窄列用不带语境的 W / L */}
+          {remake ? 'Remake' : won ? 'Victory' : 'Defeat'}
         </span>
         <Tag>{queueName(m.queueId)}</Tag>
         <span style={{ color: '#999', fontSize: 12 }}>{stamp}</span>
         <span style={{ color: '#999', fontSize: 12 }}>{mmss(m.gameDuration)}</span>
-        {players.length >= 2 && <Tag color="purple">{players.length} 人开黑</Tag>}
-        <span style={{ marginLeft: 'auto', color: '#ccc', fontSize: 12 }}>点开看十人详情 ›</span>
+        {players.length >= 2 && <Tag color="purple">{`${players.length}-stack`}</Tag>}
+        <span style={{ marginLeft: 'auto', color: '#ccc', fontSize: 12 }}>Tap for all 10 players ›</span>
       </div>
 
       <Space direction="vertical" size={6} style={{ width: '100%' }}>
@@ -227,15 +232,17 @@ function MatchCard({ m, isMobile, onOpen }) {
           <div key={p.puuid} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <LolUserAvatar name={p.nickname} src={p.avatar} size={26} />
             <span style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {p.nickname || '（未知）'}
+              {p.nickname || '(unknown)'}
             </span>
             <span style={{ color: '#666', fontSize: 13 }}>{p.championName}</span>
             {p.teamPosition && (
-              <span style={{ color: '#bbb', fontSize: 12 }}>{POSITION_LABEL[p.teamPosition] || p.teamPosition}</span>
+              <span style={{ color: '#bbb', fontSize: 12 }}>
+                {POSITION_LABEL[p.teamPosition] || p.teamPosition}
+              </span>
             )}
             <span style={{ marginLeft: 'auto', fontVariantNumeric: 'tabular-nums', fontSize: 13 }}>
               {kdaText(p)}
-              <span style={{ color: '#aaa', marginLeft: 6 }}>{p.cs} 补</span>
+              <span style={{ color: '#aaa', marginLeft: 6 }}>{`${p.cs} CS`}</span>
             </span>
           </div>
         ))}

@@ -13,7 +13,6 @@ import useIsMobile from '../../hooks/useIsMobile'
 import { compressImage } from '../../utils/image'
 import ChatPurgeModal from '../../components/ChatPurgeModal'
 import ChatExportModal from '../../components/ChatExportModal'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 专题群聊页（/news/topic/:topicId/chat）。
@@ -87,7 +86,6 @@ function renderText(content, mentionsJson, myId) {
 }
 
 export default function TopicChatPage() {
-  const { t } = useTranslation()
   const { topicId } = useParams()
   const navigate = useNavigate()
   const fromTopic = !!useLocation().state?.fromTopic
@@ -295,7 +293,7 @@ export default function TopicChatPage() {
       setJumped(true)
       stickRef.current = false
       requestAnimationFrame(() => { if (listRef.current) listRef.current.scrollTop = 0 })
-      if (!list.length) toast.info(t("这一天及之后都没有记录"))
+      if (!list.length) toast.info('No messages on or after that day')
     } catch { /* 拦截器已提示 */ }
   }
 
@@ -318,7 +316,7 @@ export default function TopicChatPage() {
       await chatApi.send(topicId, { content, ...(extra || {}) })
       if (!extra) setText('')
     } catch (e) {
-      toast.error(e?.msg || t("发送失败"))
+      toast.error(e?.msg || 'Send failed')
     } finally {
       setSending(false)
     }
@@ -344,7 +342,7 @@ export default function TopicChatPage() {
         const url = await newsApi.uploadCommentFile(packed, topicId)
         if (url) await send(asImage ? { imageUrl: url } : { fileUrl: url, fileName: file.name })
       } catch {
-        toast.error(asImage ? t("图片上传失败") : t("附件上传失败"))
+        toast.error(asImage ? 'Image upload failed' : 'Attachment upload failed')
       } finally {
         setUploading(false)
       }
@@ -439,9 +437,9 @@ export default function TopicChatPage() {
   if (!topic?.canChat) {
     return (
       <Card style={{ borderRadius: 14 }}>
-        <Empty description={topic ? t("这个专题没有开放群聊，或者你没有进入权限") : t("专题不存在")}>
+        <Empty description={topic ? 'This topic has no group chat, or you don\'t have access' : 'Topic not found'}>
           {/* 同样走 backToTopic，否则这里也会和全局返回来回弹 */}
-          <Button onClick={() => (topic ? backToTopic() : navigate('/news', { replace: true }))}>{t("返回")}</Button>
+          <Button onClick={() => (topic ? backToTopic() : navigate('/news', { replace: true }))}>Back</Button>
         </Empty>
       </Card>
     )
@@ -474,7 +472,7 @@ export default function TopicChatPage() {
             ? <ArrowLeftOutlined onClick={backToTopic} style={{ color: '#555' }} />
             : <MessageOutlined style={{ color: BRAND }} />}
           {topic.name}
-          {!isMobile && <span style={{ color: '#bbb', fontSize: 13, fontWeight: 400 }}>{t("群聊")}</span>}
+          {!isMobile && <span style={{ color: '#bbb', fontSize: 13, fontWeight: 400 }}>Group chat</span>}
         </span>
       }
       extra={(
@@ -483,8 +481,8 @@ export default function TopicChatPage() {
           {/* 按日期查找：所有能进群聊的人都能用，不只是题主，所以排在管理动作前面。
               做成和旁边一样的「图标 + 文字」链接——原来那个带输入框的日期选择器夹在
               两个按钮中间，是这一行里唯一一个有边框的控件，扎眼 */}
-          <a onClick={() => setDateOpen(true)} style={{ color: '#666' }} title={t("按日期")}>
-            <CalendarOutlined />{!isMobile && <> {t('按日期')}</>}
+          <a onClick={() => setDateOpen(true)} style={{ color: '#666' }} title="By date">
+            <CalendarOutlined />{!isMobile && <> By date</>}
           </a>
           {/* 真正的日历藏在这里：DatePicker 没法换掉自己的输入框，所以把它缩成零尺寸
               当锚点用，弹层照样挂在这个位置 */}
@@ -512,17 +510,17 @@ export default function TopicChatPage() {
           />
           {/* 备份和清理只给管理者，两个挨在一起 */}
           {topic?.canManage && (
-            <a onClick={() => setExportOpen(true)} style={{ color: '#666' }} title={t("导出备份")}>
-              <DownloadOutlined />{!isMobile && <> {t('导出备份')}</>}
+            <a onClick={() => setExportOpen(true)} style={{ color: '#666' }} title="Export">
+              <DownloadOutlined />{!isMobile && <> Export</>}
             </a>
           )}
           {topic?.canManage && (
-            <a onClick={() => setPurgeOpen(true)} style={{ color: '#666' }} title={t("清理记录")}>
-              <ClearOutlined />{!isMobile && <> {t('清理记录')}</>}
+            <a onClick={() => setPurgeOpen(true)} style={{ color: '#666' }} title="Clean up">
+              <ClearOutlined />{!isMobile && <> Clean up</>}
             </a>
           )}
           {/* 移动端的返回入口在标题左边那个箭头上，这里就不重复了 */}
-          {!isMobile && <a onClick={backToTopic}>{t("回专题")}</a>}
+          {!isMobile && <a onClick={backToTopic}>Back to topic</a>}
         </span>
       )}
     >
@@ -539,21 +537,21 @@ export default function TopicChatPage() {
         {rows === null ? (
           <Spin style={{ display: 'block', margin: '40px auto' }} />
         ) : rows.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("还没有人说话，来开个头")} style={{ margin: '40px 0' }} />
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nobody has said anything yet. Start it off" style={{ margin: '40px 0' }} />
         ) : (
           <>
             {more && (
               <div style={{ textAlign: 'center', marginBottom: 12 }}>
-                <a onClick={loadEarlier} style={{ fontSize: 12, color: '#999' }}>{t("加载更早的消息")}</a>
+                <a onClick={loadEarlier} style={{ fontSize: 12, color: '#999' }}>Load earlier messages</a>
               </div>
             )}
             {rows.map((m) => {
               const mine = m.senderId === user?.userId
-              const name = dn(m.senderId, m.senderName) || t("匿名")
+              const name = dn(m.senderId, m.senderName) || 'Anonymous'
               if (m.recalled) {
                 return (
                   <div key={m.msgId} style={{ textAlign: 'center', color: '#bbb', fontSize: 12, margin: '10px 0' }}>
-                    {mine ? t("你") : name} {t("撤回了一条消息")}
+                    {mine ? 'You' : name} recalled a message
                   </div>
                 )
               }
@@ -574,8 +572,8 @@ export default function TopicChatPage() {
                         </span>
                       )}
                       {canRecall(m) && (
-                        <Popconfirm title={t("撤回这条消息？")} okText={t("撤回")} cancelText={t("取消")} onConfirm={() => recall(m.msgId)}>
-                          <a style={{ fontSize: 11, color: '#bbb' }}>{t("撤回")}</a>
+                        <Popconfirm title="Recall this message?" okText="Recall" cancelText="Cancel" onConfirm={() => recall(m.msgId)}>
+                          <a style={{ fontSize: 11, color: '#bbb' }}>Recall</a>
                         </Popconfirm>
                       )}
                     </div>
@@ -606,7 +604,7 @@ export default function TopicChatPage() {
                       >
                         <PaperClipOutlined style={{ color: '#999' }} />
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {m.fileName || t("附件")}
+                          {m.fileName || 'Attachment'}
                         </span>
                       </a>
                     )}
@@ -628,7 +626,7 @@ export default function TopicChatPage() {
         )}
         {jumped && rows?.length > 0 && (
           <div style={{ textAlign: 'center', marginTop: 6 }}>
-            <a onClick={loadNewer} style={{ fontSize: 12, color: '#999' }}>{t("加载更新的消息")}</a>
+            <a onClick={loadNewer} style={{ fontSize: 12, color: '#999' }}>Load newer messages</a>
           </div>
         )}
         <div ref={endRef} />
@@ -668,13 +666,13 @@ export default function TopicChatPage() {
                       fontSize: 11, color: '#bbb', border: '1px solid #f0f0f0',
                       borderRadius: 4, padding: '0 4px', lineHeight: '16px',
                     }}>
-                      {t("关注", { context: 'noun' })}
+                      Following
                     </span>
                   )}
                 </div>
               ))}
               <div style={{ padding: '5px 12px', borderTop: '1px solid #f5f5f5', fontSize: 11, color: '#bbb' }}>
-                {t("↑↓ 选择 · Enter 确认 · Esc 取消")}
+                ↑↓ select · Enter confirm · Esc cancel
               </div>
             </div>
           )}
@@ -685,10 +683,10 @@ export default function TopicChatPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingBottom: 2 }}>
               <EmojiPicker onPick={insertEmoji} />
               <Upload accept="image/*" showUploadList={false} beforeUpload={makeUpload(true)}>
-                <span title={t("发图片")} style={toolIcon}><PictureOutlined /></span>
+                <span title="Send image" style={toolIcon}><PictureOutlined /></span>
               </Upload>
               <Upload accept={FILE_ACCEPT} showUploadList={false} beforeUpload={makeUpload(false)}>
-                <span title={t("发附件")} style={toolIcon}><PaperClipOutlined /></span>
+                <span title="Send file" style={toolIcon}><PaperClipOutlined /></span>
               </Upload>
               {uploading && <LoadingOutlined style={{ color: BRAND, marginLeft: 4 }} />}
             </div>
@@ -701,7 +699,7 @@ export default function TopicChatPage() {
               // 提示语只留最短的一句。原来那句把用法全写在里面（@ 提到人、回车发送、
               // Shift+回车换行），一行装不下就折成两行，把输入区顶掉一大截——
               // 而这三条试一次就会了，不值得每次打字都占着两行位置
-              placeholder={t("说点什么…")}
+              placeholder="Say something…"
               maxLength={500}
               // minRows 从 2 改成 1 才是「只占一行」的关键：它是**最小**高度，
               // 写 2 的话盒子恒定两行高，提示语再短也一样

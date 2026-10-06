@@ -39,10 +39,10 @@ public class BlockController {
     public Object toggle(String userId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (StringUtils.isBlank(userId) || userMapper.selectById(userId) == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
         if (StringUtils.equals(me.getUserId(), userId)) {
-            return new Result<>(1, "不能拉黑自己", null);
+            return new Result<>(1, "You can't block yourself", null);
         }
         QueryWrapper<UserBlock> mineQ = new QueryWrapper<UserBlock>()
                 .eq("USER_ID", me.getUserId()).eq("BLOCKED_ID", userId);
@@ -66,7 +66,7 @@ public class BlockController {
         }
         Map<String, Object> out = new HashMap<>();
         out.put("blocked", blocked);
-        return new Result<>(0, blocked ? "已拉黑" : "已解除拉黑", out);
+        return new Result<>(0, blocked ? "Blocked" : "Unblocked", out);
     }
 
     /** 我的黑名单（仅本人）：昵称/头像/拉黑时间。 */
@@ -77,7 +77,7 @@ public class BlockController {
         List<UserBlock> rows = blockMapper.selectList(new QueryWrapper<UserBlock>()
                 .eq("USER_ID", me.getUserId()).orderByDesc("CREATE_TIME"));
         if (rows.isEmpty()) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         List<String> ids = new ArrayList<>();
         for (UserBlock b : rows) {
@@ -97,6 +97,6 @@ public class BlockController {
             row.put("blockTime", b.getCreateTime());
             out.add(row);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 }

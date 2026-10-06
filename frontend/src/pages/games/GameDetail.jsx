@@ -11,16 +11,14 @@ import { compactColumns, sumColWidth } from '../players/statColumns'
 import { fmtMadePct, fmtPair, seasonYearLabel, displayName } from '../players/rankConfig'
 import GameRating from './GameRating'
 import { groupByKind, KIND_LABEL, reasonText } from './absence'
-import { useTranslation } from 'react-i18next'
-import i18n from '../../i18n'
 
 const BRAND = '#fa541c'
-const ROUND_LABEL = { 1: '首轮', 2: '半决赛', 3: '分区决赛', 4: '总决赛' }
+const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /** 第 5 节起是加时：只有一个加时叫「加时」，多个才编号 */
 const periodLabel = (p, maxPeriod) => {
   if (p <= 4) return `${p}`
-  return maxPeriod > 5 ? i18n.t("加{{v0}}", { v0: p - 4 }) : i18n.t("加时")
+  return maxPeriod > 5 ? `${p - 4}OT` : 'OT'
 }
 
 // 命中率现算，和球员逐场表共用一份（fmtMadePct）——两处各写一份迟早在
@@ -43,7 +41,6 @@ const periodLabel = (p, maxPeriod) => {
  * 回到的是刚才那个页签，而不是默认的「数据」。
  */
 export default function GameDetail() {
-  const { t } = useTranslation()
   const { gameId } = useParams()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -67,8 +64,8 @@ export default function GameDetail() {
   if (!data) {
     return (
       <Card style={{ borderRadius: 14 }}>
-        <Empty description={t("没有这场比赛")}>
-          <Button onClick={() => navigate('/games')}>{t("回每日赛场")}</Button>
+        <Empty description="Game not found">
+          <Button onClick={() => navigate('/games')}>Back to Daily Games</Button>
         </Empty>
       </Card>
     )
@@ -86,14 +83,14 @@ export default function GameDetail() {
       <Card style={{ borderRadius: 14, marginBottom: 14 }} styles={{ body: { padding: isMobile ? 16 : 20 } }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
           <Tag color={isPo ? 'volcano' : 'blue'} style={{ marginRight: 0 }}>
-            {isPo ? (ROUND_LABEL[Number(round)] ? t(ROUND_LABEL[Number(round)]) : t("季后赛")) : t("常规赛")}
+            {isPo ? (ROUND_LABEL[Number(round)] ? ROUND_LABEL[Number(round)] : 'Playoffs') : 'Regular Season'}
           </Tag>
           <span style={{ color: '#999', fontSize: 13 }}>
-            {seasonYearLabel(Number(seasonNum))} · {dayjs(gameDate).format(t("YYYY 年 M 月 D 日"))}
+            {seasonYearLabel(Number(seasonNum))} · {dayjs(gameDate).format('MMM D, YYYY')}
           </span>
           <a onClick={() => navigate(`/games?date=${dayjs(gameDate).format('YYYY-MM-DD')}`)}
              style={{ marginLeft: 'auto', fontSize: 13 }}>
-            {t("当天其他比赛")}
+            Other games that day
           </a>
         </div>
 
@@ -110,13 +107,13 @@ export default function GameDetail() {
             <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 320, fontSize: 13 }}>
               <thead>
                 <tr style={{ color: '#999' }}>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 500 }}>{t("每节得分")}</th>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 500 }}>By Quarter</th>
                   {Array.from({ length: maxPeriod }, (_, i) => (
                     <th key={i} style={{ padding: '6px 8px', fontWeight: 500, width: 44 }}>
                       {periodLabel(i + 1, maxPeriod)}
                     </th>
                   ))}
-                  <th style={{ padding: '6px 8px', width: 52 }}>{t("总分")}</th>
+                  <th style={{ padding: '6px 8px', width: 52 }}>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -154,7 +151,7 @@ export default function GameDetail() {
         value={tab}
         onChange={setTab}
         block={isMobile}
-        options={[{ value: 'stats', label: t("数据") }, { value: 'rating', label: t("评分") }]}
+        options={[{ value: 'stats', label: 'Stat' }, { value: 'rating', label: 'Rating' }]}
         style={{ marginBottom: 14 }}
       />
 
@@ -214,34 +211,34 @@ function Side({ team, score, win, isHome, isMobile }) {
  * 一眼扫的判断出错。放在下面既说清了大名单，又不干扰上面那张表。
  */
 function TeamBox({ team, isHome, players, absent, totals, isMobile, onPlayer }) {
-  const { t } = useTranslation()
   const cols = [
     {
-      title: t("球员"), dataIndex: 'playerName', width: 108, fixed: 'left',
-      render: (v, r) => (r.totalRow
-        ? <b>{t("全队")}</b>
-        : <a onClick={() => onPlayer(r.playerId)} style={{ color: '#222' }}>{v || r.nameEn || '-'}</a>),
+      title: 'Player', dataIndex: 'playerName', width: 108, fixed: 'left',
+      // 名字走 displayName（英文原名优先）。原来是 playerName || nameEn，box score 22 个人全是中文名
+      render: (_, r) => (r.totalRow
+        ? <b>Team</b>
+        : <a onClick={() => onPlayer(r.playerId)} style={{ color: '#222' }}>{displayName(r) || '-'}</a>),
     },
-    { title: t("首发"), dataIndex: 'starter', width: 48, render: (v, r) => (r.totalRow ? '' : Number(v) ? '✓' : '-') },
-    { title: t("时间"), dataIndex: 'playingTime', width: 48 },
-    { title: t("得分"), dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: BRAND }}>{v}</b> },
-    { title: t("篮板"), dataIndex: 'reb', width: 48 },
-    { title: t("助攻"), dataIndex: 'ast', width: 48 },
+    { title: 'Starter', dataIndex: 'starter', width: 48, render: (v, r) => (r.totalRow ? '' : Number(v) ? '✓' : '-') },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48 },
+    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: BRAND }}>{v}</b> },
+    { title: 'REB', dataIndex: 'reb', width: 48 },
+    { title: 'AST', dataIndex: 'ast', width: 48 },
     // 命中数和命中率分开成列，和场均表（statColumns 的「投篮 / 投篮%」）一套写法。
     // 原来挤成 "8/15 53.3%" 一格：两个数量级不同的东西并排，扫一列比命中率时
     // 眼睛要越过前面的比分才找得到百分号，而且 104px 里塞 11 个字符本来就紧
-    { title: t("投篮"), dataIndex: 'fgm', width: 66, render: (_, r) => fmtPair(r.fgm, r.fga, 0) },
-    { title: t("投篮%"), dataIndex: 'fgPct', width: 58, render: (_, r) => fmtMadePct(r.fgm, r.fga) },
-    { title: t("三分"), dataIndex: 'tpm', width: 66, render: (_, r) => fmtPair(r.tpm, r.tpa, 0) },
-    { title: t("三分%"), dataIndex: 'tpPct', width: 58, render: (_, r) => fmtMadePct(r.tpm, r.tpa) },
-    { title: t("罚球"), dataIndex: 'ftm', width: 66, render: (_, r) => fmtPair(r.ftm, r.fta, 0) },
-    { title: t("罚球%"), dataIndex: 'ftPct', width: 58, render: (_, r) => fmtMadePct(r.ftm, r.fta) },
-    { title: t("前板"), dataIndex: 'offReb', width: 48 },
-    { title: t("后板"), dataIndex: 'defReb', width: 48 },
-    { title: t("盖帽"), dataIndex: 'blk', width: 48 },
-    { title: t("抢断"), dataIndex: 'stl', width: 48 },
-    { title: t("失误"), dataIndex: 'tov', width: 48 },
-    { title: t("犯规"), dataIndex: 'pf', width: 48 },
+    { title: 'FG', dataIndex: 'fgm', width: 66, render: (_, r) => fmtPair(r.fgm, r.fga, 0) },
+    { title: 'FG%', dataIndex: 'fgPct', width: 58, render: (_, r) => fmtMadePct(r.fgm, r.fga) },
+    { title: '3P', dataIndex: 'tpm', width: 66, render: (_, r) => fmtPair(r.tpm, r.tpa, 0) },
+    { title: '3P%', dataIndex: 'tpPct', width: 58, render: (_, r) => fmtMadePct(r.tpm, r.tpa) },
+    { title: 'FT', dataIndex: 'ftm', width: 66, render: (_, r) => fmtPair(r.ftm, r.fta, 0) },
+    { title: 'FT%', dataIndex: 'ftPct', width: 58, render: (_, r) => fmtMadePct(r.ftm, r.fta) },
+    { title: 'ORB', dataIndex: 'offReb', width: 48 },
+    { title: 'DRB', dataIndex: 'defReb', width: 48 },
+    { title: 'BLK', dataIndex: 'blk', width: 48 },
+    { title: 'STL', dataIndex: 'stl', width: 48 },
+    { title: 'TOV', dataIndex: 'tov', width: 48 },
+    { title: 'PF', dataIndex: 'pf', width: 48 },
     {
       title: '+/-', dataIndex: 'plusMinus', width: 56,
       render: (v, r) => (r.totalRow || v == null
@@ -292,14 +289,13 @@ function TeamBox({ team, isHome, players, absent, totals, isMobile, onPlayer }) 
  * 挂一行「未出场：无」是在陈述一件不存在的事。
  */
 function AbsentList({ rows, onPlayer }) {
-  const { t } = useTranslation()
   const groups = groupByKind(rows)
   if (!groups.length) return null
   return (
     <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.9 }}>
       {groups.map(([kind, list]) => (
         <div key={kind}>
-          <span style={{ color: '#bbb', marginRight: 8 }}>{t(KIND_LABEL[kind])}</span>
+          <span style={{ color: '#bbb', marginRight: 8 }}>{KIND_LABEL[kind]}</span>
           {list.map((r, i) => (
             <span key={r.playerId}>
               {i > 0 && <span style={{ color: '#eee' }}> · </span>}
@@ -308,8 +304,8 @@ function AbsentList({ rows, onPlayer }) {
               </a>
               {/* DNP 的原因才有信息量（教练决定 / 禁赛 / 不随队）；
                   未激活那一组 B-R 压根不给原因，写出来只会是重复的「未激活」 */}
-              {kind === 'DNP' && reasonText(r.reason) && reasonText(r.reason) !== '未上场' && (
-                <span style={{ color: '#ddd' }}>（{t(reasonText(r.reason))}）</span>
+              {kind === 'DNP' && reasonText(r.reason) && reasonText(r.reason) !== 'DNP' && (
+                <span style={{ color: '#ddd' }}>{` (${reasonText(r.reason)})`}</span>
               )}
             </span>
           ))}

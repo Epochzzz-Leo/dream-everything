@@ -9,7 +9,7 @@ Idempotent by design:
     so a later hand-translation to Chinese survives every future sync (NAME_EN keeps English)
   - per-season rows are DELETE+INSERT scoped to (this season, PLAYER_ID LIKE 'nba-%')
   - career rows (SEASON_NUM=99, decimal(2,0) ceiling) recomputed from all nba-% season rows, games-weighted
-  - team_season upserts W/L and points-allowed only — PLAYOFF_RESULT (总冠军 etc) and all
+  - team_season upserts W/L and points-allowed only — PLAYOFF_RESULT (Champion etc) and all
     honor columns / season_award rows are hand-maintained and never touched
 
 Usage:
@@ -228,9 +228,9 @@ def fetch_awards(season):
         'MVP': ('mvp', False), 'Defensive Player of the Year': ('dpoy', False),
         'Finals MVP': ('fmvp', False), 'Sixth Man of the Year': ('smoy', False),
         'Most Improved Player': ('mip', False), 'Rookie of the Year': ('roy', False),
-        'All-NBA 1st Team': ('all_nba', '一阵'), 'All-NBA 2nd Team': ('all_nba', '二阵'),
-        'All-NBA 3rd Team': ('all_nba', '三阵'),
-        'All-Defensive 1st Team': ('all_def', '一阵'), 'All-Defensive 2nd Team': ('all_def', '二阵'),
+        'All-NBA 1st Team': ('all_nba', '1st Team'), 'All-NBA 2nd Team': ('all_nba', '2nd Team'),
+        'All-NBA 3rd Team': ('all_nba', '3rd Team'),
+        'All-Defensive 1st Team': ('all_def', '1st Team'), 'All-Defensive 2nd Team': ('all_def', '2nd Team'),
         'NBA Eastern Conference Finals MVP': ('conf_mvps', True),
         'NBA Western Conference Finals MVP': ('conf_mvps', True),
     }
@@ -289,7 +289,7 @@ def fetch_playoff_results(season, team_ids, po_codes):
     """PLAYOFF_RESULT per team, derived from playoff game wins. First round was
     best-of-5 through 2002 (champion = 15 wins), best-of-7 since 2003 (16 wins)."""
     champ, finals, conff, semis = (15, 11, 7, 3) if season <= 2002 else (16, 12, 8, 4)
-    out = {code: '未进季后赛' for code in team_ids}
+    out = {code: 'Missed playoffs' for code in team_ids}
     for code in po_codes:
         tid = id_of_code(code, season, team_ids)
         if not tid:
@@ -304,8 +304,8 @@ def fetch_playoff_results(season, team_ids, po_codes):
             for c in ev.get('competitions', [{}])[0].get('competitors', []):
                 if str(c.get('team', {}).get('id')) == str(tid) and c.get('winner') is True:
                     wins += 1
-        out[code] = ('总冠军' if wins >= champ else '总决赛' if wins >= finals
-                     else '分区决赛' if wins >= conff else '半决赛' if wins >= semis else '首轮')
+        out[code] = ('Champion' if wins >= champ else 'Finals' if wins >= finals
+                     else 'Conf. Finals' if wins >= conff else 'Semifinals' if wins >= semis else 'First Round')
         time.sleep(0.2)
     return out
 
@@ -651,7 +651,7 @@ def main():
         po_pa = num(po_opp[code]) if code in po_opp else 'NULL'
         tr = team_reg.get(code) or {}
         tp = team_po.get(code) or {}
-        result = po_results.get(code, '未进季后赛')
+        result = po_results.get(code, 'Missed playoffs')
         lines.append(
             "INSERT INTO team_season (TEAM_CODE, SEASON_NUM, WINS, LOSSES, PTS_ALLOWED, PLAYOFF_PTS_ALLOWED, "
             "PTS, REB, AST, STL, BLK, TOV, PLAYOFF_GAMES, PLAYOFF_PTS, PLAYOFF_REB, PLAYOFF_AST, PLAYOFF_STL, "

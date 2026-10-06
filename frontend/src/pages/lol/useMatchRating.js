@@ -44,7 +44,7 @@ export default function useMatchRating(matchId) {
 
   /** 没登录时别让人白填一遍再被拒——点第一下就说清楚 */
   const requireLogin = () => {
-    message.info('登录后可以评分')
+    message.info('Sign in to rate')
     navigate('/login')
     return false
   }

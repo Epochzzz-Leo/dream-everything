@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Col, Modal, Row, Tooltip } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import useIsMobile from '../../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 高阶数据说明书：全站唯一一份解释文案。
@@ -18,118 +17,118 @@ import { useTranslation } from 'react-i18next'
 
 const GROUPS = [
   {
-    group: '综合价值',
+    group: 'Overall Value',
     color: '#fa541c',
-    intro: '一个数字概括整体贡献，可以跨位置比',
+    intro: 'One number for overall contribution, comparable across positions',
     items: [
       {
         field: 'playerPerReal', label: 'PER', en: 'Player Efficiency Rating',
-        desc: '把得分、篮板、助攻、抢断、盖帽这些好事加起来，减掉打铁、失误、犯规，再按上场时间摊平。每个赛季都会重新校准，让联盟平均正好等于 15，所以不同年代可以直接比。',
-        scale: [['15', '联盟平均'], ['18', '球队二当家'], ['22', '全明星'], ['25', 'MVP 候选'], ['30+', '历史级赛季']],
+        desc: 'Adds up the good things (points, rebounds, assists, steals, blocks), subtracts missed shots, turnovers and fouls, then puts it on a per-minute basis. It is recalibrated every season so the league average is exactly 15, which makes different eras directly comparable.',
+        scale: [['15', 'League avg'], ['18', 'Team\'s #2'], ['22', 'All-Star'], ['25', 'MVP candidate'], ['30+', 'Historic season']],
       },
       {
         field: 'playerBpm', label: 'BPM', en: 'Box Plus/Minus',
-        desc: '他在场时，球队每 100 个回合比一支平均水准的球队多得几分。用基础数据估算，不是真的正负值，好处是不受队友强弱影响那么大。',
-        scale: [['0', '联盟平均'], ['+2', '优质首发'], ['+4', '全明星'], ['+8', 'MVP 赛季'], ['+10', '历史级']],
+        desc: 'How many more points per 100 possessions the team gets with him on the floor than an average team would. It is estimated from box score stats rather than real plus-minus, which has the upside of depending less on how good his teammates are.',
+        scale: [['0', 'League avg'], ['+2', 'Quality starter'], ['+4', 'All-Star'], ['+8', 'MVP season'], ['+10', 'Historic']],
       },
       {
-        field: 'playerObpm', label: '进攻BPM', en: 'Offensive BPM',
-        desc: 'BPM 里进攻端那一半，衡量他每 100 回合给球队进攻多带来几分。',
-        scale: [['0', '联盟平均'], ['+5', '顶级进攻手']],
+        field: 'playerObpm', label: 'OBPM', en: 'Offensive BPM',
+        desc: 'The offensive half of BPM: how many extra points per 100 possessions he adds to the team\'s offense.',
+        scale: [['0', 'League avg'], ['+5', 'Elite scorer']],
       },
       {
-        field: 'playerDbpm', label: '防守BPM', en: 'Defensive BPM',
-        desc: 'BPM 里防守端那一半。进攻 BPM + 防守 BPM 就是 BPM。',
-        scale: [['0', '联盟平均'], ['+3', '顶级防守人']],
+        field: 'playerDbpm', label: 'DBPM', en: 'Defensive BPM',
+        desc: 'The defensive half of BPM. Offensive BPM + Defensive BPM = BPM.',
+        scale: [['0', 'League avg'], ['+3', 'Elite defender']],
       },
       {
         field: 'playerVorp', label: 'VORP', en: 'Value Over Replacement Player',
-        desc: '比一个「随时能从发展联盟签来的替补」多贡献多少。基准线定在 BPM −2.0，再乘上场时间占比和赛季长度，所以打得久、身体健康的人分更高。',
-        scale: [['0', '替补水准'], ['2', '首发'], ['5', '全明星'], ['8+', 'MVP 级']],
+        desc: 'How much more he contributes than a "replacement player" who could be signed from the G League at any time. The baseline is set at a BPM of −2.0, then multiplied by his share of minutes and the length of the season, so players who stay healthy and play a lot score higher.',
+        scale: [['0', 'Replacement level'], ['2', 'Starter'], ['5', 'All-Star'], ['8+', 'MVP level']],
       },
       {
-        field: 'playerWs', label: '胜利贡献', en: 'Win Shares (WS)',
-        desc: '把球队赢下的场次按功劳分给每个人。全队加起来差不多就是球队的胜场数，所以它跟球队战绩绑得很紧，弱队的核心会吃亏。',
-        scale: [['5', '首发'], ['10', '全明星'], ['15+', 'MVP 级']],
+        field: 'playerWs', label: 'Win Shares', en: 'Win Shares (WS)',
+        desc: 'Splits the team\'s wins among its players according to their contribution. Added up across the roster it comes to roughly the team\'s win total, so it is closely tied to team record, and the best players on weak teams lose out.',
+        scale: [['5', 'Starter'], ['10', 'All-Star'], ['15+', 'MVP level']],
       },
       {
-        field: 'playerOws', label: '进攻胜利贡献', en: 'Offensive Win Shares',
-        desc: '胜利贡献里靠进攻挣来的那部分。',
+        field: 'playerOws', label: 'Off. Win Shares', en: 'Offensive Win Shares',
+        desc: 'The part of Win Shares earned on offense.',
       },
       {
-        field: 'playerDws', label: '防守胜利贡献', en: 'Defensive Win Shares',
-        desc: '靠防守挣来的那部分。进攻 + 防守 = 胜利贡献。',
+        field: 'playerDws', label: 'Def. Win Shares', en: 'Defensive Win Shares',
+        desc: 'The part earned on defense. Offensive + Defensive = Win Shares.',
       },
       {
         field: 'playerWs48', label: 'WS/48', en: 'Win Shares per 48 Minutes',
-        desc: '每打满一场（48 分钟）能贡献多少胜场。去掉了出场时间的影响，所以替补和首发能公平比。',
-        scale: [['.100', '联盟平均'], ['.200', '全明星'], ['.250+', '历史级']],
+        desc: 'Wins contributed per full game (48 minutes). It takes playing time out of the picture, so bench players and starters can be compared fairly.',
+        scale: [['.100', 'League avg'], ['.200', 'All-Star'], ['.250+', 'Historic']],
       },
     ],
   },
   {
-    group: '得分与回合效率',
+    group: 'Scoring & Efficiency',
     color: '#1677ff',
-    intro: '同样出手一次，谁换来的分更多',
+    intro: 'Who gets more points per attempt',
     items: [
       {
-        field: 'playerTsPct', label: '真实命中率', en: 'True Shooting % (TS%)',
-        desc: '把两分、三分、罚球放到同一把尺子上量的命中率：得分 ÷ (2 × (出手数 + 0.44 × 罚球数))。三分多一分、造犯规站上罚球线，这些价值普通命中率算不进去，真实命中率算得进去。',
-        scale: [['55%', '联盟平均'], ['60%', '高效'], ['65%+', '顶级'] ],
+        field: 'playerTsPct', label: 'True Shooting %', en: 'True Shooting % (TS%)',
+        desc: 'A shooting percentage that puts twos, threes and free throws on the same scale: PTS ÷ (2 × (FGA + 0.44 × FTA)). Plain FG% misses the extra point from a three and the value of drawing fouls to get to the line; true shooting counts them.',
+        scale: [['55%', 'League avg'], ['60%', 'Efficient'], ['65%+', 'Elite'] ],
       },
       {
-        field: 'playerUsgPct', label: '使用率', en: 'Usage % (USG%)',
-        desc: '他在场的时候，球队多少比例的回合是由他终结的（出手、罚球或者失误）。场上五个人平分就是 20%，所以 20% 是天然的平均线。它只说球权多少，不说用得好不好。',
-        scale: [['20%', '五人平分'], ['25%', '主要得分点'], ['30%+', '绝对核心']],
+        field: 'playerUsgPct', label: 'USG%', en: 'Usage % (USG%)',
+        desc: 'While he is on the floor, the share of team possessions he finishes (with a shot, free throws or a turnover). Five players splitting evenly would get 20% each, so 20% is the natural average. It says how much of the ball he gets, not how well he uses it.',
+        scale: [['20%', 'Even share'], ['25%', 'Primary scorer'], ['30%+', 'Focal point']],
       },
       {
-        field: 'playerOffEff', label: '进攻效率', en: 'Offensive Rating (ORtg)',
-        desc: '他每消耗 100 个进攻回合，能给球队产出多少分。B-R 只给到整数，所以并列很常见。',
-        scale: [['113', '近年联盟平均'], ['120+', '顶级']],
+        field: 'playerOffEff', label: 'ORtg', en: 'Offensive Rating (ORtg)',
+        desc: 'Points he produces for the team per 100 possessions he uses. B-R only reports whole numbers, so ties are common.',
+        scale: [['113', 'Recent league avg'], ['120+', 'Elite']],
       },
       {
-        field: 'playerDefEff', label: '防守效率', en: 'Defensive Rating (DRtg)',
-        desc: '他在场时对手每 100 个回合能拿多少分，越低越好。个人防守效率里含大量球队因素，看的时候别太较真。',
-        scale: [['113', '近年联盟平均'], ['105', '优秀']],
+        field: 'playerDefEff', label: 'DRtg', en: 'Defensive Rating (DRtg)',
+        desc: 'Points the opponent scores per 100 possessions while he is on the floor; lower is better. A player\'s defensive rating carries a lot of team effect, so don\'t read too much into it.',
+        scale: [['113', 'Recent league avg'], ['105', 'Good']],
       },
       {
-        field: 'playerNetEff', label: '净效率', en: 'Net Rating',
-        desc: '进攻效率减防守效率。两边都是整数，所以净效率也是整数，一个赛季里几十号人并列很正常 —— 想区分细微差距看 BPM。',
-        scale: [['0', '打平'], ['+10', '很强']],
+        field: 'playerNetEff', label: 'Net Rtg', en: 'Net Rating',
+        desc: 'Offensive rating minus defensive rating. Both are whole numbers, so net rating is too, and dozens of players tying in one season is normal. To tell small gaps apart, look at BPM.',
+        scale: [['0', 'Even'], ['+10', 'Strong']],
       },
     ],
   },
   {
-    group: '参与率',
+    group: 'Involvement',
     color: '#52c41a',
-    intro: '他在场的时候，这类事情有多少是他做的',
+    intro: 'Share of these events he accounts for while on court',
     items: [
       {
-        field: 'playerTrbPct', label: '篮板率', en: 'Total Rebound % (TRB%)',
-        desc: '他在场期间所有能抢的篮板里，他抢到的百分比。比场均篮板公平：打得少、球队投得准（可抢的板本来就少）都不会拖累它。',
-        scale: [['10%', '后卫偏高'], ['20%+', '顶级内线']],
+        field: 'playerTrbPct', label: 'REB%', en: 'Total Rebound % (TRB%)',
+        desc: 'The percentage of available rebounds he grabs while on the floor. It is fairer than rebounds per game: fewer minutes, or a team that shoots well (leaving fewer rebounds to grab), won\'t drag it down.',
+        scale: [['10%', 'High for a guard'], ['20%+', 'Elite big']],
       },
-      { field: 'playerOrbPct', label: '前板率', en: 'Offensive Rebound %', desc: '本方投失的球里，他抢到进攻篮板的比例。' },
-      { field: 'playerDrbPct', label: '后板率', en: 'Defensive Rebound %', desc: '对方投失的球里，他保护下防守篮板的比例。' },
+      { field: 'playerOrbPct', label: 'ORB%', en: 'Offensive Rebound %', desc: 'The share of his team\'s missed shots that he pulls down as offensive rebounds.' },
+      { field: 'playerDrbPct', label: 'DRB%', en: 'Defensive Rebound %', desc: 'The share of the opponent\'s missed shots that he secures as defensive rebounds.' },
       {
-        field: 'playerAstPct', label: '助攻率', en: 'Assist % (AST%)',
-        desc: '他在场时队友投中的球里，有多少是他助攻的。',
-        scale: [['20%', '普通'], ['40%+', '组织核心']],
-      },
-      {
-        field: 'playerStlPct', label: '抢断率', en: 'Steal % (STL%)',
-        desc: '对手每 100 个回合里被他断掉的比例。',
-        scale: [['1.5%', '联盟平均'], ['3%+', '顶级']],
+        field: 'playerAstPct', label: 'AST%', en: 'Assist % (AST%)',
+        desc: 'The share of teammates\' made field goals he assisted while on the floor.',
+        scale: [['20%', 'Average'], ['40%+', 'Playmaker']],
       },
       {
-        field: 'playerBlkPct', label: '盖帽率', en: 'Block % (BLK%)',
-        desc: '对手的两分出手里被他封盖的比例。',
-        scale: [['2%', '内线一般'], ['6%+', '顶级护框']],
+        field: 'playerStlPct', label: 'STL%', en: 'Steal % (STL%)',
+        desc: 'The percentage of opponent possessions that end with him stealing the ball.',
+        scale: [['1.5%', 'League avg'], ['3%+', 'Elite']],
       },
       {
-        field: 'playerTovPct', label: '失误率', en: 'Turnover % (TOV%)',
-        desc: '他每用掉 100 个回合会丢几次球，越低越好。持球多的人天然偏高，跟使用率一起看才有意义。',
-        scale: [['13%', '联盟平均'], ['10%', '很稳']],
+        field: 'playerBlkPct', label: 'BLK%', en: 'Block % (BLK%)',
+        desc: 'The share of the opponent\'s two-point attempts that he blocks.',
+        scale: [['2%', 'Average big'], ['6%+', 'Elite rim protector']],
+      },
+      {
+        field: 'playerTovPct', label: 'TOV%', en: 'Turnover % (TOV%)',
+        desc: 'Turnovers per 100 possessions he uses; lower is better. Players who handle the ball a lot naturally run higher, so read it together with usage rate.',
+        scale: [['13%', 'League avg'], ['10%', 'Very secure']],
       },
     ],
   },
@@ -138,26 +137,28 @@ const GROUPS = [
 /** field → 词条，供表头 tooltip 直接查 */
 const BY_FIELD = Object.fromEntries(GROUPS.flatMap((g) => g.items.map((i) => [i.field, { ...i, color: g.color }])))
 
-const Scale = ({ items, color, size = 11 }) => (
-  <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-    {items.map(([v, t]) => (
-      <span
-        key={v}
-        style={{
-          fontSize: size, color: '#8c8c8c', background: '#fafafa',
-          border: '1px solid #f0f0f0', borderRadius: 4, padding: '1px 6px',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        <b style={{ color }}>{v}</b> {t}
-      </span>
-    ))}
-  </div>
-)
+// 刻度是 [数值, 档位说明]（League average、All-Star …）
+function Scale({ items, color, size = 11 }) {
+  return (
+    <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+      {items.map(([v, label]) => (
+        <span
+          key={v}
+          style={{
+            fontSize: size, color: '#8c8c8c', background: '#fafafa',
+            border: '1px solid #f0f0f0', borderRadius: 4, padding: '1px 6px',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          <b style={{ color }}>{v}</b> {label}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 /** 说明书弹窗本体 */
 export function StatGlossaryModal({ open, onClose }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   return (
     <Modal
@@ -167,9 +168,9 @@ export function StatGlossaryModal({ open, onClose }) {
       width={isMobile ? '94vw' : 860}
       title={
         <span>
-          {t("高阶数据说明书")}
+          Advanced Stats Guide
           <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: '#bbb' }}>
-            {t("口径与 Basketball-Reference 一致")}
+            Definitions match Basketball-Reference
           </span>
         </span>
       }
@@ -179,8 +180,8 @@ export function StatGlossaryModal({ open, onClose }) {
         <div key={g.group}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '18px 0 10px' }}>
             <span style={{ width: 3, height: 14, background: g.color, borderRadius: 2 }} />
-            <span style={{ fontWeight: 700, fontSize: 15 }}>{t(g.group)}</span>
-            <span style={{ fontSize: 12, color: '#bbb' }}>{t(g.intro)}</span>
+            <span style={{ fontWeight: 700, fontSize: 15 }}>{g.group}</span>
+            <span style={{ fontSize: 12, color: '#bbb' }}>{g.intro}</span>
           </div>
           <Row gutter={[10, 10]}>
             {g.items.map((it) => (
@@ -193,7 +194,7 @@ export function StatGlossaryModal({ open, onClose }) {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: 14 }}>{t(it.label)}</span>
+                    <span style={{ fontWeight: 700, fontSize: 14 }}>{it.label}</span>
                     <span style={{ fontSize: 11, color: '#bbb' }}>{it.en}</span>
                   </div>
                   <div style={{ fontSize: 13, color: '#555', lineHeight: 1.75, marginTop: 4 }}>{it.desc}</div>
@@ -205,7 +206,7 @@ export function StatGlossaryModal({ open, onClose }) {
         </div>
       ))}
       <div style={{ marginTop: 20, fontSize: 12, color: '#bbb', lineHeight: 1.8 }}>
-        {t("参考刻度是常见水准的大致位置，不是硬门槛。没有数据的格子显示「/」：生涯汇总没有 高阶指标（B-R 只按赛季发布，不发生涯合计）；1976-77 没有全联盟的失误和前场篮板 统计，进攻/防守效率那年也算不出来。")}
+        Reference scales are rough positions of typical levels, not hard cutoffs. Cells without data show "/": career totals have no advanced stats (B-R publishes them per season only); 1976-77 has no league-wide turnovers or offensive rebounds, so ORtg/DRtg can't be computed that year.
       </div>
     </Modal>
   )
@@ -227,13 +228,12 @@ export function GlossaryIcon({ style }) {
 
 /** 数据表工具条上的「指标说明」入口（手机上表头 tooltip 不好点，主要靠它） */
 export function GlossaryButton() {
-  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   return (
     <>
       <a onClick={() => setOpen(true)} style={{ fontSize: 12, color: '#8c8c8c', whiteSpace: 'nowrap' }}>
         <QuestionCircleOutlined style={{ marginRight: 4 }} />
-        {t("指标说明")}
+        Stat Guide
       </a>
       <StatGlossaryModal open={open} onClose={() => setOpen(false)} />
     </>
@@ -247,7 +247,6 @@ export function GlossaryButton() {
  * 这一件事。发现入口靠工具条上的「指标说明」——手机也只能走那儿。
  */
 export function GlossaryTip({ field, children }) {
-  const { t } = useTranslation()
   const it = BY_FIELD[field]
   if (!it) return children
   return (
@@ -257,13 +256,17 @@ export function GlossaryTip({ field, children }) {
       title={
         <div style={{ fontSize: 12, lineHeight: 1.7 }}>
           <div style={{ fontWeight: 700 }}>
-            {t(it.label)}
+            {it.label}
             <span style={{ fontWeight: 400, opacity: 0.65, marginLeft: 5 }}>{it.en}</span>
           </div>
           <div style={{ marginTop: 2 }}>{it.desc}</div>
           {it.scale && (
             <div style={{ marginTop: 4, opacity: 0.8 }}>
-              {it.scale.map(([v, t]) => `${v} ${t}`).join('　')}
+              {/* 原来是 map(([v, t]) => …) 再用全角空格 join 成一个字符串：解构出来的 t 遮住了翻译函数，
+                  拼接的又是翻译后的文字。改成一段一段渲染；只有英文以后间隔改用「 · 」 */}
+              {it.scale.map(([v, label], i) => (
+                <span key={v}>{i > 0 ? ' · ' : ''}{v} {label}</span>
+              ))}
             </div>
           )}
         </div>

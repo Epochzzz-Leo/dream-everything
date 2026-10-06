@@ -132,7 +132,7 @@ public class GameRatingController {
     public Object detail(String gameId, String kind, String userInformationId, HttpServletRequest request) {
         String id = StringUtils.trimToEmpty(gameId);
         if (id.isEmpty()) {
-            return new Result<>(1, "缺少比赛 id", null);
+            return new Result<>(1, "Missing game ID", null);
         }
         // 从「我的消息」点 @ 通知进来时带 userInformationId，顺便把那条标记已读
         // （和专题页、帖子详情同一套做法：读接口顺手做，不额外开一个"标已读"接口）
@@ -181,7 +181,7 @@ public class GameRatingController {
             data.put("minePlayers", minePlayers);
             data.put("meId", me);
         }
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /** 按某一列把扁平行分组。三处要用同一个动作，写三遍迟早有一处漏掉 null 键 */
@@ -206,15 +206,15 @@ public class GameRatingController {
         String id = StringUtils.trimToEmpty(gameId);
         String me = SecUtil.getLoginUserIdToSession(request);
         if (id.isEmpty()) {
-            return new Result<>(1, "缺少比赛 id", null);
+            return new Result<>(1, "Missing game ID", null);
         }
         if (score != null && score != 0 && (score < MIN_SCORE || score > MAX_SCORE)) {
-            return new Result<>(1, "评分要在 " + MIN_SCORE + " 到 " + MAX_SCORE + " 之间", null);
+            return new Result<>(1, "Ratings must be between " + MIN_SCORE + " and " + MAX_SCORE, null);
         }
         // 比赛得真的存在。不查的话这张表会被任意字符串撑起来，
         // 而外键在这个库里没用（历史数据是脚本灌的，加外键会让灌数据变慢很多）
         if (!gameExists(id, kind)) {
-            return new Result<>(1, "没有这场比赛", null);
+            return new Result<>(1, "Game not found", null);
         }
         GameRating exist = gameRatingMapper.selectOne(new QueryWrapper<GameRating>()
                 .eq("GAME_ID", id).eq("USER_ID", me).last("limit 1"));
@@ -224,7 +224,7 @@ public class GameRatingController {
             if (exist != null) {
                 gameRatingMapper.deleteById(exist.getRatingId());
             }
-            return new Result<>(0, "已取消评分", null);
+            return new Result<>(0, "Rating removed", null);
         }
         if (exist == null) {
             GameRating r = new GameRating();
@@ -239,7 +239,7 @@ public class GameRatingController {
             exist.setUpdateTime(new Date());
             gameRatingMapper.updateById(exist);
         }
-        return new Result<>(0, "已评分", null);
+        return new Result<>(0, "Rated", null);
     }
 
     /**
@@ -253,10 +253,10 @@ public class GameRatingController {
         String pid = StringUtils.trimToEmpty(playerId);
         String me = SecUtil.getLoginUserIdToSession(request);
         if (id.isEmpty() || pid.isEmpty()) {
-            return new Result<>(1, "缺少比赛或球员", null);
+            return new Result<>(1, "Missing game or player", null);
         }
         if (score != null && score != 0 && (score < MIN_SCORE || score > MAX_SCORE)) {
-            return new Result<>(1, "评分要在 " + MIN_SCORE + " 到 " + MAX_SCORE + " 之间", null);
+            return new Result<>(1, "Ratings must be between " + MIN_SCORE + " and " + MAX_SCORE, null);
         }
         GamePlayerRating exist = playerRatingMapper.selectOne(new QueryWrapper<GamePlayerRating>()
                 .eq("GAME_ID", id).eq("PLAYER_ID", pid).eq("USER_ID", me).last("limit 1"));
@@ -264,11 +264,11 @@ public class GameRatingController {
             if (exist != null) {
                 playerRatingMapper.deleteById(exist.getRatingId());
             }
-            return new Result<>(0, "已取消", null);
+            return new Result<>(0, "Rating removed", null);
         }
         if (exist == null) {
             if (!onRoster(id, pid, kind)) {
-                return new Result<>(1, "这场比赛的名单里没有这个球员", null);
+                return new Result<>(1, "This player isn't on this game's roster", null);
             }
             GamePlayerRating r = new GamePlayerRating();
             r.setRatingId(UUID.randomUUID().toString());
@@ -283,7 +283,7 @@ public class GameRatingController {
             exist.setUpdateTime(new Date());
             playerRatingMapper.updateById(exist);
         }
-        return new Result<>(0, "已评分", null);
+        return new Result<>(0, "Rated", null);
     }
 
     /**
@@ -302,19 +302,19 @@ public class GameRatingController {
         String text = StringUtils.trimToNull(content);
         String me = SecUtil.getLoginUserIdToSession(request);
         if (id.isEmpty()) {
-            return new Result<>(1, "缺少比赛 id", null);
+            return new Result<>(1, "Missing game ID", null);
         }
         if (text == null) {
-            return new Result<>(1, "说点什么再发", null);
+            return new Result<>(1, "Write something before posting", null);
         }
         if (text.length() > MAX_COMMENT) {
             text = text.substring(0, MAX_COMMENT);
         }
         if (!gameExists(id, kind)) {
-            return new Result<>(1, "没有这场比赛", null);
+            return new Result<>(1, "Game not found", null);
         }
         if (!pid.isEmpty() && !onRoster(id, pid, kind)) {
-            return new Result<>(1, "这场比赛的名单里没有这个球员", null);
+            return new Result<>(1, "This player isn't on this game's roster", null);
         }
         GameComment c = new GameComment();
         c.setCommentId(UUID.randomUUID().toString());
@@ -326,7 +326,7 @@ public class GameRatingController {
         c.setCreateTime(new Date());
         commentMapper.insert(c);
         notifyMentions(c.getMentions(), me, id, text, kind);
-        return new Result<>(0, "已发布", null);
+        return new Result<>(0, "Posted", null);
     }
 
     /**
@@ -341,16 +341,16 @@ public class GameRatingController {
         String me = SecUtil.getLoginUserIdToSession(request);
         GameComment c = commentMapper.selectById(StringUtils.trimToEmpty(commentId));
         if (c == null) {
-            return new Result<>(0, "已删除", null);      // 已经没了，当成功
+            return new Result<>(0, "Deleted", null);      // 已经没了，当成功
         }
         if (!StringUtils.equals(c.getUserId(), me)) {
-            return new Result<>(1, "只能删自己的短评", null);
+            return new Result<>(1, "You can only delete your own comments", null);
         }
         // TARGET_ID 上没有外键，数据库不会替我们清；留着就是一堆指向不存在内容的孤儿
         replyMapper.delete(new QueryWrapper<GameRatingReply>()
                 .eq("TARGET_ID", c.getCommentId()));
         commentMapper.deleteById(c.getCommentId());
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     /**
@@ -371,10 +371,10 @@ public class GameRatingController {
         String text = StringUtils.trimToNull(content);
         String me = SecUtil.getLoginUserIdToSession(request);
         if (id.isEmpty() || target.isEmpty()) {
-            return new Result<>(1, "缺少比赛或短评", null);
+            return new Result<>(1, "Missing game or comment", null);
         }
         if (text == null) {
-            return new Result<>(1, "回复不能为空", null);
+            return new Result<>(1, "Reply can't be empty", null);
         }
         if (text.length() > MAX_COMMENT) {
             text = text.substring(0, MAX_COMMENT);
@@ -384,7 +384,7 @@ public class GameRatingController {
         // 那条回复会出现在一个和它无关的页面上（因为列表是按 GAME_ID 取的）
         if (commentMapper.selectCount(new QueryWrapper<GameComment>()
                 .eq("COMMENT_ID", target).eq("GAME_ID", id)) == 0) {
-            return new Result<>(1, "这条短评不存在了", null);
+            return new Result<>(1, "This comment no longer exists", null);
         }
         GameRatingReply r = new GameRatingReply();
         r.setReplyId(UUID.randomUUID().toString());
@@ -400,7 +400,7 @@ public class GameRatingController {
         // 同一条回复既是回复又 @ 了对方时，两条通知说的是同一件事
         java.util.Set<String> notified = notifyReply(id, target, r.getReplyToUser(), me, text, kind);
         notifyMentions(r.getMentions(), me, id, text, kind, notified);
-        return new Result<>(0, "已回复", null);
+        return new Result<>(0, "Reply posted", null);
     }
 
     /** 删掉自己的回复。别人的一律拒绝——这里没有版主概念，短评区不需要 */
@@ -410,13 +410,13 @@ public class GameRatingController {
         String me = SecUtil.getLoginUserIdToSession(request);
         GameRatingReply r = replyMapper.selectById(StringUtils.trimToEmpty(replyId));
         if (r == null) {
-            return new Result<>(0, "已删除", null);   // 已经没了，当成功
+            return new Result<>(0, "Deleted", null);   // 已经没了，当成功
         }
         if (!StringUtils.equals(r.getUserId(), me)) {
-            return new Result<>(1, "只能删自己的回复", null);
+            return new Result<>(1, "You can only delete your own replies", null);
         }
         replyMapper.deleteById(r.getReplyId());
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     /**

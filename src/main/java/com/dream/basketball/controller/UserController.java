@@ -80,19 +80,19 @@ public class UserController extends BaseUtils {
         }
         if (answer == null || StringUtils.isBlank(inputCode)
                 || !StringUtils.equalsIgnoreCase(inputCode.trim(), answer)) {
-            return handlerResultJson(false, "验证码错误！");
+            return handlerResultJson(false, "Wrong captcha");
         }
         List<DreamUserDto> users = userService.findAllUsers(dreamUserDto);
         if (CollectionUtils.isEmpty(users)) {
-            return handlerResultJson(false, "账号不存在！请检查后重新输入！");
+            return handlerResultJson(false, "Account not found. Check it and try again");
         }
         DreamUser dreamUser = users.get(0);
         if (!PasswordUtil.matches(dreamUserDto.getPassword(), dreamUser.getPassword())) {
-            return handlerResultJson(false, "密码错误，请检查后重新输入！");
+            return handlerResultJson(false, "Wrong password. Check it and try again");
         }
         // 全局用户管理：账号被超管禁用则不允许登录
         if (Constants.DISABLE.equals(dreamUser.getUserStatus())) {
-            return handlerResultJson(false, "账号已被禁用，请联系管理员");
+            return handlerResultJson(false, "This account is disabled. Contact an admin");
         }
         // P2-3: 旧 MD5 校验通过即透明升级为 BCrypt（只更新 PASSWORD 一列）
         if (PasswordUtil.needsUpgrade(dreamUser.getPassword())) {
@@ -119,11 +119,11 @@ public class UserController extends BaseUtils {
                     com.dream.basketball.config.TokenStore.hashOf(token));
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
-            return new Result<>(0, "登录成功！", data);
+            return new Result<>(0, "Signed in", data);
         }
         // 网页端一处：给本次 session 打 principal 索引，踢掉这个人的其它网页会话
         singleSession.enforceWeb(request, dreamUser.getUserId());
-        return handlerResultJson(true, "登录成功！");
+        return handlerResultJson(true, "Signed in");
     }
 
     /**
@@ -133,20 +133,20 @@ public class UserController extends BaseUtils {
     public Object regist(DreamUserDto dreamUserDto) {
         // 登录名（注册后固定，用于登录）与昵称（显示名，之后可改）都必须唯一，各查各的
         if (StringUtils.isBlank(dreamUserDto.getLoginName())) {
-            return handlerResultJson(false, "请填写登录名");
+            return handlerResultJson(false, "Enter a login name");
         }
         if (StringUtils.isBlank(dreamUserDto.getUserNickname())) {
-            return handlerResultJson(false, "请填写昵称");
+            return handlerResultJson(false, "Enter a nickname");
         }
         DreamUserDto byLogin = new DreamUserDto();
         byLogin.setLoginName(dreamUserDto.getLoginName().trim());
         if (!CollectionUtils.isEmpty(userService.findAllUsers(byLogin))) {
-            return handlerResultJson(false, "该登录名已被占用！");
+            return handlerResultJson(false, "That login name is taken");
         }
         DreamUserDto byNick = new DreamUserDto();
         byNick.setUserNickname(dreamUserDto.getUserNickname().trim());
         if (!CollectionUtils.isEmpty(userService.findAllUsers(byNick))) {
-            return handlerResultJson(false, "该昵称已被占用！");
+            return handlerResultJson(false, "That nickname is taken");
         }
         DreamUser dreamUser = new DreamUser();
         dreamUser.setUserId(UUID.randomUUID().toString());
@@ -164,14 +164,14 @@ public class UserController extends BaseUtils {
         // 就被主动封掉 NBA 模块。null 才是「没设置过」，也就是放行。
         // 新闻/百家说/私信同理，都不设。
         userService.save(dreamUser);
-        return handlerResultJson(true, "注册成功！");
+        return handlerResultJson(true, "Account created");
     }
 
     /** 检测登录状态 */
     @GetMapping("/checkLogin")
     public Object checkLogin(HttpServletRequest request) {
         DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
-        return dreamUser == null ? handlerResultJson(false, "请先登录！") : handlerResultJson(true, "已登录！");
+        return dreamUser == null ? handlerResultJson(false, "Please sign in first") : handlerResultJson(true, "Signed in");
     }
 
     /** 当前登录用户信息 + 角色标识（供前端渲染菜单/权限，P4-1） */
@@ -208,7 +208,7 @@ public class UserController extends BaseUtils {
         data.put("featPm", !"0".equals(u.getFeatPm()));
         data.put("featSchedule", !"0".equals(u.getFeatSchedule()));
         data.put("titles", u.getTitles()); // 头衔（逗号分隔）
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /** 登出 */
@@ -224,7 +224,7 @@ public class UserController extends BaseUtils {
         }
         tokenStore.revoke(tk);
         SecUtil.logout4Session(request);
-        return handlerResultJson(true, "已登出");
+        return handlerResultJson(true, "Signed out");
     }
 
     // ===== 全局用户管理（超级管理员） =====
@@ -267,7 +267,7 @@ public class UserController extends BaseUtils {
             m.put("isSuperManager", Role.fromUserRole(u.getUserRole()) == Role.SUPER_MANAGER);
             rows.add(m);
         }
-        return handlerSuccessPageJson(0, "成功", (int) info.getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) info.getTotal(), rows);
     }
 
     /** 设置某用户的全局权限（超管）：登录/浏览/发言/发帖。不能改超管、不能改自己。 */
@@ -279,13 +279,13 @@ public class UserController extends BaseUtils {
                               HttpServletRequest request) {
         DreamUser target = StringUtils.isBlank(userId) ? null : userService.getById(userId);
         if (target == null) {
-            return handlerResultJson(false, "用户不存在");
+            return handlerResultJson(false, "User not found");
         }
         if (Role.fromUserRole(target.getUserRole()) == Role.SUPER_MANAGER) {
-            return handlerResultJson(false, "不能修改超级管理员");
+            return handlerResultJson(false, "You can't change a super admin");
         }
         if (StringUtils.equals(userId, SecUtil.getLoginUserIdToSession(request))) {
-            return handlerResultJson(false, "不能修改自己");
+            return handlerResultJson(false, "You can't change your own permissions");
         }
         UpdateWrapper<DreamUser> uw = new UpdateWrapper<DreamUser>().eq("USER_ID", userId);
         if (enabled != null) {
@@ -312,7 +312,7 @@ public class UserController extends BaseUtils {
                     int n = Integer.parseInt(topicLimit.trim());
                     uw.set("TOPIC_LIMIT", Math.max(0, Math.min(99, n)));
                 } catch (NumberFormatException ignore) {
-                    return handlerResultJson(false, "专题上限必须是数字");
+                    return handlerResultJson(false, "The topic limit must be a number");
                 }
             }
         }
@@ -332,7 +332,7 @@ public class UserController extends BaseUtils {
             uw.set("FEAT_SCHEDULE", "1".equals(featSchedule) ? "1" : "0");
         }
         userService.update(uw);
-        return handlerResultJson(true, "已保存");
+        return handlerResultJson(true, "Saved");
     }
 
     /** 用户管理详情（超管）：一个用户的全部可管理项，供"点进用户"的详情页用。 */
@@ -341,7 +341,7 @@ public class UserController extends BaseUtils {
     public Object adminDetail(String userId) {
         DreamUser u = StringUtils.isBlank(userId) ? null : userService.getById(userId);
         if (u == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
         Map<String, Object> m = new HashMap<>();
         m.put("userId", u.getUserId());
@@ -372,7 +372,7 @@ public class UserController extends BaseUtils {
         m.put("featPm", !"0".equals(u.getFeatPm()));
         m.put("featSchedule", !"0".equals(u.getFeatSchedule()));
         m.put("titles", u.getTitles());
-        return new Result<>(0, "成功", m);
+        return new Result<>(0, "OK", m);
     }
 
     /** 头衔颜色白名单（antd Tag 预设色）。非白名单一律兜底成 blue。 */
@@ -389,7 +389,7 @@ public class UserController extends BaseUtils {
     public Object setUserTitles(String userId, String titles) {
         DreamUser target = StringUtils.isBlank(userId) ? null : userService.getById(userId);
         if (target == null) {
-            return handlerResultJson(false, "用户不存在");
+            return handlerResultJson(false, "User not found");
         }
         com.alibaba.fastjson.JSONArray out = new com.alibaba.fastjson.JSONArray();
         java.util.Set<String> seen = new java.util.HashSet<>();
@@ -421,7 +421,7 @@ public class UserController extends BaseUtils {
         String cleaned = out.isEmpty() ? null : out.toJSONString();
         userService.update(new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<DreamUser>()
                 .eq("USER_ID", userId).set("TITLES", cleaned));
-        return handlerResultJson(true, "已保存");
+        return handlerResultJson(true, "Saved");
     }
 
     /**
@@ -448,7 +448,7 @@ public class UserController extends BaseUtils {
         data.put("captchaId", captchaStore.save(specCaptcha.text().toLowerCase()));
         data.put("image", "data:image/gif;base64,"
                 + java.util.Base64.getEncoder().encodeToString(buf.toByteArray()));
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /** 验证码图片（旧版，答案存 session）。新前端走 /captchaJson，这个留给老缓存兜底 */

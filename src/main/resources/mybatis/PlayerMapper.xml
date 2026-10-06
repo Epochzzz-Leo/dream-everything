@@ -190,7 +190,7 @@
         from team_season ts
         join player_stats ps on ps.SEASON_NUM = ts.SEASON_NUM
             and SUBSTRING_INDEX(ps.PLAYER_TEAM, '->', -1) = ts.TEAM_CODE
-        where ps.PLAYER_ID = #{playerId} and ts.PLAYOFF_RESULT = '总冠军'
+        where ps.PLAYER_ID = #{playerId} and ts.PLAYOFF_RESULT = 'Champion'
         order by ts.SEASON_NUM
     </select>
 

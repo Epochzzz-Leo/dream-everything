@@ -51,8 +51,8 @@ public class TopicController {
      */
     private static final int NAME_MAX = 15;
     private static final int DESC_MAX = 50;
-    private static final String NAME_TOO_LONG = "专题名称最多 " + NAME_MAX + " 个字";
-    private static final String DESC_TOO_LONG = "简介最多 " + DESC_MAX + " 个字";
+    private static final String NAME_TOO_LONG = "Topic names can be up to " + NAME_MAX + " characters";
+    private static final String DESC_TOO_LONG = "Descriptions can be up to " + DESC_MAX + " characters";
 
     private static boolean tooLongName(String s) {
         return overLimit(s, NAME_MAX);
@@ -110,7 +110,7 @@ public class TopicController {
     public Object list(HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (me != null && !userPerms.canBrowse(me.getUserId())) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         List<ForumTopic> topics = topicMapper.selectList(
                 new QueryWrapper<ForumTopic>().orderByAsc("SORT").orderByAsc("CREATE_TIME"));
@@ -156,7 +156,7 @@ public class TopicController {
             v.put("pinned", pins.containsKey(String.valueOf(v.get("topicId"))));
         }
         sortPinnedFirst(out, pins);
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 专题详情 + 我的权限。无浏览权时 canView=false（前端据此上锁不拉帖）。
@@ -165,16 +165,16 @@ public class TopicController {
     public Object get(String topicId, String userInformationId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (me != null && !userPerms.canBrowse(me.getUserId())) {
-            return new Result<>(1, "你已被限制浏览论坛/新闻", null);
+            return new Result<>(1, "You've been restricted from browsing the forum and news", null);
         }
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (StringUtils.isNotBlank(userInformationId)) {
             userInformationService.updateInformationRead(userInformationId);
         }
-        return new Result<>(0, "成功", topicView(t, SecUtil.getLoginUserToSession(request)));
+        return new Result<>(0, "OK", topicView(t, SecUtil.getLoginUserToSession(request)));
     }
 
     /**
@@ -330,7 +330,7 @@ public class TopicController {
     /** 全站专题类别（公开）：按 SORT、创建时间排。 */
     @GetMapping("/categoryList")
     public Object categoryList() {
-        return new Result<>(0, "成功", categoryViews());
+        return new Result<>(0, "OK", categoryViews());
     }
 
     private List<Map<String, Object>> categoryViews() {
@@ -353,10 +353,10 @@ public class TopicController {
     public Object saveCategory(String categoryId, String name, Integer sort) {
         String n = StringUtils.trimToEmpty(name);
         if (n.isEmpty()) {
-            return new Result<>(1, "类别名不能为空", null);
+            return new Result<>(1, "Category name can't be empty", null);
         }
         if (n.length() > 12) {
-            return new Result<>(1, "类别名最多 12 个字", null);
+            return new Result<>(1, "Category names can be up to 12 characters", null);
         }
         // 重名会让筛选器出现两个一模一样的按钮，直接挡掉（改名时排除自己）
         QueryWrapper<com.dream.basketball.entity.ForumCategory> dup =
@@ -365,7 +365,7 @@ public class TopicController {
             dup.ne("CATEGORY_ID", categoryId);
         }
         if (categoryMapper.selectCount(dup) > 0) {
-            return new Result<>(1, "已经有同名类别了", null);
+            return new Result<>(1, "A category with that name already exists", null);
         }
         com.dream.basketball.entity.ForumCategory c = StringUtils.isBlank(categoryId)
                 ? null : categoryMapper.selectById(categoryId);
@@ -383,7 +383,7 @@ public class TopicController {
             }
             categoryMapper.updateById(c);
         }
-        return new Result<>(0, "已保存", categoryViews());
+        return new Result<>(0, "Saved", categoryViews());
     }
 
     /** 删专题类别（超管）：挂在它下面的专题退回「未分类」，不动专题本身。 */
@@ -391,12 +391,12 @@ public class TopicController {
     @PostMapping("/deleteCategory")
     public Object deleteCategory(String categoryId) {
         if (StringUtils.isBlank(categoryId)) {
-            return new Result<>(1, "缺少类别", null);
+            return new Result<>(1, "Missing category", null);
         }
         categoryMapper.deleteById(categoryId);
         topicMapper.update(null, new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<ForumTopic>()
                 .eq("CATEGORY_ID", categoryId).set("CATEGORY_ID", null));
-        return new Result<>(0, "已删除", categoryViews());
+        return new Result<>(0, "Deleted", categoryViews());
     }
 
     /**
@@ -409,16 +409,16 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (!perms.canManage(me, t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         com.alibaba.fastjson.JSONArray in;
         try {
             in = JSON.parseArray(StringUtils.trimToEmpty(categories));
         } catch (Exception e) {
-            return new Result<>(1, "类别格式不对", null);
+            return new Result<>(1, "Invalid category format", null);
         }
         com.alibaba.fastjson.JSONArray out = new com.alibaba.fastjson.JSONArray();
         Set<String> seenNames = new HashSet<>();
@@ -436,7 +436,7 @@ public class TopicController {
         }
         t.setPostCategories(out.isEmpty() ? null : out.toJSONString());
         topicMapper.updateById(t);
-        return new Result<>(0, "已保存", topicView(t, me));
+        return new Result<>(0, "Saved", topicView(t, me));
     }
 
     /** 认得出的类别 id 才存，否则一律当未分类——类别被删之后前端还揣着旧 id 的情况就靠这个兜。 */
@@ -483,7 +483,7 @@ public class TopicController {
                          String openPost, String openComment, String listed, String categoryId,
                          HttpServletRequest request) {
         if (StringUtils.isBlank(name)) {
-            return new Result<>(1, "专题名称不能为空", null);
+            return new Result<>(1, "Topic name can't be empty", null);
         }
         if (tooLongName(name)) {
             return new Result<>(1, NAME_TOO_LONG, null);
@@ -496,22 +496,22 @@ public class TopicController {
         if (isSuper) {
             // 超管沿用旧流程：必须显式指定 owner
             if (StringUtils.isBlank(ownerId) || userMapper.selectById(ownerId) == null) {
-                return new Result<>(1, "请指定一个有效的专题 owner", null);
+                return new Result<>(1, "Choose a valid topic owner", null);
             }
         } else {
             // 普通用户：owner 只能是自己；受"允许创建话题"开关与个人配额约束
             // （两者都现读 DB，超管一改立刻生效，不用等对方重新登录）
             DreamUser fresh = userMapper.selectById(me.getUserId());
             if (fresh == null || "0".equals(fresh.getCanCreateTopic())) {
-                return new Result<>(1, "管理员已限制你创建专题", null);
+                return new Result<>(1, "An admin has restricted you from creating topics", null);
             }
             int quota = fresh.getTopicLimit() == null ? Constants.DEFAULT_TOPIC_LIMIT : fresh.getTopicLimit();
             if (quota <= 0) {
-                return new Result<>(1, "管理员已把你的专题配额设为 0", null);
+                return new Result<>(1, "An admin has set your topic quota to 0", null);
             }
             Integer owned = topicMapper.selectCount(new QueryWrapper<ForumTopic>().eq("OWNER_ID", me.getUserId()));
             if (owned != null && owned >= quota) {
-                return new Result<>(1, "你最多可创建 " + quota + " 个专题", null);
+                return new Result<>(1, "You can create up to " + quota + (quota == 1 ? " topic" : " topics"), null);
             }
             ownerId = me.getUserId();
         }
@@ -531,7 +531,7 @@ public class TopicController {
         t.setCreateTime(new Date());
         t.setSort(0);
         topicMapper.insert(t);
-        return new Result<>(0, "创建成功", t.getTopicId());
+        return new Result<>(0, "Created", t.getTopicId());
     }
 
     /** 改专题设置（admin 或 owner）：名称/简介/公开性/开放发帖发言。admin 还能改 owner。 */
@@ -544,10 +544,10 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (!perms.canManage(me, t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         if (StringUtils.isNotBlank(name)) {
             if (tooLongName(name)) {
@@ -600,7 +600,7 @@ public class TopicController {
             t.setOwnerIds(JSON.toJSONString(Collections.singletonList(ownerId)));
         }
         topicMapper.updateById(t);
-        return new Result<>(0, "已保存", null);
+        return new Result<>(0, "Saved", null);
     }
 
     /**
@@ -616,10 +616,10 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (!perms.canManage(me, t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         String folderKey = "topic-banner-" + topicId;
         com.dream.basketball.utils.FileUtils.deleteUploadFolder(uploadPath, folderKey);
@@ -630,7 +630,7 @@ public class TopicController {
         topicMapper.updateById(t);
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);
-        return new Result<>(0, "背景图已更新", data);
+        return new Result<>(0, "Banner updated", data);
     }
 
     /**
@@ -642,7 +642,7 @@ public class TopicController {
     public Object setOwners(String topicId, String ownerIds) {
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         List<String> valid = new ArrayList<>();
         for (String raw : StringUtils.split(StringUtils.trimToEmpty(ownerIds), ',')) {
@@ -652,7 +652,7 @@ public class TopicController {
             }
         }
         if (valid.size() != 1) {
-            return new Result<>(1, "题主有且只有一个，请指定一个有效用户", null);
+            return new Result<>(1, "A topic has exactly one owner. Choose a valid user", null);
         }
         String ownerId = valid.get(0);
         t.setOwnerId(ownerId);
@@ -669,7 +669,7 @@ public class TopicController {
             }
         }
         topicMapper.updateById(t);
-        return new Result<>(0, "已更换题主", null);
+        return new Result<>(0, "Owner changed", null);
     }
 
     /**
@@ -682,10 +682,10 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (!(Role.fromUserRole(me.getUserRole()) == Role.SUPER_MANAGER || perms.isOwner(me, t))) {
-            return new Result<>(1, "只有题主可以设置小题主", null);
+            return new Result<>(1, "Only the owner can set co-owners", null);
         }
         Set<String> owners = perms.ownerIds(t);
         List<String> valid = new ArrayList<>();
@@ -696,11 +696,11 @@ public class TopicController {
             }
         }
         if (valid.size() > 3) {
-            return new Result<>(1, "每个专题最多 3 个小题主", null);
+            return new Result<>(1, "A topic can have at most 3 co-owners", null);
         }
         t.setSubOwnerIds(JSON.toJSONString(valid));
         topicMapper.updateById(t);
-        return new Result<>(0, "已保存", null);
+        return new Result<>(0, "Saved", null);
     }
 
     /** 删专题（admin）：仅当专题下没有帖子时可删（避免帖子失去归属）。 */
@@ -709,11 +709,11 @@ public class TopicController {
     public Object delete(String topicId) {
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         Integer posts = dreamNewsMapper.selectCount(new QueryWrapper<DreamNews>().eq("TOPIC_ID", topicId));
         if (posts != null && posts > 0) {
-            return new Result<>(1, "该专题下还有 " + posts + " 篇帖子，请先清空再删除", null);
+            return new Result<>(1, "This topic still has " + posts + (posts == 1 ? " post. Remove it" : " posts. Remove them") + " before deleting the topic", null);
         }
         memberMapper.delete(new QueryWrapper<ForumTopicMember>().eq("TOPIC_ID", topicId));
         subscriptionMapper.delete(new QueryWrapper<com.dream.basketball.entity.TopicSubscription>().eq("TOPIC_ID", topicId));
@@ -721,7 +721,7 @@ public class TopicController {
         topicFileMapper.delete(new QueryWrapper<com.dream.basketball.entity.ForumTopicFile>().eq("TOPIC_ID", topicId));
         com.dream.basketball.utils.FileUtils.deleteUploadFolder(uploadPath, "topicfs-" + topicId);
         topicMapper.deleteById(topicId);
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     // ===== 成员权限（admin 或 owner） =====
@@ -732,7 +732,7 @@ public class TopicController {
     public Object members(String topicId, HttpServletRequest request) {
         ForumTopic t = perms.getTopic(topicId);
         if (t == null || !perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
-            return new Result<>(1, "无权查看", null);
+            return new Result<>(1, "You don't have permission to view this", null);
         }
         List<ForumTopicMember> ms = memberMapper.selectList(new QueryWrapper<ForumTopicMember>().eq("TOPIC_ID", topicId));
         List<Map<String, Object>> out = new ArrayList<>();
@@ -749,7 +749,7 @@ public class TopicController {
             row.put("canChat", !OFF.equals(m.getCanChat()));
             out.add(row);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 授予/更新一个用户的三权（admin 或 owner）。发帖/发言会强制带上浏览权。 */
@@ -759,14 +759,14 @@ public class TopicController {
                             String canChat, HttpServletRequest request) {
         ForumTopic t = perms.getTopic(topicId);
         if (t == null || !perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         if (StringUtils.isBlank(userId) || userMapper.selectById(userId) == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
         // 小题主不能动题主的成员行
         if (!perms.canActOn(SecUtil.getLoginUserToSession(request), t, userId)) {
-            return new Result<>(1, "小题主不能对题主进行操作", null);
+            return new Result<>(1, "Co-owners can't act on the owner", null);
         }
         boolean post = ON.equals(canPost);
         boolean comment = ON.equals(canComment);
@@ -793,7 +793,7 @@ public class TopicController {
         } else {
             memberMapper.insert(m);
         }
-        return new Result<>(0, "已保存", null);
+        return new Result<>(0, "Saved", null);
     }
 
     // ===== 订阅（侧栏快捷入口；只能订阅已加入的专题） =====
@@ -805,17 +805,17 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (!(perms.canManage(me, t) || perms.isMember(me, t))) {
-            return new Result<>(1, "先加入该专题才能订阅", null);
+            return new Result<>(1, "Join this topic before subscribing", null);
         }
         QueryWrapper<com.dream.basketball.entity.TopicSubscription> q =
                 new QueryWrapper<com.dream.basketball.entity.TopicSubscription>()
                         .eq("USER_ID", me.getUserId()).eq("TOPIC_ID", topicId);
         if (subscriptionMapper.selectCount(q) > 0) {
             subscriptionMapper.delete(q);
-            return new Result<>(0, "已取消订阅", false);
+            return new Result<>(0, "Unsubscribed", false);
         }
         com.dream.basketball.entity.TopicSubscription sub = new com.dream.basketball.entity.TopicSubscription();
         sub.setId(UUID.randomUUID().toString());
@@ -823,7 +823,7 @@ public class TopicController {
         sub.setTopicId(topicId);
         sub.setCreateTime(new Date());
         subscriptionMapper.insert(sub);
-        return new Result<>(0, "已订阅", true);
+        return new Result<>(0, "Subscribed", true);
     }
 
     /** 我订阅的专题（侧栏折叠菜单用）：[{topicId, name}]，按订阅先后。 */
@@ -857,7 +857,7 @@ public class TopicController {
             m.put("pinned", pins.containsKey(String.valueOf(m.get("topicId"))));
         }
         sortPinnedFirst(out, pins);
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 置顶/取消置顶一个专题（按人存，只影响自己看到的顺序）。 */
@@ -867,7 +867,7 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         QueryWrapper<com.dream.basketball.entity.TopicPin> qw =
                 new QueryWrapper<com.dream.basketball.entity.TopicPin>()
@@ -880,7 +880,7 @@ public class TopicController {
             row.setPinTime(new Date());
             pinMapper.insert(row);
         }
-        return new Result<>(0, ON.equals(pinned) ? "已置顶" : "已取消置顶", null);
+        return new Result<>(0, ON.equals(pinned) ? "Pinned" : "Unpinned", null);
     }
 
     /** 进入专题页时打卡"已看到此刻"：红点归零、之后的新发帖/评论重新累计。 */
@@ -889,7 +889,7 @@ public class TopicController {
     public Object markSeen(String topicId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (perms.getTopic(topicId) == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         com.dream.basketball.entity.TopicSeen row = seenMapper.selectOne(
                 new QueryWrapper<com.dream.basketball.entity.TopicSeen>()
@@ -905,7 +905,7 @@ public class TopicController {
             row.setLastSeen(new Date());
             seenMapper.updateById(row);
         }
-        return new Result<>(0, "成功", null);
+        return new Result<>(0, "OK", null);
     }
 
     // ===== 申请加入 =====
@@ -917,15 +917,15 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null) {
-            return new Result<>(1, "专题不存在", null);
+            return new Result<>(1, "Topic not found", null);
         }
         if (perms.canManage(me, t)) {
-            return new Result<>(1, "你已是该专题的管理者", null);
+            return new Result<>(1, "You already manage this topic", null);
         }
         boolean pending = requestMapper.selectCount(new QueryWrapper<ForumTopicJoinRequest>()
                 .eq("TOPIC_ID", topicId).eq("USER_ID", me.getUserId()).eq("STATUS", "pending")) > 0;
         if (pending) {
-            return new Result<>(1, "你已提交申请，请等待审批", null);
+            return new Result<>(1, "You've already asked to join. Please wait for approval", null);
         }
         ForumTopicJoinRequest r = new ForumTopicJoinRequest();
         r.setId(UUID.randomUUID().toString());
@@ -938,7 +938,7 @@ public class TopicController {
         // 通知 owner
         userInformationService.saveUserInformation(me.getUserId(), me.getUserNickname(), t.getOwnerId(),
                 com.dream.basketball.utils.Constants.TOPIC_APPLY, topicId, "", "", "", "", "");
-        return new Result<>(0, "已提交申请，等待审批", null);
+        return new Result<>(0, "Request sent. Waiting for approval", null);
     }
 
     /** 待审批申请列表（admin 或 owner）：含申请人昵称/头像/留言/时间。 */
@@ -947,7 +947,7 @@ public class TopicController {
     public Object requests(String topicId, HttpServletRequest request) {
         ForumTopic t = perms.getTopic(topicId);
         if (t == null || !perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
-            return new Result<>(1, "无权查看", null);
+            return new Result<>(1, "You don't have permission to view this", null);
         }
         List<ForumTopicJoinRequest> rs = requestMapper.selectList(new QueryWrapper<ForumTopicJoinRequest>()
                 .eq("TOPIC_ID", topicId).eq("STATUS", "pending").orderByAsc("CREATE_TIME"));
@@ -963,7 +963,7 @@ public class TopicController {
             row.put("createTime", r.getCreateTime());
             out.add(row);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 审批申请（admin 或 owner）：通过=授权(默认浏览+发言，可带 canPost/canView/canComment)，驳回=拒绝；通知申请人。 */
@@ -973,15 +973,15 @@ public class TopicController {
                                 HttpServletRequest request) {
         ForumTopicJoinRequest r = StringUtils.isBlank(requestId) ? null : requestMapper.selectById(requestId);
         if (r == null || !"pending".equals(r.getStatus())) {
-            return new Result<>(1, "申请不存在或已处理", null);
+            return new Result<>(1, "The request doesn't exist or was already handled", null);
         }
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(r.getTopicId());
         if (t == null || !perms.canManage(me, t)) {
-            return new Result<>(1, "无权审批该专题", null);
+            return new Result<>(1, "You can't review requests for this topic", null);
         }
         if (!perms.canActOn(me, t, r.getUserId())) {
-            return new Result<>(1, "小题主不能对题主进行操作", null);
+            return new Result<>(1, "Co-owners can't act on the owner", null);
         }
         boolean pass = ON.equals(approve);
         r.setStatus(pass ? "approved" : "rejected");
@@ -1012,7 +1012,7 @@ public class TopicController {
         userInformationService.saveUserInformation(me.getUserId(), me.getUserNickname(), r.getUserId(),
                 pass ? com.dream.basketball.utils.Constants.TOPIC_APPROVED : com.dream.basketball.utils.Constants.TOPIC_REJECTED,
                 r.getTopicId(), "", "", "", "", "");
-        return new Result<>(0, pass ? "已通过" : "已驳回", null);
+        return new Result<>(0, pass ? "Approved" : "Declined", null);
     }
 
     /** 移除一个成员（admin / 题主 / 小题主；小题主不能移除题主）。 */
@@ -1022,12 +1022,12 @@ public class TopicController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (t == null || !perms.canManage(me, t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         if (!perms.canActOn(me, t, userId)) {
-            return new Result<>(1, "小题主不能对题主进行操作", null);
+            return new Result<>(1, "Co-owners can't act on the owner", null);
         }
         memberMapper.delete(new QueryWrapper<ForumTopicMember>().eq("TOPIC_ID", topicId).eq("USER_ID", userId));
-        return new Result<>(0, "已移除", null);
+        return new Result<>(0, "Removed", null);
     }
 }

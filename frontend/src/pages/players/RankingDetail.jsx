@@ -8,21 +8,19 @@ import SeasonPicker from '../../components/SeasonPicker'
 import useIsMobile from '../../hooks/useIsMobile'
 import { ADVANCED_TABLE_FIELDS, BASIC_TABLE_FIELDS, buildFullStatColumns, buildAdvancedStatColumns, HONOR_COLUMN_KEYS, compactColumns, sumColWidth } from './statColumns'
 import PositionFilter from './PositionFilter'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 某数据项的完整排行（/rankings/:field）：按该项降序、不分页一滚到底，
  * 展示球员的全量数据列（排行项高亮为橙色）。
  */
 export default function RankingDetail() {
-  const { t } = useTranslation()
   const { field } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   // 高阶项也能深链进来（排行卡的「完整排行」按钮），两组一起找
   const isAdvanced = ADVANCED_STATS.some((s) => s.field === field)
   const stat = [...RANKING_STATS, ...ADVANCED_STATS, ...DRILL_ONLY_STATS].find((s) => s.field === field)
-    || { field, label: t("数据"), digits: 1 }
+    || { field, label: 'Stat', digits: 1 } // 认不出的字段给个兜底名
   const stage = searchParams.get('stage') === 'po' ? 'po' : 'reg' // 跟随联盟排行的赛段切换
   const [seasonNum, setSeasonNumRaw] = useState(Number(searchParams.get('seasonNum')) || LATEST_SEASON)
   // 位置跟着 URL 走：从单项排行卡「完整排行 →」下钻时把筛选带过来
@@ -45,7 +43,7 @@ export default function RankingDetail() {
 
   const baseColumns = [
     {
-      title: t("名次"), width: isMobile ? 40 : 48, fixed: 'left',
+      title: 'Rank', width: isMobile ? 40 : 48, fixed: 'left',
       render: (_, __, index) => {
         const rank = index + 1
         return (
@@ -81,7 +79,7 @@ export default function RankingDetail() {
       <ProTable
         className="stat-compact"
         bordered
-        headerTitle={t("{{v0}}{{label}}榜 · 完整排行", { v0: stage === 'po' ? t('季后赛 · ') : '', label: t(stat.label) })}
+        headerTitle={`${stage === 'po' ? 'Playoffs · ' : ''}${stat.label} Leaders · Full ranking`}
         rowKey="statsId"
         columns={baseColumns}
         search={false}

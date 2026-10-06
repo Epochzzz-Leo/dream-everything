@@ -4,8 +4,7 @@ import {
 } from '@ant-design/icons'
 import { useAuth } from '../auth/AuthContext'
 import TeamLogo from './TeamLogo'
-import { displayName, teamZh } from '../pages/players/rankConfig'
-import { useTranslation } from 'react-i18next'
+import { displayName, teamName } from '../pages/players/rankConfig'
 
 /**
  * 搜索结果的长相。桌面弹窗（GlobalSearch）和整页搜索（pages/search/SearchPage）共用这一份，
@@ -30,7 +29,6 @@ const newsRow = (n, icon) => (
 
 /** 一行结果的内容，按类型分派。dn = 备注名（我给谁备注过，全站看到的就是备注名） */
 function RowBody({ type, d, dn }) {
-  const { t } = useTranslation()
   if (type === 'player') {
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -44,11 +42,9 @@ function RowBody({ type, d, dn }) {
         ) : (
           <Tag color="volcano" style={{ marginInlineEnd: 0, flexShrink: 0 }}>#{d.playerNumber ?? '-'}</Tag>
         )}
+        {/* 原来名字后面还有个灰色副标题，「永远显示另一种语言的名字」——英文界面上就是一行中文名。
+            网站只保留英文之后主名就是英文名，副标题没有可补充的了，整个去掉 */}
         <b style={{ flexShrink: 0 }}>{displayName(d)}</b>
-        {/* 副标题永远显示另一种名字 */}
-        {d.nameEn && d.nameEn !== d.playerName && (
-          <span style={{ color: '#bbb', fontSize: 12, ...ellipsis }}>{displayName(d) === d.nameEn ? d.playerName : d.nameEn}</span>
-        )}
       </span>
     )
   }
@@ -56,9 +52,9 @@ function RowBody({ type, d, dn }) {
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
         <TeamLogo code={d.code} size={20} />
-        <b>{teamZh(d.code)}</b>
+        <b>{teamName(d.code)}</b>
         <Tag color="orange" style={{ marginInlineEnd: 0 }}>{d.code}</Tag>
-        {d.conf && <span style={{ color: '#bbb', fontSize: 12 }}>{t(d.conf)} · {t(d.div)}</span>}
+        {d.conf && <span style={{ color: '#bbb', fontSize: 12 }}>{d.conf} · {d.div}</span>}
       </span>
     )
   }
@@ -68,7 +64,7 @@ function RowBody({ type, d, dn }) {
         <FolderOpenOutlined style={{ color: '#fa8c16' }} />
         <b style={{ flex: 1, ...ellipsis }}>{d.name}</b>
         {d.visibility === 'private' && (
-          <LockOutlined title={t("私密专题")} style={{ color: '#bbb', flexShrink: 0 }} />
+          <LockOutlined title="Private topic" style={{ color: '#bbb', flexShrink: 0 }} />
         )}
       </span>
     )
@@ -89,14 +85,13 @@ function RowBody({ type, d, dn }) {
  * @param active  键盘高亮的行下标；手机上没有键盘导航，传 -1（默认）即可
  */
 export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick }) {
-  const { t } = useTranslation()
   const { dn } = useAuth()
   const hasItem = rows.some((r) => r.kind === 'item')
   return (
     <>
       {loading && <div style={{ textAlign: 'center', padding: 32 }}><Spin /></div>}
       {!loading && kw.trim() && !hasItem && (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("未找到相关内容")} style={{ padding: 24 }} />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nothing found" style={{ padding: 24 }} />
       )}
       {!loading && rows.map((r, i) =>
         r.kind === 'group' ? (
@@ -125,13 +120,12 @@ export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick 
 
 /** 最近搜索的胶囊组。两处共用，点一条就把它填回输入框重搜 */
 export function HistoryChips({ history, onPick, onClear }) {
-  const { t } = useTranslation()
   if (!history.length) return null
   return (
     <div style={{ padding: '4px 4px 8px' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '6px 8px 8px' }}>
-        <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#999', letterSpacing: 1 }}>{t("最近搜索")}</span>
-        <a onClick={onClear} style={{ fontSize: 12, color: '#bbb' }}>{t("清空")}</a>
+        <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#999', letterSpacing: 1 }}>Recent searches</span>
+        <a onClick={onClear} style={{ fontSize: 12, color: '#bbb' }}>Clear</a>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '0 8px' }}>
         {history.map((k) => (

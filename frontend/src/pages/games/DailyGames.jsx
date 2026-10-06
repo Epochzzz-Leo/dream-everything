@@ -6,10 +6,9 @@ import TeamLogo, { HomeAwayTag, TeamNames } from '../../components/TeamLogo'
 import useIsMobile from '../../hooks/useIsMobile'
 import GameDayNav from './GameDayNav'
 import { seasonYearLabel } from '../players/rankConfig'
-import { useTranslation } from 'react-i18next'
 
 const BRAND = '#fa541c'
-const ROUND_LABEL = { 1: '首轮', 2: '半决赛', 3: '分区决赛', 4: '总决赛' }
+const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /**
  * 每日赛场：选一个日期，看当天的全部比赛，点进去是单场详情。
@@ -21,7 +20,6 @@ const ROUND_LABEL = { 1: '首轮', 2: '半决赛', 3: '分区决赛', 4: '总决
  * 小日历里有比赛的日子标成橙底：不然只能一天天点过去试，很难找到有内容的日期。
  */
 export default function DailyGames() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
   const [params, setParams] = useSearchParams()
@@ -67,10 +65,11 @@ export default function DailyGames() {
         styles={{ body: { padding: isMobile ? '14px 14px' : '18px 20px' } }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 800, fontSize: isMobile ? 18 : 20 }}>{t("每日赛场")}</span>
+          <span style={{ fontWeight: 800, fontSize: isMobile ? 18 : 20 }}>Daily Games</span>
           <GameDayNav date={date} onChange={setDate} />
+          {/* 场数走复数：总决赛那天只有一场，原来英文显示「1 games」 */}
           <span style={{ color: '#999', fontSize: 13, marginLeft: 'auto' }}>
-            {rows === null ? '…' : t("{{length}} 场", { length: rows.length })}
+            {rows === null ? '…' : ((rows.length) === 1 ? `${rows.length} game` : `${rows.length} games`)}
           </span>
         </div>
       </Card>
@@ -79,7 +78,7 @@ export default function DailyGames() {
         <Spin style={{ display: 'block', margin: '60px auto' }} />
       ) : rows.length === 0 ? (
         <Card style={{ borderRadius: 14 }}>
-          <Empty description={t("这一天没有比赛")} style={{ margin: '30px 0' }} />
+          <Empty description="No games on this day" style={{ margin: '30px 0' }} />
         </Card>
       ) : (
         <div style={{
@@ -98,7 +97,6 @@ export default function DailyGames() {
  * 每行前面挂一个「主 / 客」小标（HomeAwayTag，和单场详情共用一份）。
  */
 function GameCard({ g, onOpen }) {
-  const { t } = useTranslation()
   const home = Number(g.homeScore)
   const away = Number(g.awayScore)
   const line = (team, score, win, isHome) => (
@@ -120,7 +118,10 @@ function GameCard({ g, onOpen }) {
     >
       <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
         <Tag color={Number(g.seasonType) === 3 ? 'volcano' : 'blue'} style={{ marginRight: 0 }}>
-          {Number(g.seasonType) === 3 ? (ROUND_LABEL[Number(g.round)] || t("季后赛")) : t("常规赛")}
+          {/* 双语时期这里漏了翻译，英文界面上卡片显示过「总决赛」 */}
+          {Number(g.seasonType) === 3
+            ? (ROUND_LABEL[Number(g.round)] || 'Playoffs')
+            : 'Regular Season'}
         </Tag>
         <span style={{ color: '#bbb', fontSize: 12, alignSelf: 'center' }}>
           {seasonYearLabel(Number(g.seasonNum))}

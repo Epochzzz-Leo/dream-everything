@@ -25,14 +25,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateKeyException.class)
     public Result<Void> handleDuplicateKey(DuplicateKeyException e) {
         log.warn("duplicate key violation: {}", e.getMessage());
-        return Result.fail("数据已存在，请勿重复提交");
+        return Result.fail("This already exists. Don't submit it twice");
     }
 
     /** Missing required request parameter -> 400-style client error. */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleMissingParam(MissingServletRequestParameterException e) {
-        return Result.fail(400, "缺少必要参数：" + e.getParameterName());
+        return Result.fail(400, "Missing required parameter: " + e.getParameterName());
     }
 
     /** Invalid argument (e.g. disallowed/oversize upload from FileUtils, P2-4) -> 400. */
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleMaxUpload(MaxUploadSizeExceededException e) {
-        return Result.fail(400, "文件过大");
+        return Result.fail(400, "File too large");
     }
 
     /** Catch-all: log with stack trace, return a generic 500 body (no internals leaked). */
@@ -54,6 +54,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Void> handleException(Exception e) {
         log.error("unhandled exception", e);
-        return Result.fail(500, "服务器内部错误");
+        return Result.fail(500, "Internal server error");
     }
 }

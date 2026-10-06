@@ -56,7 +56,7 @@ self.addEventListener('push', (event) => {
   }
   const n = toNotification(data)
   event.waitUntil(
-    self.registration.showNotification(n.title || '新消息', {
+    self.registration.showNotification(n.title || 'New message', {
       body: n.body,
       icon: '/pwa-192.png',
       badge: '/pwa-192.png',

@@ -96,7 +96,7 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canChat(me, t)) {
-            return new Result<>(1, "你不能进入该专题的群聊", null);
+            return new Result<>(1, "You can't enter this topic's group chat", null);
         }
         int size = limit == null || limit <= 0 || limit > MAX_PAGE ? 30 : limit;
         // since：从某一天的第一条开始**往后**取（小日历跳转用），这时天然就是正序，不用翻转
@@ -106,7 +106,7 @@ public class ChatController {
                     .eq("TOPIC_ID", topicId).ge("SEND_TIME", from)
                     .orderByAsc("SEND_TIME").orderByAsc("MSG_ID")
                     .last("limit " + size));
-            return new Result<>(0, "成功", withSenders(rows));
+            return new Result<>(0, "OK", withSenders(rows));
         }
         QueryWrapper<TopicChatMessage> qw = new QueryWrapper<TopicChatMessage>()
                 .eq("TOPIC_ID", topicId)
@@ -117,7 +117,7 @@ public class ChatController {
         }
         List<TopicChatMessage> rows = chatMapper.selectList(qw);
         Collections.reverse(rows); // 倒序取、正序还
-        return new Result<>(0, "成功", withSenders(rows));
+        return new Result<>(0, "OK", withSenders(rows));
     }
 
     /** 往后翻一页：跳到某天之后要能接着往下看。after = 当前最后一条的时间戳（毫秒）。 */
@@ -127,14 +127,14 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canChat(me, t)) {
-            return new Result<>(1, "你不能进入该专题的群聊", null);
+            return new Result<>(1, "You can't enter this topic's group chat", null);
         }
         int size = limit == null || limit <= 0 || limit > MAX_PAGE ? 30 : limit;
         List<TopicChatMessage> rows = chatMapper.selectList(new QueryWrapper<TopicChatMessage>()
                 .eq("TOPIC_ID", topicId).gt("SEND_TIME", new Date(after == null ? 0 : after))
                 .orderByAsc("SEND_TIME").orderByAsc("MSG_ID")
                 .last("limit " + size));
-        return new Result<>(0, "成功", withSenders(rows));
+        return new Result<>(0, "OK", withSenders(rows));
     }
 
     /** 哪几天有聊天记录（小日历标深色用）。能进群聊的人都能查。 */
@@ -144,9 +144,9 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canChat(me, t)) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
-        return new Result<>(0, "成功", chatMapper.distinctDays(topicId));
+        return new Result<>(0, "OK", chatMapper.distinctDays(topicId));
     }
 
     /**
@@ -164,7 +164,7 @@ public class ChatController {
         ForumTopic t = perms.getTopic(topicId);
         List<Map<String, Object>> out = new ArrayList<>();
         if (!perms.canChat(me, t)) {
-            return new Result<>(0, "成功", out);
+            return new Result<>(0, "OK", out);
         }
         // 第一梯队：房间里的人
         Set<String> room = new java.util.LinkedHashSet<>(perms.ownerIds(t));
@@ -182,7 +182,7 @@ public class ChatController {
         Set<String> pool = new java.util.LinkedHashSet<>(room);
         pool.addAll(followed);
         if (pool.isEmpty()) {
-            return new Result<>(0, "成功", out);
+            return new Result<>(0, "OK", out);
         }
         String kw = StringUtils.trimToEmpty(keyword).toLowerCase();
         Map<String, DreamUser> byId = new HashMap<>();
@@ -213,7 +213,7 @@ public class ChatController {
                 break;
             }
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /**
@@ -243,21 +243,21 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canChat(me, t)) {
-            return new Result<>(1, "你在该专题的群聊里不能发言", null);
+            return new Result<>(1, "You can't send messages in this topic's group chat", null);
         }
         String text = StringUtils.trimToEmpty(content);
         String img = StringUtils.trimToEmpty(imageUrl);
         String file = StringUtils.trimToEmpty(fileUrl);
         if (text.isEmpty() && img.isEmpty() && file.isEmpty()) {
-            return new Result<>(1, "说点什么吧", null);
+            return new Result<>(1, "Say something first", null);
         }
         if (text.length() > MAX_LEN) {
-            return new Result<>(1, "一条最多 " + MAX_LEN + " 个字", null);
+            return new Result<>(1, "Each message can be up to " + MAX_LEN + " characters", null);
         }
         long now = System.currentTimeMillis();
         Long last = lastSendAt.get(me.getUserId());
         if (last != null && now - last < SEND_INTERVAL_MS) {
-            return new Result<>(1, "发得太快了，慢一点", null);
+            return new Result<>(1, "You're sending too fast. Slow down a little", null);
         }
         lastSendAt.put(me.getUserId(), now);
 
@@ -278,7 +278,7 @@ public class ChatController {
         Map<String, Object> view = withSenders(Collections.singletonList(msg)).get(0);
         broker.convertAndSend(WebSocketConfig.ROOM_PREFIX + topicId, envelope("message", view));
         notifyMentioned(msg, me, t);
-        return new Result<>(0, "成功", view);
+        return new Result<>(0, "OK", view);
     }
 
     /**
@@ -291,23 +291,23 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         TopicChatMessage msg = StringUtils.isBlank(msgId) ? null : chatMapper.selectById(msgId);
         if (msg == null) {
-            return new Result<>(1, "消息不存在", null);
+            return new Result<>(1, "Message not found", null);
         }
         ForumTopic t = perms.getTopic(msg.getTopicId());
         boolean manager = perms.canManage(me, t);
         boolean mine = me != null && StringUtils.equals(me.getUserId(), msg.getSenderId());
         if (!manager && !mine) {
-            return new Result<>(1, "只能撤回自己发的消息", null);
+            return new Result<>(1, "You can only recall messages you sent", null);
         }
         if (!manager && System.currentTimeMillis() - msg.getSendTime().getTime() > RECALL_WINDOW_MS) {
-            return new Result<>(1, "超过 2 分钟就撤不回来了", null);
+            return new Result<>(1, "Messages can't be recalled after 2 minutes", null);
         }
         msg.setRecalled("1");
         chatMapper.updateById(msg);
         Map<String, Object> data = new HashMap<>();
         data.put("msgId", msg.getMsgId());
         broker.convertAndSend(WebSocketConfig.ROOM_PREFIX + msg.getTopicId(), envelope("recall", data));
-        return new Result<>(0, "已撤回", null);
+        return new Result<>(0, "Recalled", null);
     }
 
     /** 我在这个专题群聊里的未读条数（别人发的、在我的已读游标之后的）。 */
@@ -317,7 +317,7 @@ public class ChatController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canChat(me, t)) {
-            return new Result<>(0, "成功", 0);
+            return new Result<>(0, "OK", 0);
         }
         TopicChatRead cursor = readMapper.selectOne(new QueryWrapper<TopicChatRead>()
                 .eq("USER_ID", me.getUserId()).eq("TOPIC_ID", topicId));
@@ -326,7 +326,7 @@ public class ChatController {
         if (cursor != null) {
             qw.gt("SEND_TIME", cursor.getLastRead());
         }
-        return new Result<>(0, "成功", chatMapper.selectCount(qw));
+        return new Result<>(0, "OK", chatMapper.selectCount(qw));
     }
 
     /** 打卡：把已读游标推到此刻（游标只进不退，见 mapper 的 greatest）。 */
@@ -337,7 +337,7 @@ public class ChatController {
         if (me != null && StringUtils.isNotBlank(topicId)) {
             readMapper.upsert(me.getUserId(), topicId, new Date());
         }
-        return new Result<>(0, "成功", null);
+        return new Result<>(0, "OK", null);
     }
 
     // ===== 备份 / 清理 / 占用 =====
@@ -351,18 +351,18 @@ public class ChatController {
     public Object purgePreview(String topicId, String from, String to, HttpServletRequest request) {
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         Date begin = parseDate(from);
         Date end = endOfDay(to);
         if (begin == null || end == null) {
-            return new Result<>(1, "请选择日期范围", null);
+            return new Result<>(1, "Choose a date range", null);
         }
         Map<String, Object> m = new HashMap<>();
         m.put("count", chatMapper.selectCount(new QueryWrapper<TopicChatMessage>()
                 .eq("TOPIC_ID", topicId).ge("SEND_TIME", begin).lt("SEND_TIME", end)));
         m.put("files", urlsOf(chatMapper.attachmentsOf(topicId, end, begin)).size());
-        return new Result<>(0, "成功", m);
+        return new Result<>(0, "OK", m);
     }
 
     /**
@@ -374,12 +374,12 @@ public class ChatController {
     public Object purge(String topicId, String from, String to, HttpServletRequest request) {
         ForumTopic t = perms.getTopic(topicId);
         if (!perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
-            return new Result<>(1, "无权管理该专题", null);
+            return new Result<>(1, "You can't manage this topic", null);
         }
         Date begin = parseDate(from);
         Date end = endOfDay(to);
         if (begin == null || end == null) {
-            return new Result<>(1, "请选择日期范围", null);
+            return new Result<>(1, "Choose a date range", null);
         }
         // 相同内容的文件只落一份盘（上传时按内容指纹命名去重），所以删之前要看清楚：
         // 留下来的消息里还有没有人指着同一个 URL。有的话只删行不删文件，否则会把别人的图删没。
@@ -400,7 +400,7 @@ public class ChatController {
         Map<String, Object> m = new HashMap<>();
         m.put("messages", rows);
         m.put("files", files);
-        return new Result<>(0, "已清理", m);
+        return new Result<>(0, "Cleared", m);
     }
 
     /** 各专题群聊的占用（仅超管）：正文字节来自库，附件字节按文件逐个 stat。 */
@@ -430,7 +430,7 @@ public class ChatController {
             m.put("totalBytes", text + agg[0]);
             out.add(m);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /**
@@ -449,7 +449,7 @@ public class ChatController {
         if (!perms.canManage(SecUtil.getLoginUserToSession(request), t)) {
             response.setStatus(javax.servlet.http.HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":403,\"msg\":\"无权管理该专题\",\"data\":null}");
+            response.getWriter().write("{\"code\":403,\"msg\":\"You can't manage this topic\",\"data\":null}");
             return;
         }
         // 日期是闭区间：选到 7-28 就包含 7-28 整天（也就包含到此刻为止的最新消息）。
@@ -470,7 +470,7 @@ public class ChatController {
             names.put(u.getUserId(), u.getUserNickname());
         }
 
-        String span = (begin == null && end == null) ? "全部"
+        String span = (begin == null && end == null) ? "all"
                 : StringUtils.trimToEmpty(from) + "_" + StringUtils.trimToEmpty(to);
         String base = "chat-" + safeName(t.getName()) + "-" + safeName(span);
         response.setContentType("application/zip");
@@ -480,7 +480,7 @@ public class ChatController {
 
         try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(response.getOutputStream())) {
             com.alibaba.fastjson.JSONArray arr = new com.alibaba.fastjson.JSONArray();
-            StringBuilder txt = new StringBuilder("# ").append(t.getName()).append(" 群聊记录\n\n");
+            StringBuilder txt = new StringBuilder("# ").append(t.getName()).append(" chat history\n\n");
             java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             java.util.Set<String> packed = new java.util.HashSet<>();
 
@@ -505,14 +505,14 @@ public class ChatController {
 
                 txt.append('[').append(when).append("] ").append(who).append(": ");
                 if (recalled) {
-                    txt.append("(已撤回)");
+                    txt.append("(recalled)");
                 } else {
                     txt.append(StringUtils.trimToEmpty(m.getContent()));
                     if (imgName != null) {
-                        txt.append(" [图片 files/").append(imgName).append(']');
+                        txt.append(" [image files/").append(imgName).append(']');
                     }
                     if (fileName != null) {
-                        txt.append(" [附件 files/").append(fileName).append(']');
+                        txt.append(" [attachment files/").append(fileName).append(']');
                     }
                 }
                 txt.append('\n');

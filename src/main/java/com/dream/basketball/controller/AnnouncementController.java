@@ -39,9 +39,9 @@ public class AnnouncementController {
     public Object current() {
         SiteAnnouncement a = mapper.selectById(SiteAnnouncement.ONLY_ID);
         if (a == null || !"1".equals(a.getEnabled()) || StringUtils.isBlank(a.getContent())) {
-            return new Result<>(0, "成功", null);
+            return new Result<>(0, "OK", null);
         }
-        return new Result<>(0, "成功", view(a));
+        return new Result<>(0, "OK", view(a));
     }
 
     /** 超管查看当前配置（含关闭状态和原文），用于编辑弹窗回填。 */
@@ -49,7 +49,7 @@ public class AnnouncementController {
     @GetMapping("/get")
     public Object get() {
         SiteAnnouncement a = mapper.selectById(SiteAnnouncement.ONLY_ID);
-        return new Result<>(0, "成功", a == null ? null : view(a));
+        return new Result<>(0, "OK", a == null ? null : view(a));
     }
 
     /** 保存（超管）。改了内容或开关，UPDATE_TIME 就变，等于换了一版，关过的人会重新看到。 */
@@ -58,11 +58,11 @@ public class AnnouncementController {
     public Object save(String content, String enabled, String level, HttpServletRequest request) {
         String text = StringUtils.trimToEmpty(content);
         if (text.length() > MAX_LEN) {
-            return new Result<>(1, "公告最多 " + MAX_LEN + " 个字", null);
+            return new Result<>(1, "Announcements can be up to " + MAX_LEN + " characters", null);
         }
         boolean on = "1".equals(enabled);
         if (on && text.isEmpty()) {
-            return new Result<>(1, "公告内容不能为空", null);
+            return new Result<>(1, "The announcement can't be empty", null);
         }
         DreamUser me = SecUtil.getLoginUserToSession(request);
         SiteAnnouncement a = mapper.selectById(SiteAnnouncement.ONLY_ID);
@@ -81,7 +81,7 @@ public class AnnouncementController {
         } else {
             mapper.updateById(a);
         }
-        return new Result<>(0, "已保存", view(a));
+        return new Result<>(0, "Saved", view(a));
     }
 
     private Map<String, Object> view(SiteAnnouncement a) {

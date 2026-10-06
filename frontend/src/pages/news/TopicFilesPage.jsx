@@ -11,7 +11,6 @@ import { topicFileApi } from '../../api/topicFile'
 import { getToken } from '../../auth/token'
 import useIsMobile from '../../hooks/useIsMobile'
 import useUrlState from '../../hooks/useUrlState'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 专题文件页（/news/topic/:topicId/files）。
@@ -60,7 +59,6 @@ const fileIcon = (name) => {
 }
 
 export default function TopicFilesPage() {
-  const { t } = useTranslation()
   const { topicId } = useParams()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -75,14 +73,14 @@ export default function TopicFilesPage() {
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    topicApi.get(topicId).then((t) => setTopicName(t?.name || '')).catch(() => {})
+    topicApi.get(topicId).then((tp) => setTopicName(tp?.name || '')).catch(() => {})
   }, [topicId])
 
   const load = useCallback(() => {
     topicFileApi.list(topicId, folder || undefined)
       .then((d) => { setData(d || { files: [], path: [], canManage: false }); setDenied('') })
-      .catch((e) => setDenied(e?.message || t("加载失败")))
-  }, [topicId, folder, t])
+      .catch((e) => setDenied(e?.message || 'Load failed'))
+  }, [topicId, folder])
 
   useEffect(() => { setData(null); load() }, [load])
 
@@ -130,14 +128,14 @@ export default function TopicFilesPage() {
       const ordered = [...dirs].sort((a, b) => a.split('/').length - b.split('/').length)
       for (const d of ordered) {
         const parent = d.includes('/') ? d.slice(0, d.lastIndexOf('/')) : ''
-        message.loading({ content: t("建目录 {{d}}…", { d }), key, duration: 0 })
+        message.loading({ content: `Creating folder ${d}…`, key, duration: 0 })
         const r = await topicFileApi.mkdir(topicId, dirIds[parent], d.split('/').pop())
-        if (!r?.fileId) throw new Error(t("目录 {{d}} 创建失败", { d }))
+        if (!r?.fileId) throw new Error(`Could not create folder ${d}`)
         dirIds[d] = r.fileId
       }
       for (const { file, rel } of items) {
         const parent = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : ''
-        message.loading({ content: t("上传中 {{v0}}/{{length}}…", { v0: ok + fails.length + 1, length: items.length }), key, duration: 0 })
+        message.loading({ content: `Uploading ${ok + fails.length + 1}/${items.length}…`, key, duration: 0 })
         try {
           await topicFileApi.upload(file, topicId, dirIds[parent])
           ok += 1
@@ -148,15 +146,16 @@ export default function TopicFilesPage() {
       }
       if (fails.length) {
         message.warning({
-          content: t("{{ok}} 个成功，{{length}} 个失败（超 30MB，或是网页脚本/可执行文件）：{{v2}}{{v3}}", { ok, length: fails.length, v2: fails.slice(0, 3).join('、'), v3: fails.length > 3 ? '…' : '' }),
+          // 文件名之间的分隔符也要跟语言走：中文用顿号，英文用逗号
+          content: `${ok} uploaded, ${fails.length} failed (over 30MB, or a script/executable): ${fails.slice(0, 3).join(', ')}${fails.length > 3 ? '…' : ''}`,
           key, duration: 6,
         })
       } else {
-        message.success({ content: t("已上传 {{ok}} 个文件", { ok }), key })
+        message.success({ content: ((ok) === 1 ? `${ok} file uploaded` : `${ok} files uploaded`), key })
       }
       load()
     } catch (e) {
-      message.error({ content: e?.message || t("上传失败"), key })
+      message.error({ content: e?.message || 'Upload failed', key })
       load()
     } finally {
       setUploading(false)
@@ -242,7 +241,7 @@ export default function TopicFilesPage() {
         credentials: 'include',
       })
       if (!res.ok || (res.headers.get('content-type') || '').includes('application/json')) {
-        message.error(t("下载失败"))
+        message.error('Download failed')
         return
       }
       const blob = await res.blob()
@@ -254,7 +253,7 @@ export default function TopicFilesPage() {
       a.remove()
       setTimeout(() => URL.revokeObjectURL(a.href), 30000)
     } catch {
-      message.error(t("下载失败"))
+      message.error('Download failed')
     } finally {
       setZipping('')
     }
@@ -300,9 +299,9 @@ export default function TopicFilesPage() {
             style={{ flexShrink: 0 }}
           />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <Link to={`/news/topic/${topicId}`} style={{ color: 'inherit' }}>{topicName || t("专题")}</Link>
+            <Link to={`/news/topic/${topicId}`} style={{ color: 'inherit' }}>{topicName || 'Topic'}</Link>
             <span style={{ color: '#bbb', margin: '0 6px' }}>/</span>
-            <span onClick={() => setFolder('')} style={{ cursor: 'pointer', color: crumbs.length ? BRAND : 'inherit' }}>{t("文件", { context: 'section' })}</span>
+            <span onClick={() => setFolder('')} style={{ cursor: 'pointer', color: crumbs.length ? BRAND : 'inherit' }}>Files</span>
             {crumbs.map((c, i) => (
               <span key={c.fileId}>
                 <span style={{ color: '#bbb', margin: '0 6px' }}>/</span>
@@ -320,18 +319,18 @@ export default function TopicFilesPage() {
       extra={canManage && (
         <span style={{ display: 'inline-flex', gap: 8 }}>
           <Button size="small" icon={<FolderAddOutlined />} onClick={() => { setMkdirName(''); setMkdirOpen(true) }}>
-            {isMobile ? '' : t("新建文件夹")}
+            {isMobile ? '' : 'New folder'}
           </Button>
           {/* 传整个文件夹：目录结构原样搬进来。只在桌面端给——手机浏览器/套壳 WebView
               没有目录选择器，directory 输入框点了要么没反应要么退化成选单个文件 */}
           {!isMobile && (
             <Upload showUploadList={false} directory beforeUpload={interceptBatch(true)}>
-              <Button size="small" icon={<FolderOpenOutlined />} loading={uploading}>{t("传文件夹")}</Button>
+              <Button size="small" icon={<FolderOpenOutlined />} loading={uploading}>Upload folder</Button>
             </Upload>
           )}
           <Upload showUploadList={false} multiple beforeUpload={interceptBatch(false)}>
             <Button size="small" type="primary" icon={<UploadOutlined />} loading={uploading} style={{ background: BRAND }}>
-              {isMobile ? '' : t("上传文件")}
+              {isMobile ? '' : 'Upload files'}
             </Button>
           </Upload>
         </span>
@@ -344,7 +343,7 @@ export default function TopicFilesPage() {
       ) : data.files.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={canManage ? t("空的，点右上角传点什么") : t("这里还什么都没有")}
+          description={canManage ? 'Empty. Upload something from the top right' : 'Nothing here yet'}
           style={{ padding: 36 }}
         />
       ) : (
@@ -375,7 +374,7 @@ export default function TopicFilesPage() {
                 type="text"
                 size="small"
                 icon={<DownloadOutlined />}
-                title={f.kind === 'folder' ? t("打包下载") : t("下载")}
+                title={f.kind === 'folder' ? 'Download as zip' : 'Download'}
                 loading={zipping === f.fileId}
                 onClick={() => downloadNode(f)}
               />
@@ -385,10 +384,10 @@ export default function TopicFilesPage() {
               <span onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0, display: 'inline-flex', gap: 2 }}>
                 <Button type="text" size="small" icon={<EditOutlined />} onClick={() => setRenameAt({ fileId: f.fileId, name: f.name })} />
                 <Popconfirm
-                  title={f.kind === 'folder' ? t("删除文件夹？里面的东西会一起删掉") : t("删除这个文件？")}
-                  okText={t("删除")}
+                  title={f.kind === 'folder' ? 'Delete this folder and everything in it?' : 'Delete this file?'}
+                  okText="Delete"
                   okButtonProps={{ danger: true }}
-                  onConfirm={() => run(() => topicFileApi.remove(f.fileId), () => message.success(t("已删除")))}
+                  onConfirm={() => run(() => topicFileApi.remove(f.fileId), () => message.success('Deleted'))}
                 >
                   <Button type="text" size="small" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -399,41 +398,41 @@ export default function TopicFilesPage() {
       )}
 
       <Modal
-        title={t("新建文件夹")}
+        title="New folder"
         open={mkdirOpen}
         onCancel={() => setMkdirOpen(false)}
         confirmLoading={busy}
-        okText={t("创建")}
+        okText="Create"
         onOk={() => {
           if (!mkdirName.trim()) return
           run(() => topicFileApi.mkdir(topicId, folder || undefined, mkdirName.trim()),
-            () => { setMkdirOpen(false); message.success(t("已创建")) })
+            () => { setMkdirOpen(false); message.success('Created') })
         }}
       >
         <Input
           value={mkdirName}
           onChange={(e) => setMkdirName(e.target.value)}
-          placeholder={t("文件夹名")}
+          placeholder="Folder name"
           maxLength={80}
           autoFocus
           onPressEnter={() => {
             if (!mkdirName.trim()) return
             run(() => topicFileApi.mkdir(topicId, folder || undefined, mkdirName.trim()),
-              () => { setMkdirOpen(false); message.success(t("已创建")) })
+              () => { setMkdirOpen(false); message.success('Created') })
           }}
         />
       </Modal>
 
       <Modal
-        title={t("重命名")}
+        title="Rename"
         open={!!renameAt}
         onCancel={() => setRenameAt(null)}
         confirmLoading={busy}
-        okText={t("保存")}
+        okText="Save"
         onOk={() => {
           if (!renameAt?.name?.trim()) return
           run(() => topicFileApi.rename(renameAt.fileId, renameAt.name.trim()),
-            () => { setRenameAt(null); message.success(t("已改名")) })
+            () => { setRenameAt(null); message.success('Renamed') })
         }}
       >
         <Input

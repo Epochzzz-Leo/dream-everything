@@ -64,7 +64,7 @@ public class LolController {
     @GetMapping("/accounts")
     public Object accounts(HttpServletRequest request) {
         String me = SecUtil.getLoginUserIdToSession(request);
-        return new Result<>(0, "成功", accountMapper.selectList(
+        return new Result<>(0, "OK", accountMapper.selectList(
                 new QueryWrapper<LolAccount>().eq("USER_ID", me).orderByAsc("BIND_TIME")));
     }
 
@@ -79,24 +79,24 @@ public class LolController {
     public Object bind(String riotId, String platform, String region, HttpServletRequest request) {
         String me = SecUtil.getLoginUserIdToSession(request);
         if (StringUtils.isBlank(riotId) || !riotId.contains("#")) {
-            return new Result<>(1, "请填写完整的 Riot ID，形如 Epoch#3113", null);
+            return new Result<>(1, "Enter your full Riot ID, like Epoch#3113", null);
         }
         String gameName = StringUtils.substringBeforeLast(riotId, "#").trim();
         String tagLine = StringUtils.substringAfterLast(riotId, "#").trim();
         if (StringUtils.isAnyBlank(gameName, tagLine)) {
-            return new Result<>(1, "请填写完整的 Riot ID，形如 Epoch#3113", null);
+            return new Result<>(1, "Enter your full Riot ID, like Epoch#3113", null);
         }
         try {
-            return new Result<>(0, "绑定成功，正在拉取历史战绩",
+            return new Result<>(0, "Linked. Fetching your match history",
                     sync.bind(me, gameName, tagLine, platform, region));
         } catch (RiotApiClient.RiotException e) {
             if (e.isNotFound()) {
-                return new Result<>(1, "查不到这个 Riot ID，检查一下大小写和 # 后面的数字", null);
+                return new Result<>(1, "Couldn't find that Riot ID. Check the capitalization and the number after #", null);
             }
             if (e.isForbidden()) {
-                return new Result<>(1, "暂时连不上 Riot（密钥或线路问题），稍后再试", null);
+                return new Result<>(1, "Can't reach Riot right now (API key or network issue). Try again later", null);
             }
-            return new Result<>(1, "Riot 那边没响应，稍后再试", null);
+            return new Result<>(1, "Riot isn't responding. Try again later", null);
         } catch (IllegalStateException e) {
             return new Result<>(1, e.getMessage(), null);
         }
@@ -106,7 +106,7 @@ public class LolController {
     @PostMapping("/unbind")
     public Object unbind(String accountId, HttpServletRequest request) {
         sync.unbind(SecUtil.getLoginUserIdToSession(request), accountId);
-        return new Result<>(0, "已解绑", null);
+        return new Result<>(0, "Unlinked", null);
     }
 
     // ───────────────────────────────────────────── 查询
@@ -129,7 +129,7 @@ public class LolController {
         if (StringUtils.isNotBlank(date)) {
             Calendar c = dayStart(date);
             if (c == null) {
-                return new Result<>(1, "日期格式不对，要 yyyy-MM-dd", null);
+                return new Result<>(1, "Invalid date. Use yyyy-MM-dd", null);
             }
             since = c.getTime();
             c.add(Calendar.DAY_OF_YEAR, 1);
@@ -165,7 +165,7 @@ public class LolController {
             List<Map<String, Object>> ps = (List<Map<String, Object>>) m.get("players");
             ps.add(p);
         }
-        return new Result<>(0, "成功", new ArrayList<>(byMatch.values()));
+        return new Result<>(0, "OK", new ArrayList<>(byMatch.values()));
     }
 
     /**
@@ -180,18 +180,18 @@ public class LolController {
     public Object dates(String month) {
         Calendar c = dayStart(StringUtils.defaultString(month) + "-01");
         if (c == null) {
-            return new Result<>(1, "月份格式不对，要 yyyy-MM", null);
+            return new Result<>(1, "Invalid month. Use yyyy-MM", null);
         }
         Date from = c.getTime();
         c.add(Calendar.MONTH, 1);
-        return new Result<>(0, "成功", playerMapper.matchDates(from, c.getTime()));
+        return new Result<>(0, "OK", playerMapper.matchDates(from, c.getTime()));
     }
 
     /** 搜索框的候选：站内昵称 + 已绑定的游戏 ID */
     @RequiresRole(Role.USER)
     @GetMapping("/searchOptions")
     public Object searchOptions() {
-        return new Result<>(0, "成功", playerMapper.searchOptions());
+        return new Result<>(0, "OK", playerMapper.searchOptions());
     }
 
     /**
@@ -210,14 +210,14 @@ public class LolController {
         data.put("rows", rows);
         data.put("summary", playerMapper.summary(since(days)));
         data.put("minGames", min(minGames));
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /** 开黑组合榜：谁和谁一起打得最多、一起赢得最多 */
     @RequiresRole(Role.USER)
     @GetMapping("/duo")
     public Object duo(Integer days, Integer queueId, Integer minGames) {
-        return new Result<>(0, "成功",
+        return new Result<>(0, "OK",
                 playerMapper.duoBoard(since(days), q(queueId), min(minGames)));
     }
 
@@ -233,13 +233,13 @@ public class LolController {
     @GetMapping("/match")
     public Object match(String matchId) {
         if (StringUtils.isBlank(matchId)) {
-            return new Result<>(1, "缺少对局 id", null);
+            return new Result<>(1, "Missing match ID", null);
         }
         Map<String, Object> d = sync.matchDetail(matchId);
         if (d == null) {
-            return new Result<>(1, "这场对局的详细数据没有存下来", null);
+            return new Result<>(1, "Detailed data for this match wasn't saved", null);
         }
-        return new Result<>(0, "成功", d);
+        return new Result<>(0, "OK", d);
     }
 
     /**
@@ -263,7 +263,7 @@ public class LolController {
     @GetMapping("/player")
     public Object player(String userId, Integer days, String puuids, String positions) {
         if (StringUtils.isBlank(userId)) {
-            return new Result<>(1, "缺少用户", null);
+            return new Result<>(1, "Missing user", null);
         }
         Date from = since(days);
         // 空串 = 看这个人的全部号。前端至少会勾一个，但接口这一层不该假设它一定守规矩
@@ -305,7 +305,7 @@ public class LolController {
             who.put("avatar", u.getAvatar());
             data.put("user", who);
         }
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /**
@@ -317,7 +317,7 @@ public class LolController {
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/sync")
     public Object syncNow() {
-        return new Result<>(0, "成功", sync.runOnce());
+        return new Result<>(0, "OK", sync.runOnce());
     }
 
     // ───────────────────────────────────────────── 参数兜底

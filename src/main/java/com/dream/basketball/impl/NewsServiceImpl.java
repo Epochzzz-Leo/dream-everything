@@ -579,19 +579,19 @@ public class NewsServiceImpl implements NewsService {
             DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
             DreamNews dreamNews = dreamNewsService.getById(newsId);
             if (dreamUser == null) {
-                return handlerResultJson(false, "请先登录！");
+                return handlerResultJson(false, "Please sign in first");
             } else if (dreamNews == null){
-                return handlerResultJson(false, "原帖已删除！");
+                return handlerResultJson(false, "The original post has been deleted");
             } else {
                 String userId = dreamUser.getUserId();
                 boolean whetherClicked = Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember("good:user:" + userId + ":newsId:" + newsId, userId));
                 // rabbitmq处理点赞
                 rabbitMqProducer.newsActionRmq(newsId, userId, whetherClicked, dreamUser, dreamNews, "good");
-                return likeResult(whetherClicked, whetherClicked ? "让我再看看这帖子质量怎么样" : "好帖，顶！");
+                return likeResult(whetherClicked, whetherClicked ? "Hmm, let me take another look at this post" : "Great post, upvoted!");
             }
         } catch (Exception e){
             e.printStackTrace();
-            return handlerResultJson(false, "后台出错！<br>" + e.getMessage());
+            return handlerResultJson(false, "Server error.<br>" + e.getMessage());
         }
     }
 
@@ -607,15 +607,15 @@ public class NewsServiceImpl implements NewsService {
         DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
         DreamNews dreamNews = dreamNewsService.getById(newsId);
         if (dreamUser == null) {
-            return handlerResultJson(false, "请先登录！");
+            return handlerResultJson(false, "Please sign in first");
         } else if (dreamNews == null){
-            return handlerResultJson(false, "原帖已删除！");
+            return handlerResultJson(false, "The original post has been deleted");
         } else {
             String userId = dreamUser.getUserId();
             boolean whetherClicked = Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember("bad:user:" + userId + ":newsId:" + newsId, userId));
             // rabbitmq处理点踩
             rabbitMqProducer.newsActionRmq(newsId, userId, whetherClicked, dreamUser, dreamNews, "bad");
-            return likeResult(whetherClicked, whetherClicked ? "我觉得还可以再看看" : "什么垃圾帖子，滚！");
+            return likeResult(whetherClicked, whetherClicked ? "Maybe it's worth another look" : "What a garbage post. Get out!");
         }
     }
 
@@ -631,15 +631,15 @@ public class NewsServiceImpl implements NewsService {
         DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
         DreamNewsComment dreamNewsComment = dreamNewsCommentService.getById(commentId);
         if (dreamUser == null) {
-            return handlerResultJson(false, "请先登录！");
+            return handlerResultJson(false, "Please sign in first");
         } else if (dreamNewsComment == null || "1".equals(dreamNewsComment.getDeleted())) {
-            return handlerResultJson(false, "原评论已删除！");
+            return handlerResultJson(false, "The original comment has been deleted");
         } else {
             String userId = dreamUser.getUserId();
             boolean whetherClicked = Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember("goodComment:user:" + userId + ":commentId:" + commentId, userId));
             // rabbitmq处理评论点赞
             rabbitMqProducer.commentActionRmq(commentId, userId, whetherClicked, dreamUser, dreamNewsComment, "good");
-            return likeResult(whetherClicked, whetherClicked ? "你的想法尚且需要我三思" : "说得好！");
+            return likeResult(whetherClicked, whetherClicked ? "I need to think twice about your take" : "Well said!");
         }
     }
 
@@ -655,15 +655,15 @@ public class NewsServiceImpl implements NewsService {
         DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
         DreamNewsComment dreamNewsComment = dreamNewsCommentService.getById(commentId);
         if (dreamUser == null) {
-            return handlerResultJson(false, "请先登录！");
+            return handlerResultJson(false, "Please sign in first");
         } else if (dreamNewsComment == null || "1".equals(dreamNewsComment.getDeleted())) {
-            return handlerResultJson(false, "原评论已删除！");
+            return handlerResultJson(false, "The original comment has been deleted");
         } else {
             String userId = dreamUser.getUserId();
             boolean whetherClicked = Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember("badComment:user:" + userId + ":commentId:" + commentId, userId));
             // rabbitmq处理评论点踩
             rabbitMqProducer.commentActionRmq(commentId, userId, whetherClicked, dreamUser, dreamNewsComment, "bad");
-            return likeResult(whetherClicked, whetherClicked ? "好像说的也没那么离谱" : "我觉得这完全没道理");
+            return likeResult(whetherClicked, whetherClicked ? "Maybe it's not that far off after all" : "That makes no sense to me");
         }
     }
 
@@ -675,14 +675,14 @@ public class NewsServiceImpl implements NewsService {
     public Object deleteComment(String commentId, HttpServletRequest request) {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         if (me == null) {
-            return handlerResultJson(false, "请先登录！");
+            return handlerResultJson(false, "Please sign in first");
         }
         DreamNewsComment c = dreamNewsCommentService.getById(commentId);
         if (c == null || "1".equals(c.getDeleted())) {
-            return handlerResultJson(false, "原评论已删除！");
+            return handlerResultJson(false, "The original comment has been deleted");
         }
         if (!me.getUserId().equals(c.getUserId())) {
-            return handlerResultJson(false, "只能删除自己的评论");
+            return handlerResultJson(false, "You can only delete your own comments");
         }
         java.util.List<com.dream.basketball.entity.ForumRatingItem> items = ratingItemMapper.selectList(
                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.dream.basketball.entity.ForumRatingItem>()
@@ -723,7 +723,7 @@ public class NewsServiceImpl implements NewsService {
             if (es != null) {
                 saveComment(es);
             }
-            resp.put("msg", "已删除");
+            resp.put("msg", "Deleted");
             resp.put("mode", "tombstone");
         } else {
             dreamNewsCommentService.removeById(commentId);
@@ -749,7 +749,7 @@ public class NewsServiceImpl implements NewsService {
                 upId = up.getCommentRelId();
             }
             template.indexOps(Comment.class).refresh();
-            resp.put("msg", "已删除");
+            resp.put("msg", "Deleted");
             resp.put("mode", "removed");
         }
         return resp;
@@ -781,27 +781,27 @@ public class NewsServiceImpl implements NewsService {
 //        eventProducer.fireEvent(event);
         DreamUser dreamUser = SecUtil.getLoginUserToSession(request);
         if (dreamUser == null) {
-            return handlerResultJson(false, "请先登录！");
+            return handlerResultJson(false, "Please sign in first");
         }
         // 全局限制：被超管禁止发言的用户不能评论
         if (!userPerms.canComment(dreamUser.getUserId())) {
-            return handlerResultJson(false, "你已被限制发言");
+            return handlerResultJson(false, "You've been restricted from commenting");
         }
         // 帖子被封锁：只读，任何人都不能再评论/回复
         DreamNews postForGate = dreamNewsService.getById(dreamNewsComment.getNewsId());
         if (postForGate != null && "1".equals(postForGate.getLocked())) {
-            return handlerResultJson(false, "该帖已被锁定，仅可查看");
+            return handlerResultJson(false, "This post is locked and read-only");
         }
         // 专题帖：评论要有该专题的发言权
         if (postForGate != null && StringUtils.isNotBlank(postForGate.getTopicId())
                 && !topicPerms.canComment(dreamUser, topicPerms.getTopic(postForGate.getTopicId()))) {
-            return handlerResultJson(false, "你在该专题没有评论权限");
+            return handlerResultJson(false, "You don't have permission to comment in this topic");
         }
         // 回复：被回复的评论必须还在（未被作者删除）——防墓碑/已彻删评论下挂新回复
         if (StringUtils.isNotBlank(dreamNewsComment.getCommentRelId())) {
             DreamNewsComment parent = dreamNewsCommentService.getById(dreamNewsComment.getCommentRelId());
             if (parent == null || "1".equals(parent.getDeleted())) {
-                return handlerResultJson(false, "原评论已删除，无法回复");
+                return handlerResultJson(false, "The original comment was deleted, so you can't reply");
             }
         }
         dreamNewsComment.setCommentId(UUID.randomUUID().toString());
@@ -865,7 +865,7 @@ public class NewsServiceImpl implements NewsService {
                     MENTION_COMMENT, dreamNewsComment.getCommentId(), dreamNewsComment.getNewsId(),
                     dreamNewsComment.getCommentId(), level, dreamNewsComment.getContent(), "");
         }
-        return handlerResultJson(true, "评论成功！");
+        return handlerResultJson(true, "Comment posted");
     }
 
     /**

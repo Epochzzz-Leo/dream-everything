@@ -416,7 +416,7 @@ def main():
     # team_season: W/L + ppg/oppg; when the B-R fallback supplied per-game detail
     # (reb/ast/stl/blk/tov) write it too — ESPN-era pre-1994 rows keep those NULL
     for code, st in standings.items():
-        result = po_results.get(code, '未进季后赛')
+        result = po_results.get(code, 'Missed playoffs')
         lines.append(
             "INSERT INTO team_season (TEAM_CODE, SEASON_NUM, WINS, LOSSES, PTS_ALLOWED, PTS, "
             "REB, AST, STL, BLK, TOV, PLAYOFF_RESULT) "

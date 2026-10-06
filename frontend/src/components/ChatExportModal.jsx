@@ -3,7 +3,6 @@ import { Alert, Checkbox, Modal } from 'antd'
 import dayjs from 'dayjs'
 import { chatApi } from '../api/chat'
 import DayRangePicker from './DayRangePicker'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 导出群聊备份（题主/管理者）。
@@ -15,7 +14,6 @@ import { useTranslation } from 'react-i18next'
  * 下载走浏览器直连（不经 axios）：要的是把文件存下来，不是拿到响应体。
  */
 export default function ChatExportModal({ topicId, open, onClose }) {
-  const { t } = useTranslation()
   const [range, setRange] = useState(null)
   const [all, setAll] = useState(true)
 
@@ -34,18 +32,18 @@ export default function ChatExportModal({ topicId, open, onClose }) {
       open={open}
       onCancel={onClose}
       onOk={ok}
-      okText={t("下载")}
-      cancelText={t("取消")}
+      okText="Download"
+      cancelText="Cancel"
       okButtonProps={{ disabled: !all && !range }}
-      title={t("导出群聊备份")}
+      title="Export chat backup"
       width={440}
       destroyOnClose
     >
       <div style={{ fontSize: 13, color: '#8c8c8c', marginBottom: 12 }}>
-        {t("打包成 zip：")}<code>messages.json</code>{t("（结构化）、")}<code>chat.txt</code>{t("（可读流水）、")}
-        <code>files/</code>{t("（图片和附件原件）。")}
+        {'Packed as a zip: '}<code>messages.json</code>{' (structured), '}<code>chat.txt</code>{' (readable log), '}
+        <code>files/</code>{' (original images and attachments).'}
       </div>
-      <Checkbox checked={all} onChange={(e) => setAll(e.target.checked)}>{t("导出全部记录")}</Checkbox>
+      <Checkbox checked={all} onChange={(e) => setAll(e.target.checked)}>Export everything</Checkbox>
       <div style={{ marginTop: 12 }}>
         <DayRangePicker
           value={range}
@@ -58,7 +56,7 @@ export default function ChatExportModal({ topicId, open, onClose }) {
         <Alert
           style={{ marginTop: 12 }}
           type="info"
-          message={t("导出 {{v0}} 到 {{v1}}，含 {{v2}} 当天到此刻的全部消息", { v0: range[0].format(t('M 月 D 日')), v1: range[1].format(t('M 月 D 日')), v2: range[1].format(t('M 月 D 日')) })}
+          message={`Export ${range[0].format('MMM D')} to ${range[1].format('MMM D')}, including everything on ${range[1].format('MMM D')} up to now`}
         />
       )}
     </Modal>

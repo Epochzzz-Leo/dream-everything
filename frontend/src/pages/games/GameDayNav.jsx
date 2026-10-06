@@ -5,7 +5,9 @@ import dayjs from 'dayjs'
 import { playerApi } from '../../api/player'
 import useIsMobile from '../../hooks/useIsMobile'
 import DateMarkPicker from '../../components/DateMarkPicker'
-import { useTranslation } from 'react-i18next'
+
+// 星期几的英文缩写，下标和 dayjs 的 day() 一致（0 = 周日）
+const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 /**
  * 比赛日翻页器：`‹  6月13日 周六  ›`
@@ -24,7 +26,6 @@ import { useTranslation } from 'react-i18next'
  * 于是翻到别的月份一片空白，点了某一天标注才冒出来。
  */
 export default function GameDayNav({ date, onChange }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [adj, setAdj] = useState({ prev: null, next: null })
   const [open, setOpen] = useState(false)
@@ -45,7 +46,6 @@ export default function GameDayNav({ date, onChange }) {
 
   const arrow = (dir) => {
     const to = dir < 0 ? adj.prev : adj.next
-    const label = dir < 0 ? t("上一个比赛日") : t("下一个比赛日")
     const btn = (
       <Button
         type="text"
@@ -55,8 +55,11 @@ export default function GameDayNav({ date, onChange }) {
         style={{ color: to ? '#595959' : undefined }}
       />
     )
-    // 到头了就没什么可提示的，antd 的 Tooltip 也包不住 disabled 的按钮
-    return to ? <Tooltip key={dir} title={`${label}：${dayjs(to).format(t("M 月 D 日"))}`}>{btn}</Tooltip>
+    // 到头了就没什么可提示的，antd 的 Tooltip 也包不住 disabled 的按钮。
+    // 提示写成整句：原来拼的是「标签 + 全角冒号 + 日期」，英文界面上也带着全角「：」
+    const date = dayjs(to).format('MMM D')
+    const tip = dir < 0 ? `Previous game day: ${date}` : `Next game day: ${date}`
+    return to ? <Tooltip key={dir} title={tip}>{btn}</Tooltip>
               : <span key={dir}>{btn}</span>
   }
 
@@ -73,8 +76,9 @@ export default function GameDayNav({ date, onChange }) {
           padding: '0 8px', whiteSpace: 'nowrap', position: 'relative',
         }}
       >
-        {d.format(isMobile ? t("M 月 D 日") : t("YYYY 年 M 月 D 日"))}
-        <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 6 }}>{t("日一二三四五六")[d.day()]}</span>
+        {d.format(isMobile ? 'MMM D' : 'MMM D, YYYY')}
+        {/* 原来是 t("日一二三四五六")[d.day()]：对译文按下标取字，英文 SMTWTFS 里周六周日都是「S」 */}
+        <span style={{ color: '#bbb', fontWeight: 400, marginLeft: 6 }}>{WEEK[d.day()]}</span>
         {/* 真正的日历藏在文字底下：DatePicker 换不掉自己的输入框，缩成零尺寸只当弹层锚点 */}
         <DateMarkPicker
           open={open}

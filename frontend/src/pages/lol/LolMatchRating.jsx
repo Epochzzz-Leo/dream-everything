@@ -27,10 +27,10 @@ function RatingBlock({ r, puuid, title, placeholder, big }) {
   const myScore = typeof mine === 'object' ? mine?.score ?? null : mine ?? null
 
   const send = async () => {
-    const t = draft.trim()
-    if (!t) return
+    const txt = draft.trim()
+    if (!txt) return
     setSaving(true)
-    const ok = await r.comment(puuid || '', t)
+    const ok = await r.comment(puuid || '', txt)
     setSaving(false)
     if (ok) setDraft('')
   }
@@ -66,7 +66,7 @@ function RatingBlock({ r, puuid, title, placeholder, big }) {
           onClick={send}
           style={{ alignSelf: 'flex-end' }}
         >
-          发布
+          Post
         </Button>
       </div>
       <div style={{ marginTop: 4 }}>
@@ -77,7 +77,7 @@ function RatingBlock({ r, puuid, title, placeholder, big }) {
           onReply={r.reply}
           onDeleteReply={r.delReply}
           onDeleteComment={r.delComment}
-          emptyText="还没有人说话"
+          emptyText="No comments yet"
         />
       </div>
     </div>
@@ -92,7 +92,7 @@ export default function LolMatchRating({ rating }) {
   if (rating.data === null) return null
   return (
     <div style={{ marginTop: 16, borderTop: '1px solid #f0f0f0', paddingTop: 14 }}>
-      <RatingBlock r={rating} title="这一局怎么样" placeholder="说说这一局，打 @ 提到别人" big />
+      <RatingBlock r={rating} title="How was this game?" placeholder="Say something about this game; type @ to mention someone" big />
     </div>
   )
 }
@@ -104,12 +104,13 @@ export function PlayerRating({ rating, puuid, name }) {
     // textAlign 要显式写死：展开行本身也是个 <td>，而数据表有一条
     // `.stat-compact ... > td { text-align: center !important }`，
     // 会把这块里的标题、输入框、短评正文全部居中。数字列该居中，成段的话不该。
+    // 没有名字时用整句兜底，不把「他」拼进句子里（拼出来的英文语序是错的）
     <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed #eee', textAlign: 'left' }}>
       <RatingBlock
         r={rating}
         puuid={puuid}
-        title={`给 ${name || '他'} 打分`}
-        placeholder={`说说${name || '他'}这一把`}
+        title={name ? `Rate ${name}` : 'Rate this player'}
+        placeholder={name ? `Your take on ${name} this game` : 'Your take on this player'}
       />
     </div>
   )

@@ -85,7 +85,7 @@ public class S3UploadStore implements UploadStore, Closeable {
     @Override
     public void put(String key, byte[] bytes, String contentType, boolean attachment) throws IOException {
         if (blank(key)) {
-            throw new IOException("key 不能为空");
+            throw new IOException("key can't be empty");
         }
         PutObjectRequest.Builder b = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -99,7 +99,7 @@ public class S3UploadStore implements UploadStore, Closeable {
         try {
             s3.putObject(b.build(), RequestBody.fromBytes(bytes));
         } catch (RuntimeException e) {
-            throw new IOException("S3 上传失败: " + key, e);
+            throw new IOException("S3 upload failed: " + key, e);
         }
     }
 

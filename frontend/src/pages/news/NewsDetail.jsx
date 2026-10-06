@@ -19,7 +19,6 @@ import { SuperAdminBadge, TopicOwnerBadge, OpBadge } from '../../components/Role
 import UserTitles from '../../components/UserTitles'
 import useIsMobile from '../../hooks/useIsMobile'
 import { MENTION_CSS, MENTION_SELECTOR, markPlayerMentions, mentionHref, readMentionInfo } from '../../utils/mention'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 资讯详情（公开，/news/:newsId，P5-2 文章页改版）。
@@ -50,8 +49,7 @@ const avatarColor = (name) => {
  * 头像用专题背景图裁成圆的；没设背景图就退回首字母彩底（和站里其它没头像的地方同一套哈希规则）。
  */
 function TopicPill({ topic, onClick }) {
-  const { t } = useTranslation()
-  const name = topic.name || t("专题")
+  const name = topic.name || 'Topic'
   // 没有背景图时按名字哈希出稳定的底色，和帖子列表里没头像的作者同一套规则
   let h = 0
   for (const c of name) h = (h * 31 + c.codePointAt(0)) % 360
@@ -94,7 +92,6 @@ function TopicPill({ topic, onClick }) {
  * 在 fit5032 的帖子里会推出一堆 NBA 帖，读者根本没在看那个板块。
  */
 function MorePosts({ channel, exceptId, topicId, topicName }) {
-  const { t } = useTranslation()
   const [rows, setRows] = useState(null)
   const official = channel === 'official'
 
@@ -131,7 +128,7 @@ function MorePosts({ channel, exceptId, topicId, topicName }) {
       title={(
         <span>
           <FireOutlined style={{ color: '#f5222d', marginRight: 6 }} />
-          {official ? t("更多新闻") : t("热门帖子")}
+          {official ? 'More news' : 'Hot posts'}
           {topicName && <span style={{ color: '#999', fontSize: 12, fontWeight: 400, marginLeft: 6 }}>· {topicName}</span>}
         </span>
       )}
@@ -140,7 +137,7 @@ function MorePosts({ channel, exceptId, topicId, topicName }) {
           to={official ? '/official' : (topicId ? `/news/topic/${topicId}` : '/news')}
           style={{ fontSize: 13, color: '#888' }}
         >
-          {t("更多")} <RightOutlined style={{ fontSize: 10 }} />
+          More <RightOutlined style={{ fontSize: 10 }} />
         </Link>
       )}
       loading={rows === null}
@@ -161,7 +158,7 @@ function MorePosts({ channel, exceptId, topicId, topicName }) {
               {i + 1}
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: i < 3 ? 600 : 400, ...clamp(1) }}>{p.title || t("(无标题)")}</div>
+              <div style={{ fontSize: 13, fontWeight: i < 3 ? 600 : 400, ...clamp(1) }}>{p.title || '(untitled)'}</div>
               <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
                 <LikeOutlined /> {p.goodNum ?? 0} · 💬 {p.commentNum ?? 0}
               </div>
@@ -169,14 +166,13 @@ function MorePosts({ channel, exceptId, topicId, topicName }) {
           </Link>
         ))
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无内容")} />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nothing here yet" />
       )}
     </Card>
   )
 }
 
 export default function NewsDetail() {
-  const { t } = useTranslation()
   const { newsId } = useParams()
   const [searchParams] = useSearchParams()
   // 从"我的消息"深链进来时带 userInformationId，请求详情即顺便标记该消息已读
@@ -207,7 +203,7 @@ export default function NewsDetail() {
 
   // 帖子点赞/点踩：登录才行；计数经 RabbitMQ 异步更新，这里按 delta 乐观更新
   const likePost = async (type) => {
-    if (!user) { message.info(t("请先登录")); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); navigate('/login'); return }
     const res = await (type === 'good' ? newsApi.goodPost(newsId) : newsApi.badPost(newsId))
     if (res?.result) {
       const d = res.delta || 0 // 后端给的计数增量（+1 点亮 / -1 取消）
@@ -218,7 +214,7 @@ export default function NewsDetail() {
       } : n))
       message.success(res.msg)
     } else {
-      message.error(res?.msg || t("操作失败"))
+      message.error(res?.msg || 'Action failed')
     }
   }
 
@@ -269,7 +265,7 @@ export default function NewsDetail() {
     try {
       const agg = await ratingApi.vote(itemId, score)
       setRatingItems((items) => items.map((it) => (it.itemId === itemId ? { ...it, ...agg } : it)))
-      message.success(t("已打分"))
+      message.success('Rated')
     } catch { /* 拦截器已弹错 */ }
   }
 
@@ -278,7 +274,7 @@ export default function NewsDetail() {
     try {
       await ratingApi.remove(itemId)
       setRatingItems((items) => items.filter((it) => it.itemId !== itemId))
-      message.success(t("已删除"))
+      message.success('Deleted')
     } catch { /* 拦截器已弹错 */ }
   }
 
@@ -294,14 +290,14 @@ export default function NewsDetail() {
     try {
       const agg = await pollApi.vote(itemId, optionIndex)
       setPollItems((items) => items.map((it) => (it.itemId === itemId ? { ...it, ...agg } : it)))
-      message.success(t("已投票"))
+      message.success('Voted')
     } catch { /* 拦截器已弹错 */ }
   }
   const deletePoll = async (itemId) => {
     try {
       await pollApi.remove(itemId)
       setPollItems((items) => items.filter((it) => it.itemId !== itemId))
-      message.success(t("已删除"))
+      message.success('Deleted')
     } catch { /* 拦截器已弹错 */ }
   }
   const openPoll = async (subject, options, content) => {
@@ -312,11 +308,11 @@ export default function NewsDetail() {
 
   // 收藏/取消收藏：登录后 toggle，接口回最新状态
   const toggleFavorite = async () => {
-    if (!user) { message.info(t("请先登录")); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); navigate('/login'); return }
     try {
       const res = await newsApi.favorite(newsId)
       setFav({ favorited: !!res.favorited, count: res.count ?? 0 })
-      message.success(res.favorited ? t("已收藏") : t("已取消收藏"))
+      message.success(res.favorited ? 'Saved' : 'Removed from favorites')
     } catch { /* 拦截器已提示 */ }
   }
 
@@ -337,17 +333,17 @@ export default function NewsDetail() {
   // 置顶/精华/封锁/隐藏（可并存）：成功就地更新；失败由 http 拦截器统一弹错（接口回统一 Result，成功时 data 为空，不能靠 res.result 判断）
   // 提示按「哪个操作 + 开还是关」给对应文案，不再笼统说"已更新"
   const FLAG_MSGS = {
-    top: ['已置顶', '已取消置顶'],
-    essence: ['已设为精华', '已取消精华'],
-    locked: ['已锁定，帖子转为只读', '已解除锁定'],
-    hidden: ['已隐藏，仅管理者可见', '已取消隐藏'],
+    top: ['Pinned', 'Unpinned'],
+    essence: ['Featured', 'Unfeatured'],
+    locked: ['Locked. The post is now read-only', 'Unlocked'],
+    hidden: ['Hidden. Only managers can see it', 'Unhidden'],
   }
   const toggleFlag = async (flag) => {
     const cur = news?.[flag] === '1'
     try {
       await newsApi.setFlag(newsId, flag, cur ? '0' : '1')
       setNews((n) => (n ? { ...n, [flag]: cur ? '0' : '1' } : n))
-      message.success(t((FLAG_MSGS[flag] || ['已更新', '已更新'])[cur ? 1 : 0]))
+      message.success((FLAG_MSGS[flag] || ['Updated', 'Updated'])[cur ? 1 : 0])
     } catch { /* 拦截器已弹错 */ }
   }
 
@@ -355,7 +351,7 @@ export default function NewsDetail() {
   const removePost = async () => {
     try {
       await newsApi.deletePost(newsId)
-      message.success(t("已删除"))
+      message.success('Deleted')
       navigate(-1)
     } catch { /* 拦截器已弹错 */ }
   }
@@ -364,7 +360,7 @@ export default function NewsDetail() {
   const flagChip = (flag, active, icon, label, color) => (
     <span
       onClick={() => toggleFlag(flag)}
-      title={active ? t("已{{label}}，点击取消", { label }) : t("设为{{label}}", { label })}
+      title={active ? `${label} is on. Click to undo` : `${label}`}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none',
         padding: '3px 12px', borderRadius: 7, fontSize: 13, fontWeight: 600,
@@ -404,12 +400,12 @@ export default function NewsDetail() {
                       onClick={() => navigate(`/news/edit/${newsId}`, { state: { composerBackground: location } })}
                       style={{ color: '#888', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                     >
-                      <FormOutlined /> {t("编辑")}
+                      <FormOutlined /> Edit
                     </a>
                   )}
                 </div>
                 <h1 style={{ fontSize: isMobile ? 20 : 26, fontWeight: 800, lineHeight: 1.4, margin: '14px 0 18px' }}>
-                  {news.title || t("(无标题)")}
+                  {news.title || '(untitled)'}
                 </h1>
 
                 {/* 作者署名行 */}
@@ -435,23 +431,24 @@ export default function NewsDetail() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       {news.authorId
                         ? <a onClick={() => navigate(`/users/${news.authorId}`)} style={{ fontWeight: 700, fontSize: 15, color: '#222' }}>{dn(news.authorId, news.author)}</a>
-                        : <span style={{ fontWeight: 700, fontSize: 15 }}>{dn(news.authorId, news.author) || t("匿名")}</span>}
+                        : <span style={{ fontWeight: 700, fontSize: 15 }}>{dn(news.authorId, news.author) || 'Anonymous'}</span>}
                       <OpBadge />
                       {news.authorSuperManager && <SuperAdminBadge />}
                       {topicOwnerIds?.includes(news.authorId) && <TopicOwnerBadge />}
                       <UserTitles titles={news.authorTitles} size="sm" />
-                      {official && <Tag color="blue" style={{ marginInlineEnd: 0 }}>{t("官方")}</Tag>}
-                      {news.top === '1' && <Tag color="red" style={{ marginInlineEnd: 0 }}>{t("置顶", { context: 'state' })}</Tag>}
-                      {news.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 0 }}>{t("精华", { context: 'state' })}</Tag>}
-                      {news.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 0 }}>{t("已锁定")}</Tag>}
-                      {news.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 0 }}>{t("已隐藏")}</Tag>}
+                      {official && <Tag color="blue" style={{ marginInlineEnd: 0 }}>Official</Tag>}
+                      {news.top === '1' && <Tag color="red" style={{ marginInlineEnd: 0 }}>Pinned</Tag>}
+                      {news.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 0 }}>Featured</Tag>}
+                      {news.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 0 }}>Locked</Tag>}
+                      {news.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 0 }}>Hidden</Tag>}
                     </div>
                     <div style={{ color: '#999', fontSize: 12, marginTop: 3 }}>
-                      {t('发布于 {{time}} · 浏览 {{views}} · {{viewers}} 人看过', { time: fmt(news.publishDate), views: news.viewCount ?? 0, viewers: news.viewerCount ?? 0 })}
+                      {/* 浏览次数和人数各自要分单复数（1 view / 2 readers），拆成两个短语再拼进整句 */}
+                      {`Posted ${fmt(news.publishDate)} · ${((news.viewCount ?? 0) === 1 ? `${news.viewCount ?? 0} view` : `${news.viewCount ?? 0} views`)} · ${((news.viewerCount ?? 0) === 1 ? `${news.viewerCount ?? 0} reader` : `${news.viewerCount ?? 0} readers`)}`}
                     </div>
                     {news.lastEditTime && (
                       <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>
-                        {t('最后由 {{name}} 于 {{time}} 编辑', { name: news.lastEditorName || t('管理员'), time: fmt(news.lastEditTime) })}
+                        {`Last edited by ${news.lastEditorName || 'Admin'} at ${fmt(news.lastEditTime)}`}
                       </div>
                     )}
                   </div>
@@ -460,14 +457,14 @@ export default function NewsDetail() {
                 {/* 管理工具条：owner / manager 可置顶、加精（可并存）；点亮=已应用，再点取消 */}
                 {canManage && (
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 16, padding: '6px 10px 6px 12px', background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, color: '#999' }}>{t("管理")}</span>
-                    {flagChip('top', news.top === '1', <PushpinFilled />, t("置顶"), '#f5222d')}
-                    {flagChip('essence', news.essence === '1', <StarFilled />, t("精华"), '#fa8c16')}
-                    {flagChip('locked', news.locked === '1', <LockOutlined />, news.locked === '1' ? t("已锁定") : t("封锁"), '#595959')}
-                    {flagChip('hidden', news.hidden === '1', <EyeInvisibleOutlined />, news.hidden === '1' ? t("已隐藏") : t("隐藏"), '#722ed1')}
-                    <Popconfirm title={t("确认删除该帖？此操作不可恢复")} okText={t("删除")} okButtonProps={{ danger: true }} onConfirm={removePost}>
+                    <span style={{ fontSize: 12, color: '#999' }}>Manage</span>
+                    {flagChip('top', news.top === '1', <PushpinFilled />, 'Pin', '#f5222d')}
+                    {flagChip('essence', news.essence === '1', <StarFilled />, 'Feature', '#fa8c16')}
+                    {flagChip('locked', news.locked === '1', <LockOutlined />, news.locked === '1' ? 'Locked' : 'Lock', '#595959')}
+                    {flagChip('hidden', news.hidden === '1', <EyeInvisibleOutlined />, news.hidden === '1' ? 'Hidden' : 'Hide', '#722ed1')}
+                    <Popconfirm title="Delete this post? This cannot be undone" okText="Delete" okButtonProps={{ danger: true }} onConfirm={removePost}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none', padding: '3px 12px', borderRadius: 7, fontSize: 13, fontWeight: 600, color: '#cf1322', background: '#fff', border: '1px solid #ffccc7' }}>
-                        <DeleteOutlined /> {t("删除")}
+                        <DeleteOutlined /> Delete
                       </span>
                     </Popconfirm>
                   </div>
@@ -542,10 +539,10 @@ export default function NewsDetail() {
                 {/* 顶/踩/收藏 */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 14, margin: '26px 0 8px', flexWrap: 'wrap' }}>
                   <Button shape="round" size="large" icon={<LikeOutlined />} onClick={() => likePost('good')}>
-                    {t("顶")} {news.goodNum ?? 0}
+                    Up {news.goodNum ?? 0}
                   </Button>
                   <Button shape="round" size="large" icon={<DislikeOutlined />} onClick={() => likePost('bad')}>
-                    {t("踩")} {news.badNum ?? 0}
+                    Down {news.badNum ?? 0}
                   </Button>
                   <Button
                     shape="round"
@@ -554,7 +551,7 @@ export default function NewsDetail() {
                     onClick={toggleFavorite}
                     style={fav.favorited ? { borderColor: '#faad14', color: '#d48806' } : undefined}
                   >
-                    {fav.favorited ? t("已收藏") : t("收藏")} {fav.count}
+                    {fav.favorited ? 'Saved' : 'Save'} {fav.count}
                   </Button>
                 </div>
 
@@ -582,7 +579,7 @@ export default function NewsDetail() {
                  走到这个分支就意味着正文卡不渲染——不补一个，人就被困在这儿了 */
               <>
                 <BackButton size={28} onClick={goBack} />
-                <Empty description={t("资讯不存在或已删除")} style={{ marginTop: 8 }} />
+                <Empty description="Post not found or deleted" style={{ marginTop: 8 }} />
               </>
             )}
           </Skeleton>
@@ -612,17 +609,17 @@ export default function NewsDetail() {
                     <span
                       onClick={() => news.authorId && navigate(`/users/${news.authorId}`)}
                       style={{ fontWeight: 700, fontSize: 15, cursor: news.authorId ? 'pointer' : undefined }}
-                    >{dn(news.authorId, news.author) || t("匿名")}</span>
+                    >{dn(news.authorId, news.author) || 'Anonymous'}</span>
                     {news.authorSuperManager && <SuperAdminBadge />}
                     <UserTitles titles={news.authorTitles} size="sm" />
                   </div>
-                  <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{official ? t("官方新闻作者") : t("论坛作者")}</div>
+                  <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{official ? 'News author' : 'Forum author'}</div>
                 </div>
               </div>
 
               {/* 作者数据小结：发帖 / 精华 / 置顶 / 获赞 */}
               <div style={{ display: 'flex', marginTop: 14, textAlign: 'center' }}>
-                {[[t("发帖", { context: 'noun' }), authorStats?.postCount], [t("精华", { context: 'state' }), authorStats?.essenceCount], [t("置顶", { context: 'state' }), authorStats?.topCount], [t("获赞"), authorStats?.likeCount]].map(([label, n]) => (
+                {[['Posts', authorStats?.postCount], ['Featured', authorStats?.essenceCount], ['Pinned', authorStats?.topCount], ['Likes', authorStats?.likeCount]].map(([label, n]) => (
                   <div key={label} style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 16, color: '#333' }}>{n ?? 0}</div>
                     <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{label}</div>
@@ -632,7 +629,7 @@ export default function NewsDetail() {
 
               {news.authorId && (
                 <Button block style={{ marginTop: 14 }} onClick={() => navigate(`/users/${news.authorId}`)}>
-                  {t("查看主页")}
+                  View profile
                 </Button>
               )}
             </Card>

@@ -40,7 +40,7 @@ export default function LolBind() {
     setSaving(true)
     lolApi.bind(v)
       .then(() => {
-        message.success('绑定成功，历史战绩正在后台拉取，几分钟后回来看')
+        message.success('Linked. Your match history is loading in the background; check back in a few minutes')
         setRiotId('')
         load()
       })
@@ -51,13 +51,13 @@ export default function LolBind() {
 
   const remove = (accountId) => {
     lolApi.unbind(accountId)
-      .then(() => { message.success('已解绑'); load() })
+      .then(() => { message.success('Unlinked'); load() })
       .catch(() => {})
   }
 
   return (
     <Card
-      title="绑定游戏账号"
+      title="Link a Game Account"
       style={{ borderRadius: 16 }}
       styles={{ body: { padding: isMobile ? 16 : 24 } }}
     >
@@ -65,15 +65,16 @@ export default function LolBind() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="绑定之后，你的对局会自动进榜"
+        message="Once linked, your games show up on the leaderboards automatically"
         description={
           <>
-            填游戏里的完整 Riot ID，形如 <Tag style={{ margin: '0 2px' }}>Epoch#3113</Tag>
-            （名字后面那串在客户端的个人资料里能看到）。
+            {/* 第三句原来写的是「**连同…删掉**」，JSX 不认 Markdown，页面上一直原样显示两对星号 */}
+            Enter your full Riot ID as it appears in the game, like <Tag style={{ margin: '0 2px' }}>Epoch#3113</Tag> (the
+            part after the name is shown on your profile in the client).
             <br />
-            绑定后会自动补最近 100 场，之后每几分钟同步一次新的对局，不用管它。
+            Your last 100 games are filled in after linking, and new games sync every few minutes. Nothing else to do.
             <br />
-            解绑会**连同你的对局记录一起删掉**，随时可以解。
+            Unlinking <b>deletes your match records along with it</b>. You can unlink at any time.
           </>
         }
       />
@@ -93,14 +94,14 @@ export default function LolBind() {
           onClick={add}
           style={{ height: 34, borderRadius: '0 17px 17px 0' }}
         >
-          绑定
+          Link
         </Button>
       </Space.Compact>
 
       {rows === null ? (
         <Spin style={{ display: 'block', margin: '30px auto' }} />
       ) : rows.length === 0 ? (
-        <Empty description="还没绑定任何账号" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Empty description="No accounts linked yet" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <List
           dataSource={rows}
@@ -109,13 +110,13 @@ export default function LolBind() {
               actions={[
                 <Popconfirm
                   key="del"
-                  title="解绑这个账号？"
-                  description="这个号的对局记录会一起删掉"
-                  okText="解绑"
-                  cancelText="算了"
+                  title="Unlink this account?"
+                  description="Its match records will be deleted too"
+                  okText="Unlink"
+                  cancelText="Never mind"
                   onConfirm={() => remove(a.accountId)}
                 >
-                  <Button type="link" danger size="small">解绑</Button>
+                  <Button type="link" danger size="small">Unlink</Button>
                 </Popconfirm>,
               ]}
             >
@@ -131,9 +132,9 @@ export default function LolBind() {
                     <Tag color="blue">{String(a.platform || '').toUpperCase()}</Tag>
                     {/* 回填没跑完时说一声，否则用户会以为「绑了但没数据」是坏了 */}
                     {a.backfilled === '1'
-                      ? <span style={{ color: '#999', fontSize: 12 }}>历史已补齐</span>
-                      : <Tag color="orange">正在补历史…</Tag>}
-                    {a.lastError && <Tag color="red">同步异常</Tag>}
+                      ? <span style={{ color: '#999', fontSize: 12 }}>History filled in</span>
+                      : <Tag color="orange">Filling in history…</Tag>}
+                    {a.lastError && <Tag color="red">Sync error</Tag>}
                   </Space>
                 }
               />

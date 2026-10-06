@@ -68,7 +68,7 @@ public class PlayerController extends BaseUtils {
             param.setSeasonNum(1);
         }
         List<DreamPlayerDto> rows = playerService.findAllPlayers(param);
-        return handlerSuccessPageJson(0, "成功", (int) new PageInfo<>(rows).getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) new PageInfo<>(rows).getTotal(), rows);
     }
 
     /** 单个球员生涯逐季数据 */
@@ -78,7 +78,7 @@ public class PlayerController extends BaseUtils {
         // 排序：白名单校验后再拼接，既真正生效又防注入（P3-1）
         param.setField(SortUtil.safeStatsOrderBy(param.getField(), param.getOrder()));
         List<PlayerStatsDto> rows = playerService.findPlayerStats(param);
-        return handlerSuccessPageJson(0, "成功", (int) new PageInfo<>(rows).getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) new PageInfo<>(rows).getTotal(), rows);
     }
 
     /** 全体球员某赛季数据榜 */
@@ -92,7 +92,7 @@ public class PlayerController extends BaseUtils {
             param.setSeasonNum(1);
         }
         List<PlayerStatsDto> rows = playerService.findPlayersSeasonStats(param);
-        return handlerSuccessPageJson(0, "成功", (int) new PageInfo<>(rows).getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) new PageInfo<>(rows).getTotal(), rows);
     }
 
     /**
@@ -112,7 +112,7 @@ public class PlayerController extends BaseUtils {
                 }
             }
         }
-        return new Result<>(0, "成功", teams);
+        return new Result<>(0, "OK", teams);
     }
 
     /**
@@ -148,17 +148,17 @@ public class PlayerController extends BaseUtils {
             if (Integer.valueOf(1).equals(r.getDpoyRank())) {
                 dpoy.add(r.getSeasonNum());
             }
-            if ("一阵".equals(r.getAllDbaTeam())) {
+            if ("1st Team".equals(r.getAllDbaTeam())) {
                 all1.add(r.getSeasonNum());
-            } else if ("二阵".equals(r.getAllDbaTeam())) {
+            } else if ("2nd Team".equals(r.getAllDbaTeam())) {
                 all2.add(r.getSeasonNum());
-            } else if ("三阵".equals(r.getAllDbaTeam())) {
+            } else if ("3rd Team".equals(r.getAllDbaTeam())) {
                 all3.add(r.getSeasonNum());
             }
             // All-Defensive only has 1st/2nd teams in reality — no 3rd
-            if ("一阵".equals(r.getAllDefTeam())) {
+            if ("1st Team".equals(r.getAllDefTeam())) {
                 def1.add(r.getSeasonNum());
-            } else if ("二阵".equals(r.getAllDefTeam())) {
+            } else if ("2nd Team".equals(r.getAllDefTeam())) {
                 def2.add(r.getSeasonNum());
             }
         }
@@ -179,13 +179,13 @@ public class PlayerController extends BaseUtils {
                     .add(award.get("season"));
         }
         data.put("champion", playerService.findPlayerChampionships(playerId));
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     /** 某赛季的特别奖得主（FMVP/最佳第六人/最快进步球员，公开） */
     @GetMapping("/seasonAwards")
     public Object seasonAwards(Integer seasonNum) {
-        return new Result<>(0, "成功", playerService.findSeasonAwards(seasonNum == null ? 1 : seasonNum));
+        return new Result<>(0, "OK", playerService.findSeasonAwards(seasonNum == null ? 1 : seasonNum));
     }
 
     /**
@@ -196,20 +196,20 @@ public class PlayerController extends BaseUtils {
      */
     @GetMapping("/draftClass")
     public Object draftClass(Integer year) {
-        return new Result<>(0, "成功", year == null
+        return new Result<>(0, "OK", year == null
                 ? new ArrayList<>() : playerMapper.findDraftClass(year));
     }
 
     /** 有选秀数据的年份，新的在前。给年份选择器用。 */
     @GetMapping("/draftYears")
     public Object draftYears() {
-        return new Result<>(0, "成功", playerMapper.findDraftYears());
+        return new Result<>(0, "OK", playerMapper.findDraftYears());
     }
 
     /** 单个球员季后赛逐季数据（含生涯汇总行，公开） */
     @GetMapping("/getPlayerPlayoffStatsList")
     public Object getPlayerPlayoffStatsList(String playerId) {
-        return new Result<>(0, "成功", playerService.findPlayerPlayoffStats(playerId));
+        return new Result<>(0, "OK", playerService.findPlayerPlayoffStats(playerId));
     }
 
     /** 全体球员某赛季季后赛数据榜（公开，排序走 P3-1 白名单） */
@@ -222,7 +222,7 @@ public class PlayerController extends BaseUtils {
             param.setSeasonNum(1);
         }
         List<PlayerStatsDto> rows = playerService.findPlayersPlayoffSeasonStats(param);
-        return handlerSuccessPageJson(0, "成功", (int) new PageInfo<>(rows).getTotal(), rows);
+        return handlerSuccessPageJson(0, "OK", (int) new PageInfo<>(rows).getTotal(), rows);
     }
 
     /** 某队某赛季单轮次的阵容数据（公开）。round 缺省为首轮。 */
@@ -235,58 +235,58 @@ public class PlayerController extends BaseUtils {
         if (param.getRound() == null) {
             param.setRound(1);
         }
-        return new Result<>(0, "成功", playerService.findPlayersPlayoffRoundStats(param));
+        return new Result<>(0, "OK", playerService.findPlayersPlayoffRoundStats(param));
     }
 
     /** 某队某赛季打过哪几轮（公开），前端据此渲染轮次选项。 */
     @GetMapping("/teamPlayoffRounds")
     public Object teamPlayoffRounds(Integer seasonNum, String teamCode) {
-        return new Result<>(0, "成功",
+        return new Result<>(0, "OK",
                 playerService.findTeamPlayoffRounds(seasonNum, StringUtils.trimToEmpty(teamCode)));
     }
 
     /** 单个球员某赛季的逐场数据（公开）。seasonType：2 常规赛 / 3 季后赛，缺省季后赛。 */
     @GetMapping("/playerGameLog")
     public Object playerGameLog(String playerId, Integer seasonNum, Integer seasonType) {
-        return new Result<>(0, "成功", playerService.findPlayerGameLog(
+        return new Result<>(0, "OK", playerService.findPlayerGameLog(
                 StringUtils.trimToEmpty(playerId), seasonNum, seasonType == null ? 3 : seasonType));
     }
 
     /** 生涯总数 + 历史排名（公开）。排名池是 1947 年至今的全联盟，不是本库的 50 季。 */
     @GetMapping("/careerTotals")
     public Object careerTotals(String playerId) {
-        return new Result<>(0, "成功", playerService.findCareerTotals(StringUtils.trimToEmpty(playerId)));
+        return new Result<>(0, "OK", playerService.findCareerTotals(StringUtils.trimToEmpty(playerId)));
     }
 
     /** 某项生涯总数的历史总榜（公开）：1947 年至今全联盟，含本库没有的老球员。 */
     @GetMapping("/allTimeBoard")
     public Object allTimeBoard(String field, Integer limit) {
-        return new Result<>(0, "成功", playerService.findAllTimeBoard(StringUtils.trimToEmpty(field), limit));
+        return new Result<>(0, "OK", playerService.findAllTimeBoard(StringUtils.trimToEmpty(field), limit));
     }
 
     /** 历史荣誉（公开）：某个奖项/统计王的逐季获奖者，1946-47 至今。 */
     @GetMapping("/awardHistory")
     public Object awardHistory(String award) {
-        return new Result<>(0, "成功", playerService.findAwardHistory(StringUtils.trimToEmpty(award)));
+        return new Result<>(0, "OK", playerService.findAwardHistory(StringUtils.trimToEmpty(award)));
     }
 
     /** 历史球员最小档案（公开）：本库没有资料卡的人，按 B-R id 只给生涯总数。 */
     @GetMapping("/historyPlayer")
     public Object historyPlayer(String brId) {
-        return new Result<>(0, "成功", playerService.findCareerTotalsByBrId(StringUtils.trimToEmpty(brId)));
+        return new Result<>(0, "OK", playerService.findCareerTotalsByBrId(StringUtils.trimToEmpty(brId)));
     }
 
     /** 该球员有逐场数据的赛季（公开），空数组表示这一块还没回补到他。 */
     @GetMapping("/playerGameLogSeasons")
     public Object playerGameLogSeasons(String playerId) {
-        return new Result<>(0, "成功",
+        return new Result<>(0, "OK",
                 playerService.findPlayerGameLogSeasons(StringUtils.trimToEmpty(playerId)));
     }
 
     /** 每日赛场：某一天的全部比赛（公开）。date 形如 2026-06-13。 */
     @GetMapping("/gamesByDate")
     public Object gamesByDate(String date) {
-        return new Result<>(0, "成功", playerService.findGamesByDate(StringUtils.trimToEmpty(date)));
+        return new Result<>(0, "OK", playerService.findGamesByDate(StringUtils.trimToEmpty(date)));
     }
 
     /**
@@ -295,14 +295,14 @@ public class PlayerController extends BaseUtils {
      */
     @GetMapping("/adjacentGameDates")
     public Object adjacentGameDates(String date) {
-        return new Result<>(0, "成功",
+        return new Result<>(0, "OK",
                 playerService.findAdjacentGameDates(StringUtils.trimToEmpty(date)));
     }
 
     /** 有比赛的最后一天（公开）。每日赛场默认落在这天，而不是今天。 */
     @GetMapping("/latestGameDate")
     public Object latestGameDate() {
-        return new Result<>(0, "成功", playerService.findLatestGameDate());
+        return new Result<>(0, "OK", playerService.findLatestGameDate());
     }
 
     /**
@@ -315,20 +315,20 @@ public class PlayerController extends BaseUtils {
     public Object gameDates(String month) {
         String m = StringUtils.trimToEmpty(month);
         if (!m.matches("\\d{4}-\\d{2}")) {
-            return new Result<>(1, "月份格式应为 yyyy-MM", null);
+            return new Result<>(1, "The month must be in yyyy-MM format", null);
         }
         int y = Integer.parseInt(m.substring(0, 4));
         int mo = Integer.parseInt(m.substring(5));
         String begin = String.format("%04d-%02d-01", y, mo);
         String end = mo == 12 ? String.format("%04d-01-01", y + 1) : String.format("%04d-%02d-01", y, mo + 1);
-        return new Result<>(0, "成功", playerService.findGameDates(begin, end));
+        return new Result<>(0, "OK", playerService.findGameDates(begin, end));
     }
 
     /** 单场详情（公开）：比赛信息 + 每节得分 + 两队球员数据 + 两队合计。 */
     @GetMapping("/gameDetail")
     public Object gameDetail(String gameId) {
         Map<String, Object> d = playerService.findGameDetail(StringUtils.trimToEmpty(gameId));
-        return d == null ? new Result<>(1, "没有这场比赛", null) : new Result<>(0, "成功", d);
+        return d == null ? new Result<>(1, "Game not found", null) : new Result<>(0, "OK", d);
     }
 
     // ===== 写接口：superManager 专属（P2-5），多步写已下沉为 @Transactional 服务方法（P3-2） =====
@@ -337,42 +337,42 @@ public class PlayerController extends BaseUtils {
     @PostMapping("/insertAndSavePlayer")
     public Object insertAndSavePlayer(String data) {
         playerService.insertPlayersWithBlankRow(JSON.parseArray(data, DreamPlayer.class));
-        return handlerResultJson(true, "操作成功！");
+        return handlerResultJson(true, "Done");
     }
 
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/savePlayer")
     public Object savePlayer(String data) {
         playerService.savePlayers(JSON.parseArray(data, DreamPlayer.class));
-        return handlerResultJson(true, "操作成功！");
+        return handlerResultJson(true, "Done");
     }
 
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/insertAndSavePlayerStats")
     public Object insertAndSavePlayerStats(String data, String playerId) {
         playerStatsService.insertStatsWithBlankRow(JSON.parseArray(data, PlayerStats.class), playerId);
-        return handlerResultJson(true, "操作成功！");
+        return handlerResultJson(true, "Done");
     }
 
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/savePlayerStats")
     public Object savePlayerStats(String data, String playerId) {
         playerStatsService.saveStatsAndRecomputeSummary(JSON.parseArray(data, PlayerStats.class), playerId);
-        return handlerResultJson(true, "操作成功！");
+        return handlerResultJson(true, "Done");
     }
 
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/deletePlayer")
     public Object deletePlayer(String playerId) {
         playerService.deletePlayerCascade(playerId);
-        return handlerResultJson(true, "删除成功！");
+        return handlerResultJson(true, "Deleted");
     }
 
     @RequiresRole(Role.SUPER_MANAGER)
     @PostMapping("/deletePlayerStats")
     public Object deletePlayerStats(String statsId, String playerId) {
         playerStatsService.deleteStatsAndRecomputeSummary(statsId, playerId);
-        return handlerResultJson(true, "删除成功！");
+        return handlerResultJson(true, "Deleted");
     }
 
     /**
@@ -384,7 +384,7 @@ public class PlayerController extends BaseUtils {
     public Object uploadPhoto(MultipartFile file, String playerId) throws IOException {
         DreamPlayer player = playerService.getById(StringUtils.trimToEmpty(playerId));
         if (player == null) {
-            return new Result<>(1, "球员不存在", null);
+            return new Result<>(1, "Player not found", null);
         }
         String folderKey = "player-" + player.getPlayerId();
         FileUtils.deleteUploadFolder(uploadPath, folderKey); // one photo per player — drop the old one
@@ -392,7 +392,7 @@ public class PlayerController extends BaseUtils {
         playerService.update(new UpdateWrapper<DreamPlayer>().eq("PLAYER_ID", player.getPlayerId()).set("PHOTO", url));
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);
-        return new Result<>(0, "照片已更新", data);
+        return new Result<>(0, "Photo updated", data);
     }
 
     /** 移除球员照片（清空 PHOTO 并删除该球员的上传目录） */
@@ -401,10 +401,10 @@ public class PlayerController extends BaseUtils {
     public Object deletePhoto(String playerId) {
         DreamPlayer player = playerService.getById(StringUtils.trimToEmpty(playerId));
         if (player == null) {
-            return new Result<>(1, "球员不存在", null);
+            return new Result<>(1, "Player not found", null);
         }
         FileUtils.deleteUploadFolder(uploadPath, "player-" + player.getPlayerId());
         playerService.update(new UpdateWrapper<DreamPlayer>().eq("PLAYER_ID", player.getPlayerId()).set("PHOTO", null));
-        return new Result<>(0, "照片已移除", null);
+        return new Result<>(0, "Photo removed", null);
     }
 }

@@ -5,8 +5,6 @@ import '@ant-design/v5-patch-for-react-19'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-// 必须在任何组件调用 useTranslation 之前初始化（副作用导入）
-import './i18n'
 import LocaleProvider from './components/LocaleProvider'
 import 'antd/dist/reset.css'
 import './index.css'
@@ -17,7 +15,7 @@ import { isNative } from './config/origin'
 
 /**
  * 应用入口，自外向内包了三层"环境"：
- * - ConfigProvider：antd 主题 + 语言包（跟着 i18n 的当前语言走，见 LocaleProvider）。
+ * - ConfigProvider：antd 主题 + 英文语言包（见 LocaleProvider）。
  * - BrowserRouter：前端路由（基于浏览器 History）。
  * - AuthProvider：全局登录态（启动即拉 /user/current）。
  */

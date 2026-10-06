@@ -1,10 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Avatar } from 'antd'
-import { Boot, createEditor, createToolbar } from '@wangeditor/editor'
+import { Boot, createEditor, createToolbar, i18nChangeLanguage } from '@wangeditor/editor'
 import mentionModule from '@wangeditor/plugin-mention'
 import '@wangeditor/editor/dist/css/style.css'
-import { useTranslation } from 'react-i18next'
 
 /**
  * wangEditor 富文本编辑器的轻封装。
@@ -16,6 +15,11 @@ import { useTranslation } from 'react-i18next'
  * mention 节点，序列化成 <span data-w-e-type="mention" data-info="{id}">@名字</span>，
  * id 就藏在 data-info 里——后端据此发通知，详情页据此渲染成可点链接。
  */
+
+// 编辑器自己的界面文字（工具栏的悬停提示、「更多」菜单、插入链接和图片的弹窗）默认是中文，
+// 网站只有英文，在创建任何编辑器之前切成英文。wangEditor 用的是它依赖里自带的一份 i18next，
+// 和网站自己的代码没有关系；自带 'en' 和 'zh-CN' 两套文字。
+i18nChangeLanguage('en')
 
 // mention 插件必须在"创建任何编辑器之前、且只注册一次"（官方要求）。
 // 放模块顶层注册；用 window 标记防 Vite HMR 重新求值本模块时重复注册报错。
@@ -43,10 +47,9 @@ const avatarColor = (name) => {
  * 「戴尔·库里 / 斯蒂芬·库里」这种同姓的人光看中文名分不出谁是谁）。
  */
 function MentionPanel({ top, left, search, onPick, onClose, placeholder: placeholderProp, emptyText: emptyTextProp }) {
-  const { t } = useTranslation()
   // 默认文案不能写在参数默认值里：那一行在 hook 之前执行，t 还不存在
-  const placeholder = placeholderProp ?? t('搜索用户…')
-  const emptyText = emptyTextProp ?? t('无匹配用户')
+  const placeholder = placeholderProp ?? 'Search users…'
+  const emptyText = emptyTextProp ?? 'No matching users'
   const [kw, setKw] = useState('')
   const [opts, setOpts] = useState([])
   const [active, setActive] = useState(0)
@@ -143,9 +146,8 @@ const RichTextEditor = forwardRef(function RichTextEditor({
   value, onChange, uploadImage, mentionSearch, mentionHint, placeholder: placeholderProp,
   bare = false, minHeight = 220,
 }, ref) {
-  const { t } = useTranslation()
   // 同上：默认占位语等 hook 之后再取。它只在创建编辑器那一刻用一次，切语言不会跟着变
-  const placeholder = placeholderProp ?? t('请输入正文…')
+  const placeholder = placeholderProp ?? 'Write your post…'
   const editorRef = useRef(null)
   const toolbarElRef = useRef(null)
   const editorElRef = useRef(null)

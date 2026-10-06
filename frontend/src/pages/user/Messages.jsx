@@ -12,8 +12,6 @@ import UserTitles from '../../components/UserTitles'
 import { SuperAdminBadge } from '../../components/RoleBadges'
 import { humanSize } from '../../components/CommentComposer'
 import { assetUrl } from '../../config/origin'
-import { useTranslation } from 'react-i18next'
-import i18n from '../../i18n'
 
 // 附件：图片走 image/*，文件走常见文档白名单；单条最多 9 个
 const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.zip,.rar,.7z'
@@ -37,7 +35,6 @@ const avatarColor = (name) => {
 }
 
 function UserAvatar({ name, src, size, online }) {
-  const { t } = useTranslation()
   const av = src ? (
     <Avatar size={size} src={src} style={{ flexShrink: 0, display: 'block' }} />
   ) : (
@@ -51,7 +48,7 @@ function UserAvatar({ name, src, size, online }) {
     <span style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}>
       {av}
       <span
-        title={t("在线")}
+        title="Online"
         style={{
           position: 'absolute', right: 0, bottom: 0, width: d, height: d, borderRadius: '50%',
           background: '#52c41a', border: '2px solid #fff', boxSizing: 'border-box',
@@ -72,15 +69,14 @@ const convTime = (v) => {
 
 // 按天分割的标签：今天 / 昨天 / M月D日 / YYYY年M月D日
 const dayLabel = (d) => {
-  if (d.isSame(dayjs(), 'day')) return i18n.t("今天")
-  if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return i18n.t("昨天")
-  if (d.isSame(dayjs(), 'year')) return d.format(i18n.t("M月D日"))
-  return d.format(i18n.t("YYYY年M月D日"))
+  if (d.isSame(dayjs(), 'day')) return 'Today'
+  if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday'
+  if (d.isSame(dayjs(), 'year')) return d.format('MMM D')
+  return d.format('MMM D, YYYY')
 }
 
 // 气泡里的附件：图片内联缩略（可点开预览）+ 文件下载卡，按发送方向对齐
 function MessageAttachments({ attachmentsJson, mine }) {
-  const { t } = useTranslation()
   let atts = []
   try { atts = JSON.parse(attachmentsJson || '[]') } catch { atts = [] }
   atts = atts.filter((a) => a && typeof a.url === 'string' && /^(https?:\/\/|\/)/.test(a.url))
@@ -110,7 +106,7 @@ function MessageAttachments({ attachmentsJson, mine }) {
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: '#fff', border: '1px solid #eef0f2', borderRadius: 12, color: 'inherit', maxWidth: 260, boxShadow: '0 1px 4px rgba(0,0,0,.05)' }}
         >
           <FileOutlined style={{ color: '#fa541c', fontSize: 18 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || t("文件")}</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'File'}</span>
           {a.size != null && <span style={{ fontSize: 11, color: '#999', flexShrink: 0 }}>{humanSize(a.size)}</span>}
         </a>
       ))}
@@ -119,7 +115,6 @@ function MessageAttachments({ attachmentsJson, mine }) {
 }
 
 export default function Messages() {
-  const { t } = useTranslation()
   const { user, dn } = useAuth()
   const screens = Grid.useBreakpoint()
   const isMobile = !screens.md // < 768px：会话列表/聊天窗单栏切换，不并排
@@ -307,7 +302,7 @@ export default function Messages() {
 
   // 附件上传：走 antd Upload 的 customRequest，成功后进 attachments 待发送队列
   const doUpload = async ({ file, onSuccess, onError }) => {
-    if (attachments.length >= MAX_ATTACH) { message.warning(t("最多 {{MAX_ATTACH}} 个附件", { MAX_ATTACH })); onError?.(new Error('max')); return }
+    if (attachments.length >= MAX_ATTACH) { message.warning(`At most ${MAX_ATTACH} attachments`); onError?.(new Error('max')); return }
     setUploading(true)
     try {
       // 手机拍的照片动辄三四 MB，上传前先缩到长边 1600（非图片原样返回）
@@ -318,7 +313,7 @@ export default function Messages() {
         setAttachments((a) => [...a, { type: isImage ? 'image' : 'file', url, name: file.name, size: packed.size }])
         onSuccess?.()
       } else {
-        onError?.(new Error(t("上传失败")))
+        onError?.(new Error('Upload failed'))
       }
     } catch (err) {
       onError?.(err) // 具体错误已由 http 拦截器弹出
@@ -386,8 +381,8 @@ export default function Messages() {
     const active = c.peerId === peerId
     const unread = c.unread > 0
     const preview = c.lastRecalled
-      ? t("[消息已撤回]")
-      : `${c.lastFromMe ? t("我: ") : ''}${c.lastContent || t("[图片/附件]")}`
+      ? '[Message recalled]'
+      : `${c.lastFromMe ? 'Me: ' : ''}${c.lastContent || '[Image/attachment]'}`
     return (
       <div
         key={c.peerId}
@@ -405,7 +400,7 @@ export default function Messages() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ fontWeight: unread ? 700 : 600, fontSize: 14, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#222' }}>
-              {dn(c.peerId, c.peerNickname) || t("用户")}
+              {dn(c.peerId, c.peerNickname) || 'User'}
             </span>
             <span style={{ fontSize: 11, color: unread ? BRAND : '#bbb', flexShrink: 0, fontWeight: unread ? 600 : 400 }}>{convTime(c.lastTime)}</span>
           </div>
@@ -414,12 +409,12 @@ export default function Messages() {
           </div>
         </div>
         <Popconfirm
-          title={t("删除会话？")}
-          description={t("只在你这边消失，不影响对方")}
+          title="Delete this conversation?"
+          description="Removed on your side only"
           onConfirm={(e) => { e?.stopPropagation?.(); deleteConv(c.peerId) }}
           onCancel={(e) => e?.stopPropagation?.()}
-          okText={t("删除")}
-          cancelText={t("取消")}
+          okText="Delete"
+          cancelText="Cancel"
         >
           <DeleteOutlined
             className="pm-conv-del"
@@ -455,7 +450,7 @@ export default function Messages() {
       if (m.recalled === '1') {
         out.push(
           <div key={m.pmId} style={{ textAlign: 'center', fontSize: 12, color: '#b5b8bd', margin: '10px 0' }}>
-            {mine ? t('你撤回了一条消息') : t('对方撤回了一条消息')}
+            {mine ? 'You recalled a message' : 'They recalled a message'}
           </div>,
         )
         return
@@ -493,7 +488,7 @@ export default function Messages() {
             </div>
             {mine && canRecall && (
               <a className="pm-recall" style={{ fontSize: 11, color: '#bbb', opacity: 0, transition: 'opacity .15s', flexShrink: 0, alignSelf: 'center' }} onClick={() => recall(m.pmId)}>
-                {t("撤回")}
+                Recall
               </a>
             )}
           </div>
@@ -505,7 +500,7 @@ export default function Messages() {
       )
     })
     return out
-  }, [msgs, user.userId, user.userNickname, user.avatar, activePeer, t])
+  }, [msgs, user.userId, user.userNickname, user.avatar, activePeer])
 
   return (
     <Card
@@ -544,9 +539,9 @@ export default function Messages() {
       }}>
         <div style={{ padding: isMobile ? '12px 14px 10px' : '16px 18px 12px', borderBottom: '1px solid #f5f5f5', display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>{t("私信")}</div>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>Messages</div>
             <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-              {convs?.length ? t("{{length}} 个会话 · ", { length: convs.length }) : ''}{t("到对方个人空间点「发私信」发起新会话")}
+              {convs?.length ? ((convs.length) === 1 ? `${convs.length} conversation · ` : `${convs.length} conversations · `) : ''}Open someone's profile and tap "Message" to start a new one
             </div>
           </div>
         </div>
@@ -558,7 +553,7 @@ export default function Messages() {
           ) : (
             <div style={{ textAlign: 'center', color: '#bbb', marginTop: 70, padding: '0 20px' }}>
               <div style={{ fontSize: 40 }}>💬</div>
-              <div style={{ fontSize: 13, marginTop: 10, lineHeight: 1.7 }}>{t("还没有会话")}<br />{t("想和谁聊，去 TA 的个人空间点「发私信」")}</div>
+              <div style={{ fontSize: 13, marginTop: 10, lineHeight: 1.7 }}>No conversations yet<br />Open someone's profile and tap "Message" to start chatting</div>
             </div>
           )}
         </div>
@@ -590,7 +585,7 @@ export default function Messages() {
         {!peerId ? (
           <div style={{ margin: 'auto', textAlign: 'center', color: '#bbb' }}>
             <div style={{ fontSize: 52 }}>✉️</div>
-            <div style={{ fontSize: 14, marginTop: 12 }}>{t("选择左侧会话开始聊天")}</div>
+            <div style={{ fontSize: 14, marginTop: 12 }}>Pick a conversation on the left</div>
           </div>
         ) : (
           <>
@@ -611,17 +606,17 @@ export default function Messages() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
                   <Link to={`/users/${peerId}`} style={{ fontWeight: 700, fontSize: 15, color: '#222' }}>
-                    {dn(activePeer?.peerId, activePeer?.peerNickname) || t("用户")}
+                    {dn(activePeer?.peerId, activePeer?.peerNickname) || 'User'}
                   </Link>
                   {activePeer?.peerSuperManager && <SuperAdminBadge />}
                   <UserTitles titles={activePeer?.peerTitles} size="sm" />
                 </div>
                 <div style={{ fontSize: 11, color: onlineMap[peerId] ? '#52c41a' : '#aaa', marginTop: 1 }}>
-                  {onlineMap[peerId] ? t("在线") : t("离线")}
+                  {onlineMap[peerId] ? 'Online' : 'Offline'}
                 </div>
               </div>
               <Link to={`/users/${peerId}`} style={{ fontSize: 12, color: '#999', flexShrink: 0 }}>
-                {t("查看主页")} <RightOutlined style={{ fontSize: 9 }} />
+                View profile <RightOutlined style={{ fontSize: 9 }} />
               </Link>
             </div>
 
@@ -634,13 +629,13 @@ export default function Messages() {
                   {hasMore && (
                     <div style={{ textAlign: 'center', margin: '6px 0 2px' }}>
                       <Button size="small" type="text" loading={loadingOlder} onClick={loadOlder} style={{ color: '#999', fontSize: 12 }}>
-                        {t("加载更早的消息")}
+                        Load earlier messages
                       </Button>
                     </div>
                   )}
                   {msgs.length === 0 && (
                     <div style={{ textAlign: 'center', color: '#bbb', fontSize: 13, marginTop: 80 }}>
-                      {t("还没有消息，打个招呼吧 👋")}
+                      No messages yet. Say hi 👋
                     </div>
                   )}
                   {bubbles}
@@ -672,17 +667,17 @@ export default function Messages() {
                       />
                     </div>
                   ))}
-                  {uploading && <span style={{ fontSize: 12, color: '#999', alignSelf: 'center' }}>{t("上传中…")}</span>}
+                  {uploading && <span style={{ fontSize: 12, color: '#999', alignSelf: 'center' }}>Uploading…</span>}
                 </div>
               )}
               <div ref={inputWrapRef} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 6 }}>
                   <EmojiPicker onPick={insertEmoji} />
                   <Upload accept="image/*" multiple showUploadList={false} customRequest={doUpload}>
-                    <Tooltip title={t("图片")}><PictureOutlined style={{ fontSize: 18, color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
+                    <Tooltip title="Image"><PictureOutlined style={{ fontSize: 18, color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
                   </Upload>
                   <Upload accept={FILE_ACCEPT} multiple showUploadList={false} customRequest={doUpload}>
-                    <Tooltip title={t("文件")}><FileOutlined style={{ fontSize: 18, color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
+                    <Tooltip title="File"><FileOutlined style={{ fontSize: 18, color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
                   </Upload>
                 </div>
                 <Input.TextArea
@@ -694,7 +689,7 @@ export default function Messages() {
                       send()
                     }
                   }}
-                  placeholder={t("发消息…")}
+                  placeholder="Type a message…"
                   maxLength={500}
                   autoSize={{ minRows: 1, maxRows: 5 }}
                   variant="filled"

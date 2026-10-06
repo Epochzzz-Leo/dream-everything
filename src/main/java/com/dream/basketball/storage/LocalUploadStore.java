@@ -40,7 +40,7 @@ public class LocalUploadStore implements UploadStore {
         File target = new File(root, key);
         File dir = target.getParentFile();
         if (dir != null && !dir.exists() && !dir.mkdirs()) {
-            throw new IOException("无法创建上传目录");
+            throw new IOException("Couldn't create the upload directory");
         }
         if (!target.exists()) {
             Files.write(target.toPath(), bytes);

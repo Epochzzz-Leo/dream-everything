@@ -214,9 +214,9 @@ public class WebPushSender {
         if (StringUtils.isBlank(receiverId)) {
             return;
         }
-        String who = StringUtils.defaultIfBlank(senderName, "有人");
+        String who = StringUtils.defaultIfBlank(senderName, "Someone");
         // 纯附件的私信 content 是空串，通知里给个说得通的占位，别显示成空白
-        String text = StringUtils.defaultIfBlank(content, "[附件]");
+        String text = StringUtils.defaultIfBlank(content, "[Attachment]");
 
         JSONObject o = new JSONObject();
         o.put("msgType", "pm");
@@ -226,7 +226,7 @@ public class WebPushSender {
         final String payload = push == null ? null : o.toJSONString();
 
         final boolean toFcm = fcm.isEnabled();
-        final String title = who + " 给你发了一条私信";
+        final String title = who + " sent you a message";
         final String body = NotificationText.stripHtml(text);
         final String url = "/messages?peerId=" + senderId;
         try {
@@ -256,12 +256,15 @@ public class WebPushSender {
         if (push != null) {
             JSONObject o = new JSONObject();
             o.put("msgType", "test");
-            o.put("operatorName", "测试");
+            o.put("operatorName", "Test");
             ok += sendToUser(userId, o.toJSONString());
         }
         // 两条路都试：诊断入口就该把两边的实际结果加在一起报，
         // 只报一边会让"App 收得到、网页收不到"这类问题看上去像全好
-        ok += fcm.sendToUser(userId, "测试 推送已经通了", "收到这条就说明整条链路是通的", "/me");
+        UserInformation test = new UserInformation();
+        test.setMsgType("test");
+        test.setOperatorName("Test");
+        ok += fcm.sendToUser(userId, NotificationText.titleOf(test), NotificationText.bodyOf(test), "/me");
         return ok;
     }
 

@@ -4,24 +4,23 @@ import { Button, Popconfirm, message } from 'antd'
 import { useParams, Link } from 'react-router-dom'
 import { playerApi } from '../../api/player'
 import { CAREER_SEASON } from './rankConfig'
-import { useTranslation } from 'react-i18next'
 
 // [字段, 列名, 类型]：数字用 digit(InputNumber)，文本用 text
 const STAT_FIELDS = [
-  ['season', '赛季', 'digit'], ['seasonNum', '序号', 'digit'],
-  ['playerTeam', '球队', 'text'], ['playerPosition', '位置', 'text'],
-  ['playerAppearance', '出场', 'digit'], ['playerFrAppearance', '先发', 'digit'], ['playerSrAppearance', '替补', 'digit'],
-  ['playingTime', '时间', 'digit'], ['playerAvgScore', '得分', 'digit'],
-  ['playerAvgReb', '篮板', 'digit'], ['playerAvgOffReb', '前场篮板', 'digit'], ['playerAvgDefReb', '后场篮板', 'digit'],
-  ['playerAvgAss', '助攻', 'digit'],
-  ['playerAvgFgm', '投篮命中', 'digit'], ['playerAvgFga', '投篮出手', 'digit'], ['playerAccuracy', '投篮%', 'digit'],
-  ['playerAvgTpm', '三分命中', 'digit'], ['playerAvgTpa', '三分出手', 'digit'], ['playerThreeAccuracy', '三分%', 'digit'],
-  ['playerAvgFtm', '罚球命中', 'digit'], ['playerAvgFta', '罚球出手', 'digit'], ['playerFreethrowAccuracy', '罚球%', 'digit'],
-  ['playerAvgBlock', '盖帽', 'digit'], ['playerAvgSteal', '抢断', 'digit'], ['playerAvgTurnover', '失误', 'digit'],
+  ['season', 'Season', 'digit'], ['seasonNum', '#', 'digit'],
+  ['playerTeam', 'Team', 'text'], ['playerPosition', 'Pos', 'text'],
+  ['playerAppearance', 'GP', 'digit'], ['playerFrAppearance', 'GS', 'digit'], ['playerSrAppearance', 'Bench', 'digit'],
+  ['playingTime', 'MIN', 'digit'], ['playerAvgScore', 'PTS', 'digit'],
+  ['playerAvgReb', 'REB', 'digit'], ['playerAvgOffReb', 'ORB', 'digit'], ['playerAvgDefReb', 'DRB', 'digit'],
+  ['playerAvgAss', 'AST', 'digit'],
+  ['playerAvgFgm', 'FGM', 'digit'], ['playerAvgFga', 'FGA', 'digit'], ['playerAccuracy', 'FG%', 'digit'],
+  ['playerAvgTpm', '3PM', 'digit'], ['playerAvgTpa', '3PA', 'digit'], ['playerThreeAccuracy', '3P%', 'digit'],
+  ['playerAvgFtm', 'FTM', 'digit'], ['playerAvgFta', 'FTA', 'digit'], ['playerFreethrowAccuracy', 'FT%', 'digit'],
+  ['playerAvgBlock', 'BLK', 'digit'], ['playerAvgSteal', 'STL', 'digit'], ['playerAvgTurnover', 'TOV', 'digit'],
   ['playerPer', 'PER', 'digit'], ['playerPie', 'PIE', 'digit'], ['playerWs', 'WS', 'digit'],
-  ['playerOffEff', '进攻效率', 'digit'], ['playerDefEff', '防守效率', 'digit'], ['playerNetEff', '净效率', 'digit'], ['playerAvgPn', '正负值', 'digit'],
+  ['playerOffEff', 'ORtg', 'digit'], ['playerDefEff', 'DRtg', 'digit'], ['playerNetEff', 'Net Rtg', 'digit'], ['playerAvgPn', '+/-', 'digit'],
   ['mvpRank', 'MVP', 'digit'], ['dpoyRank', 'DPOY', 'digit'],
-  ['allDbaTeam', '最佳阵容', 'text'], ['allDefTeam', '最佳防守', 'text'],
+  ['allDbaTeam', 'All-NBA', 'text'], ['allDefTeam', 'All-Def', 'text'],
 ]
 
 const SUMMARY_SEASON = CAREER_SEASON // 生涯汇总行（season/seasonNum=CAREER_SEASON），由后端重算，不可删
@@ -33,7 +32,6 @@ const isTemp = (id) => typeof id === 'string' && id.startsWith('new-')
  * savePlayerStats 对空 statsId 会补 UUID 再保存，并重算生涯汇总行(seasonNum=99)。
  */
 export default function PlayerStatsManage() {
-  const { t } = useTranslation()
   const { playerId } = useParams()
   const [rows, setRows] = useState([])
   const [editableKeys, setEditableKeys] = useState([])
@@ -67,7 +65,7 @@ export default function PlayerStatsManage() {
     // 临时行清空 statsId（让后端补 UUID）并带上 playerId
     const payload = rows.map((r) => (isTemp(r.statsId) ? { ...r, statsId: '', playerId } : r))
     await playerApi.savePlayerStats(payload, playerId)
-    message.success(t("已保存，生涯汇总已重算"))
+    message.success('Saved; career totals recalculated')
     reload()
   }
 
@@ -78,20 +76,20 @@ export default function PlayerStatsManage() {
       return
     }
     await playerApi.deletePlayerStats(row.statsId, playerId)
-    message.success(t("已删除，生涯汇总已重算"))
+    message.success('Deleted; career totals recalculated')
     reload()
   }
 
   const columns = [
-    ...STAT_FIELDS.map(([dataIndex, title, valueType]) => ({ title: t(title), dataIndex, valueType, width: 92 })),
+    ...STAT_FIELDS.map(([dataIndex, title, valueType]) => ({ title: title, dataIndex, valueType, width: 92 })),
     {
-      title: t("操作"), valueType: 'option', fixed: 'right', width: 80, editable: false,
+      title: 'Actions', valueType: 'option', fixed: 'right', width: 80, editable: false,
       render: (_, row) =>
         row.seasonNum === SUMMARY_SEASON
-          ? [<span key="s" style={{ color: '#999' }}>{t("汇总行")}</span>]
+          ? [<span key="s" style={{ color: '#999' }}>Totals</span>]
           : [
-              <Popconfirm key="del" title={t("删除该赛季数据？")} onConfirm={() => onDelete(row)}>
-                <a style={{ color: '#ff4d4f' }}>{t("删除")}</a>
+              <Popconfirm key="del" title="Delete this season's data?" onConfirm={() => onDelete(row)}>
+                <a style={{ color: '#ff4d4f' }}>Delete</a>
               </Popconfirm>,
             ],
     },
@@ -101,7 +99,7 @@ export default function PlayerStatsManage() {
     <>
       <EditableProTable
         rowKey="statsId"
-        headerTitle={t("生涯逐季数据管理（保存后自动重算生涯汇总行）")}
+        headerTitle="Manage season data (career totals recalculate on save)"
         loading={loading}
         value={rows}
         onChange={setRows}
@@ -110,8 +108,8 @@ export default function PlayerStatsManage() {
         columns={columns}
         scroll={{ x: 3300 }}
         toolBarRender={() => [
-          <Button key="add" onClick={onAddRow}>{t("新增一行赛季")}</Button>,
-          <Button key="save" type="primary" onClick={onSaveAll}>{t("保存全部（重算汇总）")}</Button>,
+          <Button key="add" onClick={onAddRow}>Add season row</Button>,
+          <Button key="save" type="primary" onClick={onSaveAll}>Save all (recalculate)</Button>,
         ]}
       />
     </>

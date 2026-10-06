@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Popover, Tooltip } from 'antd'
 import { SmileOutlined } from '@ant-design/icons'
 import useIsMobile from '../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 轻量 emoji 选择器：一个笑脸按钮 + 弹层网格，点选回调 onPick(emoji)。
@@ -10,15 +9,14 @@ import { useTranslation } from 'react-i18next'
  */
 
 const GROUPS = [
-  { name: '表情', list: '😀 😄 😁 😂 🤣 😅 😊 🙂 😍 😘 😜 🤪 😎 🤩 🥳 😏 😐 😢 😭 😤 😡 🤔 🤨 😱 😳 🥺 😴 🤗 🤭 🙄 😬 😇 🤯 🥶 😷'.split(' ') },
-  { name: '手势', list: '👍 👎 👏 🙌 🙏 👌 ✌️ 🤞 🤝 💪 👊 ✊ 🫰 🤙 👋 🫶 ☝️ 👀'.split(' ') },
-  { name: '爱心', list: '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💔 💕 💯 🔥 ✨ ⭐ 🎉 🎊 🏆 🥇'.split(' ') },
-  { name: '篮球', list: '🏀 ⛹️ 🤾 🏃 🏅 🥇 🥈 🥉 📈 📊 ⏱️ 🎯 🙌 🔥'.split(' ') },
-  { name: '其他', list: '☕ 🍺 🍜 🎮 💰 💤 👑 🤖 💩 🐐 ✅ ❌ ❓ ❗ 💬 👇'.split(' ') },
+  { name: 'Emoji', list: '😀 😄 😁 😂 🤣 😅 😊 🙂 😍 😘 😜 🤪 😎 🤩 🥳 😏 😐 😢 😭 😤 😡 🤔 🤨 😱 😳 🥺 😴 🤗 🤭 🙄 😬 😇 🤯 🥶 😷'.split(' ') },
+  { name: 'Gestures', list: '👍 👎 👏 🙌 🙏 👌 ✌️ 🤞 🤝 💪 👊 ✊ 🫰 🤙 👋 🫶 ☝️ 👀'.split(' ') },
+  { name: 'Hearts', list: '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💔 💕 💯 🔥 ✨ ⭐ 🎉 🎊 🏆 🥇'.split(' ') },
+  { name: 'Basketball', list: '🏀 ⛹️ 🤾 🏃 🏅 🥇 🥈 🥉 📈 📊 ⏱️ 🎯 🙌 🔥'.split(' ') },
+  { name: 'Other', list: '☕ 🍺 🍜 🎮 💰 💤 👑 🤖 💩 🐐 ✅ ❌ ❓ ❗ 💬 👇'.split(' ') },
 ]
 
 export default function EmojiPicker({ onPick }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
 
@@ -26,7 +24,7 @@ export default function EmojiPicker({ onPick }) {
     <div style={{ width: isMobile ? 260 : 288, maxHeight: 300, overflowY: 'auto' }}>
       {GROUPS.map((g) => (
         <div key={g.name} style={{ marginBottom: 8 }}>
-          <div style={{ fontSize: 11, color: '#999', margin: '4px 2px' }}>{t(g.name)}</div>
+          <div style={{ fontSize: 11, color: '#999', margin: '4px 2px' }}>{g.name}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             {g.list.map((e, i) => (
               <span
@@ -50,7 +48,7 @@ export default function EmojiPicker({ onPick }) {
 
   return (
     <Popover content={content} trigger="click" open={open} onOpenChange={setOpen} placement="topLeft" arrow={false}>
-      <Tooltip title={t("表情")}>
+      <Tooltip title="Emoji">
         <SmileOutlined style={{ fontSize: 18, color: '#8c8c8c', cursor: 'pointer' }} />
       </Tooltip>
     </Popover>

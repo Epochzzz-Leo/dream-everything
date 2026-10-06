@@ -1,5 +1,4 @@
-
-import i18n from '../../i18n'/**
+/**
  * 选秀详情标签：贴在球员身份头名字下面的那一枚，也复用在历史选秀表的顺位列里。
  *
  * ## 为什么分档而不是一律灰底
@@ -19,9 +18,9 @@ import i18n from '../../i18n'/**
  * 不编一个顺位出来——编了会让「1954年状元」这种说法凭空成立。
  */
 
-const GOLD = { name: '状元', color: '#a97c00', bg: 'rgba(212,160,23,.16)', border: 'rgba(212,160,23,.5)' }
-const SILVER = { name: '榜眼', color: '#6b7075', bg: 'rgba(140,145,150,.16)', border: 'rgba(140,145,150,.5)' }
-const BRONZE = { name: '探花', color: '#96551f', bg: 'rgba(176,106,44,.16)', border: 'rgba(176,106,44,.5)' }
+const GOLD = { name: '#1 pick', color: '#a97c00', bg: 'rgba(212,160,23,.16)', border: 'rgba(212,160,23,.5)' }
+const SILVER = { name: '#2 pick', color: '#6b7075', bg: 'rgba(140,145,150,.16)', border: 'rgba(140,145,150,.5)' }
+const BRONZE = { name: '#3 pick', color: '#96551f', bg: 'rgba(176,106,44,.16)', border: 'rgba(176,106,44,.5)' }
 const LOTTERY = { color: '#6d4bc4', bg: 'rgba(124,92,214,.13)', border: 'rgba(124,92,214,.42)' }
 const PLAIN = { color: '#8c8c8c', bg: '#f5f5f5', border: '#e8e8e8' }
 
@@ -37,9 +36,9 @@ export const draftTier = (pick) => {
 export const draftText = (d) => {
   if (!d) return ''
   const pick = Number(d.pickNum) || 0
-  if (!pick) return i18n.t("{{draftYear}}年第{{roundNum}}轮", { draftYear: d.draftYear, roundNum: d.roundNum })
+  if (!pick) return `${d.draftYear} Round ${d.roundNum}`
   const tier = draftTier(pick)
-  return i18n.t("{{draftYear}}年{{v1}}", { draftYear: d.draftYear, v1: tier.name ? i18n.t(tier.name) : i18n.t("{{pick}}号秀", { pick }) })
+  return `${d.draftYear} ${tier.name ? tier.name : `#${pick} pick`}`
 }
 
 /**

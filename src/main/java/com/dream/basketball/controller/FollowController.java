@@ -50,10 +50,10 @@ public class FollowController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamUser target = StringUtils.isBlank(userId) ? null : userMapper.selectById(userId);
         if (target == null) {
-            return new Result<>(1, "用户不存在", null);
+            return new Result<>(1, "User not found", null);
         }
         if (StringUtils.equals(me.getUserId(), userId)) {
-            return new Result<>(1, "不能关注自己", null);
+            return new Result<>(1, "You can't follow yourself", null);
         }
         // 拉黑关系下不允许建立关注（任一方向）
         if (blockMapper.selectCount(new QueryWrapper<com.dream.basketball.entity.UserBlock>()
@@ -61,7 +61,7 @@ public class FollowController {
                 || blockMapper.selectCount(new QueryWrapper<com.dream.basketball.entity.UserBlock>()
                         .eq("USER_ID", me.getUserId()).eq("BLOCKED_ID", userId)) > 0) {
             if (!edgeExists(me.getUserId(), userId)) {
-                return new Result<>(1, "当前无法关注该用户", null);
+                return new Result<>(1, "You can't follow this user right now", null);
             }
         }
         boolean following;
@@ -84,14 +84,14 @@ public class FollowController {
         Map<String, Object> out = new HashMap<>();
         out.put("following", following);
         out.put("followerCount", followMapper.selectCount(new QueryWrapper<UserFollow>().eq("FOLLOWEE_ID", userId)));
-        return new Result<>(0, following ? "已关注" : "已取消关注", out);
+        return new Result<>(0, following ? "Following" : "Unfollowed", out);
     }
 
     /** 某用户的关注/粉丝计数 + 我与 TA 的关系（公开，登录可选）。 */
     @GetMapping("/status")
     public Object status(String userId, HttpServletRequest request) {
         if (StringUtils.isBlank(userId)) {
-            return new Result<>(1, "参数缺失", null);
+            return new Result<>(1, "Missing parameters", null);
         }
         DreamUser viewer = SecUtil.getLoginUserToSession(request);
         Map<String, Object> out = new HashMap<>();
@@ -99,7 +99,7 @@ public class FollowController {
         out.put("followingCount", followMapper.selectCount(new QueryWrapper<UserFollow>().eq("FOLLOWER_ID", userId)));
         out.put("following", viewer != null && edgeExists(viewer.getUserId(), userId));
         out.put("followedBy", viewer != null && edgeExists(userId, viewer.getUserId()));
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 关注列表/粉丝列表：type=following|followers；行带昵称/头像/互关/我是否已关注。
@@ -107,13 +107,13 @@ public class FollowController {
     @GetMapping("/list")
     public Object list(String userId, String type, HttpServletRequest request) {
         if (StringUtils.isBlank(userId)) {
-            return new Result<>(1, "参数缺失", null);
+            return new Result<>(1, "Missing parameters", null);
         }
         DreamUser owner = userMapper.selectById(userId);
         DreamUser asker = SecUtil.getLoginUserToSession(request);
         if (owner != null && "1".equals(owner.getHideFollows())
                 && (asker == null || !StringUtils.equals(asker.getUserId(), userId))) {
-            return new Result<>(1, "该用户未公开关注和粉丝列表", null);
+            return new Result<>(1, "This user keeps their following and followers private", null);
         }
         boolean followers = "followers".equals(type);
         List<UserFollow> edges = followMapper.selectList(new QueryWrapper<UserFollow>()
@@ -124,7 +124,7 @@ public class FollowController {
             ids.add(followers ? e.getFollowerId() : e.getFolloweeId());
         }
         if (ids.isEmpty()) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         // 名单用户 + 反向边（算互关）+ 观察者的关注集合，各一把查询
         Map<String, DreamUser> users = new HashMap<>();
@@ -159,6 +159,6 @@ public class FollowController {
             row.put("followingByMe", viewer != null && myFollowing.contains(id));
             out.add(row);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 }

@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { fmtNum as num, fmtPair, fmtPct, ADVANCED_STATS, fmtAdv, displayName } from './rankConfig'
 import { TeamNames } from '../../components/TeamLogo'
 import { withGlossary } from './statGlossary'
-import i18n from '../../i18n'
 
 /**
  * 「首发/出场」这一格。0 场的赛季行不写成 `0/0`，写成「未出场」。
@@ -18,10 +17,10 @@ export const renderAppearance = (_, r) => {
   if (g === 0) {
     return (
       <span
-        title={i18n.t("整季在这支球队，但没有出场记录")}
+        title="On this team all season, but no appearances"
         style={{ color: '#bfbfbf', fontSize: 12, whiteSpace: 'nowrap' }}
       >
-        {i18n.t("未出场")}
+        DNP
       </span>
     )
   }
@@ -38,44 +37,48 @@ export function buildFullStatColumns({ serverSort = true } = {}) {
   // 列宽尽量收窄（不压文字）方便移动端一屏多看；出场两列合成「首发/出场」。
   return [
     {
-      title: i18n.t("球员"), dataIndex: 'playerName', fixed: 'left', width: 96,
+      title: 'Player', dataIndex: 'playerName', fixed: 'left', width: 96,
       // 带上该行的赛季：从任何一张按赛季组织的表点进去，资料卡都停在同一个赛季
       // （生涯汇总行的 seasonNum 是 99，点过去正好落在生涯档）
       render: (_, row) => (
         <Link to={`/players/${row.playerId}${row.seasonNum != null ? `?seasonNum=${row.seasonNum}` : ''}`}>{displayName(row)}</Link>
       ),
     },
-    { title: i18n.t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
-    { title: i18n.t("位置"), dataIndex: 'playerPosition', width: 46 },
-    { title: i18n.t("首发/出场"), dataIndex: 'playerAppearance', width: 94, ...srt, render: renderAppearance },
-    { title: i18n.t("时间"), dataIndex: 'playingTime', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("得分"), dataIndex: 'playerAvgScore', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("篮板"), dataIndex: 'playerAvgReb', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("助攻"), dataIndex: 'playerAvgAss', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("投篮"), dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
-    { title: i18n.t("投篮%"), dataIndex: 'playerAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
-    { title: i18n.t("三分"), dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
-    { title: i18n.t("三分%"), dataIndex: 'playerThreeAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
-    { title: i18n.t("罚球"), dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
-    { title: i18n.t("罚球%"), dataIndex: 'playerFreethrowAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
+    { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+    { title: 'Pos', dataIndex: 'playerPosition', width: 46 },
+    { title: 'GS/GP', dataIndex: 'playerAppearance', width: 94, ...srt, render: renderAppearance },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'REB', dataIndex: 'playerAvgReb', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'AST', dataIndex: 'playerAvgAss', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'FG', dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
+    { title: 'FG%', dataIndex: 'playerAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
+    { title: '3P', dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
+    { title: '3P%', dataIndex: 'playerThreeAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
+    { title: 'FT', dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
+    { title: 'FT%', dataIndex: 'playerFreethrowAccuracy', width: 56, ...srt, render: (v) => fmtPct(v) },
     // 前后场篮板独立成列（原来挤在篮板列里写成 "8.5(2.1/6.4)"，窄列很难读）
-    { title: i18n.t("前板"), dataIndex: 'playerAvgOffReb', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("后板"), dataIndex: 'playerAvgDefReb', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("盖帽"), dataIndex: 'playerAvgBlock', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("抢断"), dataIndex: 'playerAvgSteal', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("失误"), dataIndex: 'playerAvgTurnover', width: 48, ...srt, render: (v) => num(v) },
-    { title: i18n.t("犯规"), dataIndex: 'playerAvgPf', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'ORB', dataIndex: 'playerAvgOffReb', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'DRB', dataIndex: 'playerAvgDefReb', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'BLK', dataIndex: 'playerAvgBlock', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'STL', dataIndex: 'playerAvgSteal', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'TOV', dataIndex: 'playerAvgTurnover', width: 48, ...srt, render: (v) => num(v) },
+    { title: 'PF', dataIndex: 'playerAvgPf', width: 48, ...srt, render: (v) => num(v) },
     // 正负值是基础数据，不是高阶指标（NBA 官方 box score 里就有这一列）。它一度只挂在高阶视图下，
     // 纯粹是因为当时只有季后赛拿得到：赛季汇总表没有这一项，只能靠逐场累加。常规赛逐场入库后
     // 1997 起每季都有（B-R 1997 才开始记正负值，1996 及更早整列为空，和 1980 前没三分同理）。
-    { title: i18n.t("正负值"), dataIndex: 'playerAvgPn', width: 62, ...srt, render: (v) => num(v) },
-    { title: i18n.t("效率值"), dataIndex: 'playerPer', width: 78, ...srt, render: (v) => num(v) },
+    { title: '+/-', dataIndex: 'playerAvgPn', width: 62, ...srt, render: (v) => num(v) },
+    { title: 'PER', dataIndex: 'playerPer', width: 78, ...srt, render: (v) => num(v) },
     { title: 'MVP', dataIndex: 'mvpRank', width: 50, ...srt },
     { title: 'DPOY', dataIndex: 'dpoyRank', width: 56, ...srt },
-    { title: i18n.t("最佳阵容"), dataIndex: 'allDbaTeam', width: 72 },
-    { title: i18n.t("最佳防守"), dataIndex: 'allDefTeam', width: 72 },
+    // 库里存的是 1st Team / 2nd Team / 3rd Team（sync.py 写入，honorConfig 和后端都拿它做比较），原样显示
+    { title: 'All-NBA', dataIndex: 'allDbaTeam', width: 72, render: renderAllTeam },
+    { title: 'All-Def', dataIndex: 'allDefTeam', width: 72, render: renderAllTeam },
   ]
 }
+
+/** 最佳阵容 / 最佳防守阵容这一格：身份值原样留在数据里，显示时才翻；没入选给占位符 */
+export const renderAllTeam = (v) => (v ? v : '-')
 
 /**
  * 一段文字在给定字号下的估算宽度：中文一个 em，大写字母 0.75 em，其余（数字/小写/符号）
@@ -96,7 +99,7 @@ export const headerWidth = (label, em, pad) => textWidth(label, em) + pad
  * 下限 48 只在这儿加：逐场表那些 40px 的整数列不该被这个下限顶宽。
  */
 export const advColWidth = (a, em, pad) =>
-  Math.max(48, headerWidth(i18n.t(a.label), em, pad), textWidth(a.pct || a.rate ? '100.0%' : '-12.3', em) + pad)
+  Math.max(48, headerWidth(a.label, em, pad), textWidth(a.pct || a.rate ? '100.0%' : '-12.3', em) + pad)
 
 /** 桌面端 14px 字号 + 左右各 6px 内边距（.stat-compact 的规则） */
 const advWidth = (a) => advColWidth(a, 14, 14)
@@ -108,19 +111,19 @@ const advWidth = (a) => advColWidth(a, 14, 14)
 export function buildAdvancedStatColumns() {
   return withGlossary([
     {
-      title: i18n.t("球员"), dataIndex: 'playerName', fixed: 'left', width: 96,
+      title: 'Player', dataIndex: 'playerName', fixed: 'left', width: 96,
       render: (_, row) => (
         <Link to={`/players/${row.playerId}${row.seasonNum != null ? `?seasonNum=${row.seasonNum}` : ''}`}>{displayName(row)}</Link>
       ),
     },
-    { title: i18n.t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+    { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
     // 出场场次不在这儿重复——基础表已经有「首发/出场」。时间留着：使用率、篮板率
     // 这些率值得配上场时间才读得懂
-    { title: i18n.t("时间"), dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
     // 正负值不在这儿——它已经回到基础表（见 buildFullStatColumns）。两个视图之间不重复列，
     // 只有「时间」是例外，因为使用率、篮板率这些率值不配上场时间读不懂。
     ...ADVANCED_STATS.map((a) => ({
-      title: i18n.t(a.label),
+      title: a.label,
       dataIndex: a.field,
       width: advWidth(a),
       render: (v) => fmtAdv(v, a),

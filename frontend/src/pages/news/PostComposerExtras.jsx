@@ -3,7 +3,6 @@ import { Button, Input, Modal, Spin, message } from 'antd'
 import { CloseCircleFilled, StarFilled } from '@ant-design/icons'
 import { newsApi } from '../../api/news'
 import { RatingImagePicker } from '../../components/RatingCard'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 发帖器里那几个"点一下弹出来填"的东西：话题选择、投票编辑、打分编辑，
@@ -15,8 +14,8 @@ import { useTranslation } from 'react-i18next'
 
 export const MAX_TAGS = 10
 
-// 没有现成话题时兜底的推荐项（通用分类，不绑定具体主题）
-const FALLBACK_TAGS = ['讨论', '分享', '求助', '公告', '资源', '教程', '反馈', '闲聊', '重磅', '精华']
+// 没有现成话题时兜底的推荐项（通用分类，不绑定具体主题）。话题是自由文本，后端不认具体值
+const FALLBACK_TAGS = ['Discussion', 'Sharing', 'Help', 'Announcement', 'Resources', 'Tutorial', 'Feedback', 'Chat', 'Breaking', 'Highlights']
 
 /** 一枚话题胶囊。选中=品牌橙实心边框，未选=灰底 */
 function TagChip({ text, count, active, onClick }) {
@@ -45,9 +44,8 @@ function TagChip({ text, count, active, onClick }) {
  * （专题页每次进来都会拉这一份），再拉一次不算新增负担。弹窗打开才拉，不打开不花钱。
  */
 export function TagPickerModal({ open, onClose, value, onChange, topicId, official }) {
-  const { t } = useTranslation()
   return (
-    <Modal open={open} onCancel={onClose} title={t("添加话题")} footer={null} width={460} destroyOnClose>
+    <Modal open={open} onCancel={onClose} title="Add hashtags" footer={null} width={460} destroyOnClose>
       {/* 内容单独一层：`destroyOnClose` 让它随弹窗一起卸载，
           于是"关掉再打开"天然是全新的一份状态，不用在 effect 里手动重置 */}
       <TagPickerBody value={value} onChange={onChange} topicId={topicId} official={official} onClose={onClose} />
@@ -56,7 +54,6 @@ export function TagPickerModal({ open, onClose, value, onChange, topicId, offici
 }
 
 function TagPickerBody({ value, onChange, topicId, official, onClose }) {
-  const { t } = useTranslation()
   const [pool, setPool] = useState(null) // [{ text, count }]，null = 还在拉
   const [kw, setKw] = useState('')
 
@@ -85,7 +82,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
 
   const toggle = (tag) => {
     if (value.includes(tag)) return onChange(value.filter((x) => x !== tag))
-    if (value.length >= MAX_TAGS) return message.warning(t("最多 {{MAX_TAGS}} 个话题", { MAX_TAGS }))
+    if (value.length >= MAX_TAGS) return message.warning(`At most ${MAX_TAGS} hashtags`)
     return onChange([...value, tag])
   }
 
@@ -94,7 +91,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
     const typed = kw.trim().replace(/^#+/, '').trim()
     if (!typed) return
     if (!value.includes(typed)) {
-      if (value.length >= MAX_TAGS) return message.warning(t("最多 {{MAX_TAGS}} 个话题", { MAX_TAGS }))
+      if (value.length >= MAX_TAGS) return message.warning(`At most ${MAX_TAGS} hashtags`)
       onChange([...value, typed])
     }
     setKw('')
@@ -102,22 +99,23 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
 
   const k = kw.trim().replace(/^#+/, '').toLowerCase()
   const existing = useMemo(
-    () => (pool || []).filter((t) => !k || t.text.toLowerCase().includes(k)),
+    () => (pool || []).filter((x) => !k || x.text.toLowerCase().includes(k)),
     [pool, k],
   )
   // 推荐项里已经出现在"本专题已有"里的就不再重复列一遍
   const suggested = useMemo(() => {
-    const has = new Set((pool || []).map((t) => t.text))
-    return FALLBACK_TAGS.filter((t) => !has.has(t) && (!k || t.toLowerCase().includes(k)))
+    const has = new Set((pool || []).map((x) => x.text))
+    return FALLBACK_TAGS
+      .filter((tag) => !has.has(tag) && (!k || tag.toLowerCase().includes(k)))
   }, [pool, k])
   // 敲的这个谁都没有 → 给一条"创建"
-  const canCreate = !!k && !existing.some((t) => t.text.toLowerCase() === k) && !suggested.some((t) => t.toLowerCase() === k)
+  const canCreate = !!k && !existing.some((x) => x.text.toLowerCase() === k) && !suggested.some((tag) => tag.toLowerCase() === k)
 
   return (
     <>
       <Input
         className="pill-input"
-        placeholder={t("搜索或输入新话题，回车添加")}
+        placeholder="Search or type a new hashtag, Enter to add"
         value={kw}
         maxLength={20}
         onChange={(e) => setKw(e.target.value)}
@@ -127,9 +125,9 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
 
       {value.length > 0 && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>{t("已选")} {value.length}/{MAX_TAGS}{t("（点一下取消）")}</div>
+          <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>Selected {value.length}/{MAX_TAGS}(tap to remove)</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {value.map((t) => <TagChip key={t} text={t} active onClick={() => toggle(t)} />)}
+            {value.map((tag) => <TagChip key={tag} text={tag} active onClick={() => toggle(tag)} />)}
           </div>
         </div>
       )}
@@ -144,7 +142,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
               color: '#d4380d', background: '#fff7e6', border: '1px dashed #ffbb96',
             }}
           >
-            {t('创建「#{{v}}」', { v: kw.trim().replace(/^#+/, '') })}
+            {`Create "#${kw.trim().replace(/^#+/, '')}"`}
           </span>
         </div>
       )}
@@ -154,21 +152,21 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
       ) : (
         <>
           <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>
-            {topicId ? t("本专题已有的话题") : t("这里已有的话题")}
+            {topicId ? 'Hashtags used in this topic' : 'Hashtags used here'}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
             {existing.length
-              ? existing.map((t) => (
-                <TagChip key={t.text} text={t.text} count={t.count} active={value.includes(t.text)} onClick={() => toggle(t.text)} />
+              ? existing.map((x) => (
+                <TagChip key={x.text} text={x.text} count={x.count} active={value.includes(x.text)} onClick={() => toggle(x.text)} />
               ))
-              : <span style={{ fontSize: 13, color: '#ccc' }}>{t("还没有人用过话题，你可以开第一个")}</span>}
+              : <span style={{ fontSize: 13, color: '#ccc' }}>No hashtags yet. Start the first one</span>}
           </div>
           {suggested.length > 0 && (
             <>
-              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>{t("常用")}</div>
+              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>Common</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {suggested.map((t) => (
-                  <TagChip key={t} text={t} active={value.includes(t)} onClick={() => toggle(t)} />
+                {suggested.map((tag) => (
+                  <TagChip key={tag} text={tag} active={value.includes(tag)} onClick={() => toggle(tag)} />
                 ))}
               </div>
             </>
@@ -177,7 +175,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-        <Button type="primary" onClick={onClose}>{t("完成")}</Button>
+        <Button type="primary" onClick={onClose}>Done</Button>
       </div>
     </>
   )
@@ -188,16 +186,14 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
  * 校验和后端一致：主题必填、2-10 个非空选项。
  */
 export function PollEditModal({ open, onClose, value, onSave }) {
-  const { t } = useTranslation()
   return (
-    <Modal open={open} onCancel={onClose} title={t("发起投票")} footer={null} width={440} destroyOnClose>
+    <Modal open={open} onCancel={onClose} title="Start poll" footer={null} width={440} destroyOnClose>
       <PollEditBody value={value} onSave={onSave} onClose={onClose} />
     </Modal>
   )
 }
 
 function PollEditBody({ value, onSave, onClose }) {
-  const { t } = useTranslation()
   // 初值直接从当前值取（内容随弹窗卸载，所以每次打开都是重新初始化的一份）：
   // 改到一半关掉再打开，看到的是已保存的那份，不是半成品
   const [subject, setSubject] = useState(value?.subject || '')
@@ -206,8 +202,8 @@ function PollEditBody({ value, onSave, onClose }) {
   const save = () => {
     const s = subject.trim()
     const opts = options.map((o) => o.trim()).filter(Boolean)
-    if (!s) return message.warning(t("填一下投票主题"))
-    if (opts.length < 2) return message.warning(t("至少两个选项"))
+    if (!s) return message.warning('Enter the poll question')
+    if (opts.length < 2) return message.warning('At least two options')
     onSave({ subject: s, options: opts })
     return onClose()
   }
@@ -216,7 +212,7 @@ function PollEditBody({ value, onSave, onClose }) {
     <>
       <Input
         className="pill-input"
-        placeholder={t("想投什么？")}
+        placeholder="What do you want to ask?"
         maxLength={30}
         showCount
         value={subject}
@@ -227,24 +223,24 @@ function PollEditBody({ value, onSave, onClose }) {
           <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <Input
               className="pill-input"
-              placeholder={t("选项 {{v0}}", { v0: i + 1 })}
+              placeholder={`Option ${i + 1}`}
               maxLength={20}
               value={opt}
               onChange={(e) => setOptions((arr) => arr.map((x, j) => (j === i ? e.target.value : x)))}
             />
             {options.length > 2 && (
-              <Button type="text" danger onClick={() => setOptions((arr) => arr.filter((_, j) => j !== i))}>{t("删")}</Button>
+              <Button type="text" danger onClick={() => setOptions((arr) => arr.filter((_, j) => j !== i))}>Del</Button>
             )}
           </div>
         ))}
         {options.length < 10 && (
-          <Button onClick={() => setOptions((arr) => [...arr, ''])} style={{ width: 120, borderRadius: 999 }}>{t("+ 添加选项")}</Button>
+          <Button onClick={() => setOptions((arr) => [...arr, ''])} style={{ width: 120, borderRadius: 999 }}>+ Add option</Button>
         )}
       </div>
-      <div style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>{t("2-10 个选项，单选、可改票")}</div>
+      <div style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>2–10 options, single choice, votes can be changed</div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
-        {value && <Button danger onClick={() => { onSave(null); onClose() }}>{t("移除")}</Button>}
-        <Button type="primary" onClick={save}>{t("保存")}</Button>
+        {value && <Button danger onClick={() => { onSave(null); onClose() }}>Remove</Button>}
+        <Button type="primary" onClick={save}>Save</Button>
       </div>
     </>
   )
@@ -252,22 +248,20 @@ function PollEditBody({ value, onSave, onClose }) {
 
 /** 开启打分的编辑弹窗。保存回 { subject, imageUrl }，移除回 null。 */
 export function RatingEditModal({ open, onClose, value, onSave, upload }) {
-  const { t } = useTranslation()
   return (
-    <Modal open={open} onCancel={onClose} title={t("开启打分")} footer={null} width={440} destroyOnClose>
+    <Modal open={open} onCancel={onClose} title="Open rating" footer={null} width={440} destroyOnClose>
       <RatingEditBody value={value} onSave={onSave} onClose={onClose} upload={upload} />
     </Modal>
   )
 }
 
 function RatingEditBody({ value, onSave, onClose, upload }) {
-  const { t } = useTranslation()
   const [subject, setSubject] = useState(value?.subject || '')
   const [img, setImg] = useState(value?.imageUrl || '')
 
   const save = () => {
     const s = subject.trim()
-    if (!s) return message.warning(t("填一下要为什么打分"))
+    if (!s) return message.warning('Enter what to rate')
     onSave({ subject: s, imageUrl: img })
     return onClose()
   }
@@ -276,7 +270,7 @@ function RatingEditBody({ value, onSave, onClose, upload }) {
     <>
       <Input
         className="pill-input"
-        placeholder={t("想为什么打分？")}
+        placeholder="What do you want to rate?"
         maxLength={30}
         showCount
         value={subject}
@@ -285,10 +279,10 @@ function RatingEditBody({ value, onSave, onClose, upload }) {
       <div style={{ marginTop: 16 }}>
         <RatingImagePicker value={img} onChange={setImg} upload={upload} />
       </div>
-      <div style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>{t("1-5 星，可配一张图；发帖后还能在评论区继续为别的对象开分")}</div>
+      <div style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>1–5 stars, with an optional image; you can open more ratings in the comments after posting</div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
-        {value && <Button danger onClick={() => { onSave(null); onClose() }}>{t("移除")}</Button>}
-        <Button type="primary" onClick={save}>{t("保存")}</Button>
+        {value && <Button danger onClick={() => { onSave(null); onClose() }}>Remove</Button>}
+        <Button type="primary" onClick={save}>Save</Button>
       </div>
     </>
   )
@@ -315,11 +309,10 @@ function PreviewShell({ children, onEdit, onRemove }) {
 
 /** 正文下面那张投票卡（只是长得像，不能投——发出去之后才是真的） */
 export function PollPreview({ value, onEdit, onRemove }) {
-  const { t } = useTranslation()
   return (
     <PreviewShell onEdit={onEdit} onRemove={onRemove}>
       <div style={{ fontSize: 15, fontWeight: 700, paddingRight: 24, wordBreak: 'break-word' }}>{value.subject}</div>
-      <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t("单选")}</div>
+      <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>Single choice</div>
       <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {value.options.map((o, i) => (
           <div
@@ -340,7 +333,6 @@ export function PollPreview({ value, onEdit, onRemove }) {
 
 /** 正文下面那张打分卡 */
 export function RatingPreview({ value, onEdit, onRemove }) {
-  const { t } = useTranslation()
   return (
     <PreviewShell onEdit={onEdit} onRemove={onRemove}>
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -353,7 +345,7 @@ export function RatingPreview({ value, onEdit, onRemove }) {
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, paddingRight: 24, wordBreak: 'break-word' }}>{value.subject}</div>
-          <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t("1-5 星")}</div>
+          <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>1–5 stars</div>
           <div style={{ marginTop: 8, display: 'flex', gap: 6, color: '#e0e0e0', fontSize: 20 }}>
             {[0, 1, 2, 3, 4].map((i) => <StarFilled key={i} />)}
           </div>

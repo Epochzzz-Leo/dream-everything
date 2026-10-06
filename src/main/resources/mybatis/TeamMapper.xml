@@ -53,7 +53,7 @@
                IFNULL(PLAYOFF_TOV, 0) as tov
         from team_season
         where SEASON_NUM = #{seasonNum}
-          and PLAYOFF_RESULT is not null and PLAYOFF_RESULT &lt;&gt; '未进季后赛'
+          and PLAYOFF_RESULT is not null and PLAYOFF_RESULT &lt;&gt; 'Missed playoffs'
     </select>
 
     <select id="findTeamPlayoffHistory" resultType="com.dream.basketball.dto.TeamSeasonDto">
@@ -70,7 +70,7 @@
                IFNULL(PLAYOFF_TOV, 0) as tov
         from team_season
         where TEAM_CODE = #{teamCode}
-          and PLAYOFF_RESULT is not null and PLAYOFF_RESULT &lt;&gt; '未进季后赛'
+          and PLAYOFF_RESULT is not null and PLAYOFF_RESULT &lt;&gt; 'Missed playoffs'
         order by SEASON_NUM
     </select>
 

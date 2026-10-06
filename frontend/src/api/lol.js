@@ -55,45 +55,45 @@ export const lolApi = {
 }
 
 /**
- * 队列编号 → 中文。
+ * 队列编号 → 显示名（Riot 官方英文名）。
  *
  * 只列这个圈子实际会打到的几个，其余原样显示编号——把 Riot 的全部队列表抄进来
  * 有一百多条，绝大多数（各种限时模式、教程、机器人局）这辈子不会出现在榜上，
  * 而抄进来的那一刻它就开始过期了。
  */
 export const QUEUE_LABEL = {
-  400: '匹配 征召',
-  420: '单双排位',
-  430: '匹配 盲选',
-  440: '灵活排位',
-  450: '极地大乱斗',
-  490: '快速匹配',
-  700: '冠军杯',
-  1700: '斗魂竞技场',
-  1900: '无限火力',
+  400: 'Normal Draft',
+  420: 'Ranked Solo/Duo',
+  430: 'Normal Blind',
+  440: 'Ranked Flex',
+  450: 'ARAM',
+  490: 'Quickplay',
+  700: 'Clash',
+  1700: 'Arena',
+  1900: 'URF',
 }
 
-export const queueName = (id) => QUEUE_LABEL[id] || `队列 ${id}`
+export const queueName = (id) => QUEUE_LABEL[id] || `Queue ${id}`
 
 /** 榜单和筛选条共用的一组队列选项（0 = 全部） */
 export const QUEUE_OPTIONS = [
-  { value: 0, label: '全部队列' },
-  { value: 420, label: '单双排位' },
-  { value: 440, label: '灵活排位' },
-  { value: 400, label: '匹配 征召' },
-  { value: 450, label: '大乱斗' },
+  { value: 0, label: 'All Queues' },
+  { value: 420, label: 'Ranked Solo/Duo' },
+  { value: 440, label: 'Ranked Flex' },
+  { value: 400, label: 'Normal Draft' },
+  { value: 450, label: 'ARAM' },
 ]
 
 /** 时间窗选项。默认 30 天：够攒出样本，又不至于把三个月前的手感算进今天 */
 export const DAYS_OPTIONS = [
-  { value: 7, label: '近 7 天' },
-  { value: 30, label: '近 30 天' },
-  { value: 90, label: '近 90 天' },
-  { value: 365, label: '近一年' },
+  { value: 7, label: 'Last 7 Days' },
+  { value: 30, label: 'Last 30 Days' },
+  { value: 90, label: 'Last 90 Days' },
+  { value: 365, label: 'Last Year' },
 ]
 
-/** 位置英文 → 中文。teamPosition 可能是空串（大乱斗没有分路） */
+/** Riot 的位置代码 → 显示名。teamPosition 可能是空串（大乱斗没有分路） */
 export const POSITION_LABEL = {
-  TOP: '上路', JUNGLE: '打野', MIDDLE: '中路', BOTTOM: '下路', UTILITY: '辅助',
+  TOP: 'Top', JUNGLE: 'Jungle', MIDDLE: 'Mid', BOTTOM: 'Bot', UTILITY: 'Support',
 }
 

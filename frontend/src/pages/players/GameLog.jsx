@@ -9,19 +9,17 @@ import useUrlState from '../../hooks/useUrlState'
 import { fmtMadePct, fmtPair, seasonShort, seasonYearLabel } from './rankConfig'
 import { ROUND_LABEL, SEASON_TYPE } from './gameLogConfig'
 import { compactColumns, sumColWidth } from './statColumns'
-import { useTranslation } from 'react-i18next'
-import i18n from '../../i18n'
 
 function buildColumns(seasonType, isMobile, openGame) {
   const cols = [
-    { title: i18n.t("日期"), dataIndex: 'gameDate', width: 92, fixed: 'left', render: (v) => String(v || '').slice(5) },
+    { title: 'Date', dataIndex: 'gameDate', width: 92, fixed: 'left', render: (v) => String(v || '').slice(5) },
     // 轮次只对季后赛有意义，常规赛行的 ROUND 是 NULL
     ...(seasonType === SEASON_TYPE.PO
-      ? [{ title: i18n.t("轮次"), dataIndex: 'round', width: 72, render: (v) => (ROUND_LABEL[Number(v)] ? i18n.t(ROUND_LABEL[Number(v)]) : '-') }]
+      ? [{ title: 'Round', dataIndex: 'round', width: 72, render: (v) => (ROUND_LABEL[Number(v)] ? ROUND_LABEL[Number(v)] : '-') }]
       : []),
-    { title: i18n.t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+    { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
     {
-      title: i18n.t("对手"), dataIndex: 'oppTeam', width: 78,
+      title: 'Opponent', dataIndex: 'oppTeam', width: 78,
       render: (v, r) => (
         <span style={{ whiteSpace: 'nowrap' }}>{Number(r.home) ? '' : '@'}<TeamNames value={v} /></span>
       ),
@@ -33,11 +31,11 @@ function buildColumns(seasonType, isMobile, openGame) {
       // 用 span 不用 <a>：<a> 会吃到 antd 的链接色（主色是橙），和左边红色的「负」撞在一起。
       // 这一格不加任何链接装饰，就是纯数字（见 index.css 的 .game-link）。
       // 没有 gameId 的行（理论上不该有）退回纯文本，不给一个点不动的假链接
-      title: i18n.t("结果"), dataIndex: 'win', width: 84,
+      title: 'Result', dataIndex: 'win', width: 84,
       render: (v, r) => {
         const body = (
           <>
-            <b style={{ color: Number(v) ? '#52c41a' : '#ff4d4f' }}>{Number(v) ? i18n.t("胜") : i18n.t("负")}</b>
+            <b style={{ color: Number(v) ? '#52c41a' : '#ff4d4f' }}>{Number(v) ? 'W' : 'L'}</b>
             <span className="score" style={{ color: '#999', marginLeft: 4 }}>{r.teamScore}-{r.oppScore}</span>
           </>
         )
@@ -46,7 +44,7 @@ function buildColumns(seasonType, isMobile, openGame) {
           <span
             className="game-link"
             onClick={() => openGame(r.gameId)}
-            title={i18n.t("查看这场比赛")}
+            title="View game"
             style={{ whiteSpace: 'nowrap' }}
           >
             {body}
@@ -54,27 +52,27 @@ function buildColumns(seasonType, isMobile, openGame) {
         )
       },
     },
-    { title: i18n.t("首发"), dataIndex: 'starter', width: 48, render: (v) => (Number(v) ? '✓' : '-') },
-    { title: i18n.t("时间"), dataIndex: 'playingTime', width: 48 },
-    { title: i18n.t("得分"), dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{v}</b> },
-    { title: i18n.t("篮板"), dataIndex: 'reb', width: 48 },
-    { title: i18n.t("助攻"), dataIndex: 'ast', width: 48 },
+    { title: 'Starter', dataIndex: 'starter', width: 48, render: (v) => (Number(v) ? '✓' : '-') },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48 },
+    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{v}</b> },
+    { title: 'REB', dataIndex: 'reb', width: 48 },
+    { title: 'AST', dataIndex: 'ast', width: 48 },
     // 命中数和命中率分开成列，和单场详情、场均表同一套写法。
     // 用 fmtPair 而不是模板串：1980 年前没有三分线、1974 年前没有抢断/盖帽/失误，
     // 那几列存的是 NULL，直接拼字符串会在页面上印出 "null/null"
-    { title: i18n.t("投篮"), dataIndex: 'fgm', width: 66, render: (_, r) => fmtPair(r.fgm, r.fga, 0) },
-    { title: i18n.t("投篮%"), dataIndex: 'fgPct', width: 58, render: (_, r) => fmtMadePct(r.fgm, r.fga) },
-    { title: i18n.t("三分"), dataIndex: 'tpm', width: 66, render: (_, r) => fmtPair(r.tpm, r.tpa, 0) },
-    { title: i18n.t("三分%"), dataIndex: 'tpPct', width: 58, render: (_, r) => fmtMadePct(r.tpm, r.tpa) },
-    { title: i18n.t("罚球"), dataIndex: 'ftm', width: 66, render: (_, r) => fmtPair(r.ftm, r.fta, 0) },
-    { title: i18n.t("罚球%"), dataIndex: 'ftPct', width: 58, render: (_, r) => fmtMadePct(r.ftm, r.fta) },
+    { title: 'FG', dataIndex: 'fgm', width: 66, render: (_, r) => fmtPair(r.fgm, r.fga, 0) },
+    { title: 'FG%', dataIndex: 'fgPct', width: 58, render: (_, r) => fmtMadePct(r.fgm, r.fga) },
+    { title: '3P', dataIndex: 'tpm', width: 66, render: (_, r) => fmtPair(r.tpm, r.tpa, 0) },
+    { title: '3P%', dataIndex: 'tpPct', width: 58, render: (_, r) => fmtMadePct(r.tpm, r.tpa) },
+    { title: 'FT', dataIndex: 'ftm', width: 66, render: (_, r) => fmtPair(r.ftm, r.fta, 0) },
+    { title: 'FT%', dataIndex: 'ftPct', width: 58, render: (_, r) => fmtMadePct(r.ftm, r.fta) },
     // 前后场篮板独立成列，与场均表口径一致；紧挨盖帽之前，两张表顺序对齐
-    { title: i18n.t("前板"), dataIndex: 'offReb', width: 48 },
-    { title: i18n.t("后板"), dataIndex: 'defReb', width: 48 },
-    { title: i18n.t("盖帽"), dataIndex: 'blk', width: 48 },
-    { title: i18n.t("抢断"), dataIndex: 'stl', width: 48 },
-    { title: i18n.t("失误"), dataIndex: 'tov', width: 48 },
-    { title: i18n.t("犯规"), dataIndex: 'pf', width: 48 },
+    { title: 'ORB', dataIndex: 'offReb', width: 48 },
+    { title: 'DRB', dataIndex: 'defReb', width: 48 },
+    { title: 'BLK', dataIndex: 'blk', width: 48 },
+    { title: 'STL', dataIndex: 'stl', width: 48 },
+    { title: 'TOV', dataIndex: 'tov', width: 48 },
+    { title: 'PF', dataIndex: 'pf', width: 48 },
     {
       title: '+/-', dataIndex: 'plusMinus', width: 56,
       render: (v) => <span style={{ color: v > 0 ? '#52c41a' : v < 0 ? '#ff4d4f' : '#999' }}>{v > 0 ? `+${v}` : v}</span>,
@@ -89,7 +87,6 @@ function buildColumns(seasonType, isMobile, openGame) {
  * 默认落在最新的一季 —— 常规赛和季后赛用的是同一套控件，只是 seasonType 不同。
  */
 export default function GameLogTable({ playerId, seasonType, seasons }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const navigate = useNavigate()
   // 选中的赛季写进 URL：从这张表点开某一场比赛，返回时要停在同一个赛季上。
@@ -117,13 +114,13 @@ export default function GameLogTable({ playerId, seasonType, seasons }) {
     return () => { alive = false }
   }, [playerId, season, seasonType])
 
-  if (!seasons?.length) return <Empty description={t("该球员暂无逐场数据")} />
+  if (!seasons?.length) return <Empty description="No game logs for this player" />
 
   const cols = buildColumns(seasonType, isMobile, (gameId) => navigate(`/games/${gameId}`))
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ color: '#999', fontSize: 13 }}>{t("赛季")}</span>
+        <span style={{ color: '#999', fontSize: 13 }}>Season</span>
         <Select
           virtual={false}
           value={season}
@@ -131,7 +128,7 @@ export default function GameLogTable({ playerId, seasonType, seasons }) {
           style={{ width: isMobile ? 168 : 210 }}
           options={seasons.map((s) => ({
             value: s.seasonNum,
-            label: t("{{v0}} · {{games}} 场", { v0: isMobile ? seasonShort(s.seasonNum) : seasonYearLabel(s.seasonNum), games: s.games }),
+            label: `${isMobile ? seasonShort(s.seasonNum) : seasonYearLabel(s.seasonNum)} · ${s.games} G`,
           }))}
         />
       </div>

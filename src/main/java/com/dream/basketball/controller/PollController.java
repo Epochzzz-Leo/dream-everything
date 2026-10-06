@@ -79,29 +79,29 @@ public class PollController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if (!StringUtils.equals(news.getAuthorId(), me.getUserId())) {
-            return new Result<>(1, "只有楼主可以发起投票", null);
+            return new Result<>(1, "Only the OP can start a poll", null);
         }
         String sub = StringUtils.trimToEmpty(subject);
         if (sub.isEmpty() || sub.length() > SUBJECT_MAX) {
-            return new Result<>(1, "投票主题需为 1-" + SUBJECT_MAX + " 字", null);
+            return new Result<>(1, "The poll question must be 1 to " + SUBJECT_MAX + " characters", null);
         }
         List<String> opts = parseOptions(options);
         if (opts == null) {
-            return new Result<>(1, "选项需为 " + OPTIONS_MIN + "-" + OPTIONS_MAX + " 个、每个不超过 " + OPTION_MAX_LEN + " 字且互不重复", null);
+            return new Result<>(1, "A poll needs " + OPTIONS_MIN + " to " + OPTIONS_MAX + " options, each up to " + OPTION_MAX_LEN + " characters and all different", null);
         }
         if (StringUtils.isNotBlank(commentId)) {
             DreamNewsComment c = dreamNewsCommentService.getById(commentId);
             if (c == null || !StringUtils.equals(c.getNewsId(), newsId)
                     || !"1".equals(c.getLevel()) || !StringUtils.equals(c.getUserId(), me.getUserId())) {
-                return new Result<>(1, "只能在你自己发的一级楼上发起投票", null);
+                return new Result<>(1, "You can only start a poll on your own top-level comment", null);
             }
         }
         Integer already = itemMapper.selectCount(new QueryWrapper<ForumPollItem>().eq("NEWS_ID", newsId));
         if (already != null && already >= ITEMS_PER_POST_MAX) {
-            return new Result<>(1, "该帖投票已达上限", null);
+            return new Result<>(1, "This post has reached its poll limit", null);
         }
         ForumPollItem item = new ForumPollItem();
         item.setItemId(UUID.randomUUID().toString());
@@ -112,7 +112,7 @@ public class PollController {
         item.setCreateBy(me.getUserId());
         item.setCreateTime(new Date());
         itemMapper.insert(item);
-        return new Result<>(0, "已发起投票", item.getItemId());
+        return new Result<>(0, "Poll started", item.getItemId());
     }
 
     /** 楼主"在回复里继续发投票"：一步发一条一级楼（说明文字可空）+ 挂上投票项。 */
@@ -122,17 +122,17 @@ public class PollController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if (!StringUtils.equals(news.getAuthorId(), me.getUserId())) {
-            return new Result<>(1, "只有楼主可以发起投票", null);
+            return new Result<>(1, "Only the OP can start a poll", null);
         }
         String sub = StringUtils.trimToEmpty(subject);
         if (sub.isEmpty() || sub.length() > SUBJECT_MAX) {
-            return new Result<>(1, "投票主题需为 1-" + SUBJECT_MAX + " 字", null);
+            return new Result<>(1, "The poll question must be 1 to " + SUBJECT_MAX + " characters", null);
         }
         if (parseOptions(options) == null) {
-            return new Result<>(1, "选项需为 " + OPTIONS_MIN + "-" + OPTIONS_MAX + " 个、每个不超过 " + OPTION_MAX_LEN + " 字且互不重复", null);
+            return new Result<>(1, "A poll needs " + OPTIONS_MIN + " to " + OPTIONS_MAX + " options, each up to " + OPTION_MAX_LEN + " characters and all different", null);
         }
         DreamNewsComment c = new DreamNewsComment();
         c.setNewsId(newsId);
@@ -152,7 +152,7 @@ public class PollController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumPollItem item = StringUtils.isBlank(itemId) ? null : itemMapper.selectById(itemId);
         if (item == null) {
-            return new Result<>(1, "投票不存在", null);
+            return new Result<>(1, "Poll not found", null);
         }
         List<String> opts;
         try {
@@ -161,18 +161,18 @@ public class PollController {
             opts = new ArrayList<>();
         }
         if (optionIndex == null || optionIndex < 0 || optionIndex >= opts.size()) {
-            return new Result<>(1, "选项不存在", null);
+            return new Result<>(1, "Option not found", null);
         }
         DreamNews news = dreamNewsService.getById(item.getNewsId());
         if (news == null) {
-            return new Result<>(1, "帖子不存在", null);
+            return new Result<>(1, "Post not found", null);
         }
         if ("1".equals(news.getLocked())) {
-            return new Result<>(1, "该帖已被锁定，暂不能投票", null);
+            return new Result<>(1, "This post is locked. Voting is off", null);
         }
         if (StringUtils.isNotBlank(news.getTopicId())
                 && !topicPerms.canView(me, topicPerms.getTopic(news.getTopicId()))) {
-            return new Result<>(1, "你没有权限查看该专题的内容", null);
+            return new Result<>(1, "You don't have permission to view this topic", null);
         }
         ForumPollVote v = voteMapper.selectOne(new QueryWrapper<ForumPollVote>()
                 .eq("ITEM_ID", itemId).eq("USER_ID", me.getUserId()));
@@ -193,7 +193,7 @@ public class PollController {
         Map<String, Object> agg = aggregate(Collections.singletonList(itemId)).get(itemId);
         Map<String, Object> out = agg == null ? new HashMap<>() : agg;
         out.put("myChoice", optionIndex);
-        return new Result<>(0, "已投票", out);
+        return new Result<>(0, "Voted", out);
     }
 
     /** 该帖全部投票项 + 每项各选项票数 + 我的选择（公开；私密专题帖要有浏览权）。 */
@@ -202,16 +202,16 @@ public class PollController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         DreamNews news = StringUtils.isBlank(newsId) ? null : dreamNewsService.getById(newsId);
         if (news == null) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         if (StringUtils.isNotBlank(news.getTopicId())
                 && !topicPerms.canView(me, topicPerms.getTopic(news.getTopicId()))) {
-            return new Result<>(1, "你没有权限查看该专题的内容", null);
+            return new Result<>(1, "You don't have permission to view this topic", null);
         }
         List<ForumPollItem> items = itemMapper.selectList(new QueryWrapper<ForumPollItem>()
                 .eq("NEWS_ID", newsId).orderByAsc("CREATE_TIME"));
         if (items.isEmpty()) {
-            return new Result<>(0, "成功", new ArrayList<>());
+            return new Result<>(0, "OK", new ArrayList<>());
         }
         List<String> ids = new ArrayList<>();
         for (ForumPollItem it : items) {
@@ -244,7 +244,7 @@ public class PollController {
             m.put("myChoice", mine.get(it.getItemId()));
             out.add(m);
         }
-        return new Result<>(0, "成功", out);
+        return new Result<>(0, "OK", out);
     }
 
     /** 删投票（超管或楼主）：连带删票。 */
@@ -254,17 +254,17 @@ public class PollController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumPollItem item = StringUtils.isBlank(itemId) ? null : itemMapper.selectById(itemId);
         if (item == null) {
-            return new Result<>(1, "投票不存在", null);
+            return new Result<>(1, "Poll not found", null);
         }
         DreamNews news = dreamNewsService.getById(item.getNewsId());
         boolean isSuper = Role.fromUserRole(me.getUserRole()) == Role.SUPER_MANAGER;
         boolean isAuthor = news != null && StringUtils.equals(news.getAuthorId(), me.getUserId());
         if (!isSuper && !isAuthor) {
-            return new Result<>(1, "无权删除该投票", null);
+            return new Result<>(1, "You can't delete this poll", null);
         }
         voteMapper.delete(new QueryWrapper<ForumPollVote>().eq("ITEM_ID", itemId));
         itemMapper.deleteById(itemId);
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     /** 批量聚合：itemId → {count(总票数), counts{选项下标: 票数}} */

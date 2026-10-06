@@ -130,30 +130,30 @@ public class UserInformationServiceImpl extends ServiceImpl<UserInformationMappe
     */
     public UserInformation getMsgContentInit(String msgType, String msgId, String commentContent){
         UserInformation userInformation = new UserInformation();
-        String content = "消息类型错误！";
-        String contentMsg = "消息类型错误！";
+        String content = "Unknown message type";
+        String contentMsg = "Unknown message type";
         if (StringUtils.equals(GOOD_NEWS, msgType) || StringUtils.equals(BAD_NEWS, msgType)) {
             DreamNews dreamNews = dreamNewsService.getById(msgId);
             if (dreamNews != null) {
                 content = dreamNews.getContent().length() > 30 ? dreamNews.getContent().substring(0, 30) + "......" : dreamNews.getContent();
             } else {
-                content = "原帖已删除！";
+                content = "The original post has been deleted";
             }
-            contentMsg = StringUtils.equals(GOOD_NEWS, msgType) ? "点赞了您的帖子" : "点踩了您的帖子";
+            contentMsg = StringUtils.equals(GOOD_NEWS, msgType) ? "liked your post" : "disliked your post";
         } else if (StringUtils.equals(GOOD_COMMENT, msgType) || StringUtils.equals(BAD_COMMENT, msgType)) {
             DreamNewsComment dreamNewsComment = dreamNewsCommentService.getById(msgId);
             if (dreamNewsComment != null) {
                 content = dreamNewsComment.getContent().length() > 30 ? dreamNewsComment.getContent().substring(0, 30) + "......" : dreamNewsComment.getContent();
             } else {
-                content = "原评论已删除！";
+                content = "The original comment has been deleted";
             }
-            contentMsg = StringUtils.equals(GOOD_COMMENT, msgType) ? "点赞了您的评论" : "点踩了您的评论";
+            contentMsg = StringUtils.equals(GOOD_COMMENT, msgType) ? "liked your comment" : "disliked your comment";
         } else if (StringUtils.equals(COMMENT_COMMENT, msgType)) {
             DreamNewsComment dreamNewsComment = dreamNewsCommentService.getById(msgId);
             if (dreamNewsComment != null) {
                 content = dreamNewsComment.getContent().length() > 30 ? dreamNewsComment.getContent().substring(0, 30) + "......" : dreamNewsComment.getContent();
             } else {
-                content = "原评论已删除！";
+                content = "The original comment has been deleted";
             }
             contentMsg = commentContent;
         } else if (StringUtils.equals(COMMENT_NEWS, msgType)){
@@ -161,69 +161,69 @@ public class UserInformationServiceImpl extends ServiceImpl<UserInformationMappe
             if (dreamNews != null) {
                 content = dreamNews.getContent().length() > 30 ? dreamNews.getContent().substring(0, 30) + "......" : dreamNews.getContent();
             } else {
-                content = "原帖已删除！";
+                content = "The original post has been deleted";
             }
             contentMsg = commentContent;
         } else if (StringUtils.equals(MENTION_COMMENT, msgType)) {
             // msgId=评论 id：明细展示 @ 了你的那条评论原文
             DreamNewsComment dreamNewsComment = dreamNewsCommentService.getById(msgId);
-            content = dreamNewsComment == null ? "原评论已删除！"
+            content = dreamNewsComment == null ? "The original comment has been deleted"
                     : (dreamNewsComment.getContent().length() > 30 ? dreamNewsComment.getContent().substring(0, 30) + "......" : dreamNewsComment.getContent());
-            contentMsg = "在评论里@了您";
+            contentMsg = "mentioned you in a comment";
         } else if (StringUtils.equals(MENTION_NEWS, msgType)) {
             // msgId=帖子 id：明细展示帖子摘要
             DreamNews dreamNews = dreamNewsService.getById(msgId);
-            content = dreamNews == null ? "原帖已删除！"
+            content = dreamNews == null ? "The original post has been deleted"
                     : (dreamNews.getContent().length() > 30 ? dreamNews.getContent().substring(0, 30) + "......" : dreamNews.getContent());
-            contentMsg = "在帖子里@了您";
+            contentMsg = "mentioned you in a post";
         } else if (StringUtils.equals(SCHEDULE_ASSIGN, msgType) || StringUtils.equals(SCHEDULE_REMIND, msgType)
                 || StringUtils.equals(SCHEDULE_OVERDUE, msgType) || StringUtils.equals(SCHEDULE_EXPIRY, msgType)) {
             // 日程类：正文用调用方传入的摘要（指派=事件标题+日期；提醒=当日事件清单）；msgId=事件id/日期，前端据此跳日历
-            content = StringUtils.defaultIfBlank(commentContent, "日程");
-            contentMsg = StringUtils.equals(SCHEDULE_ASSIGN, msgType) ? "给你指派了一条日程"
-                    : StringUtils.equals(SCHEDULE_OVERDUE, msgType) ? "日程超时提醒"
-                    : StringUtils.equals(SCHEDULE_EXPIRY, msgType) ? "循环日程即将结束" : "今日日程提醒";
+            content = StringUtils.defaultIfBlank(commentContent, "Schedule");
+            contentMsg = StringUtils.equals(SCHEDULE_ASSIGN, msgType) ? "assigned you a schedule item"
+                    : StringUtils.equals(SCHEDULE_OVERDUE, msgType) ? "Overdue reminder"
+                    : StringUtils.equals(SCHEDULE_EXPIRY, msgType) ? "Repeat ending soon" : "Today's schedule";
         } else if (StringUtils.equals(FOLLOW, msgType)) {
             // msgId=关注者的用户 id（点击跳他的主页）。前端这一类现在不显示 content，
             // 但那是碰巧不是设计——库里躺着 "消息类型错误！" 迟早会漏到界面上。
             DreamUser follower = userService.getById(msgId);
-            content = follower == null ? "用户已注销" : follower.getUserNickname();
-            contentMsg = "关注了你";
+            content = follower == null ? "Deleted user" : follower.getUserNickname();
+            contentMsg = "followed you";
         } else if (StringUtils.equals(MENTION_CHAT, msgType)) {
             // msgId=专题 id（点击要跳回那个专题的群聊），commentContent=被 @ 的那条群聊原文。
             // 漏掉这一支的后果不是报错而是**默认值原样落库**：content 存成 "消息类型错误！"，
             // 消息列表照着显示，看起来像系统坏了。
             com.dream.basketball.entity.ForumTopic topic = forumTopicMapper.selectById(msgId);
-            content = topic == null ? "专题已删除" : topic.getName();
+            content = topic == null ? "Deleted topic" : topic.getName();
             contentMsg = StringUtils.length(commentContent) > 30
                     ? StringUtils.substring(commentContent, 0, 30) + "......"
-                    : StringUtils.defaultIfBlank(commentContent, "(图片或附件)");
+                    : StringUtils.defaultIfBlank(commentContent, "(image or attachment)");
         } else if (StringUtils.equals(MENTION_LOL, msgType) || StringUtils.equals(REPLY_LOL, msgType)) {
             // msgId=Riot 的 matchId，commentContent=那条短评/回复的原文。
             // 和 MENTION_GAME 一样不去查那一局——要展示的就是那句话本身
             content = StringUtils.length(commentContent) > 30
                     ? StringUtils.substring(commentContent, 0, 30) + "......"
-                    : StringUtils.defaultIfBlank(commentContent, "(空)");
-            contentMsg = StringUtils.equals(REPLY_LOL, msgType) ? "回复了您在对局里的短评" : "在对局短评里@了您";
+                    : StringUtils.defaultIfBlank(commentContent, "(empty)");
+            contentMsg = StringUtils.equals(REPLY_LOL, msgType) ? "replied to your match comment" : "mentioned you in a match comment";
         } else if (StringUtils.equals(MENTION_GAME, msgType) || StringUtils.equals(REPLY_GAME, msgType)) {
             // msgId=比赛 id（点击跳 /games/:gameId），commentContent=那条短评/回复的原文。
             // 这里**不去查比赛**：查一场比赛要对 player_game_stats 做 group by，
             // 而消息里真正要展示的就是那句话本身，比赛信息点进去就看到了。
             content = StringUtils.length(commentContent) > 30
                     ? StringUtils.substring(commentContent, 0, 30) + "......"
-                    : StringUtils.defaultIfBlank(commentContent, "(空)");
-            contentMsg = StringUtils.equals(REPLY_GAME, msgType) ? "回复了您的赛后短评" : "在赛后短评里@了您";
+                    : StringUtils.defaultIfBlank(commentContent, "(empty)");
+            contentMsg = StringUtils.equals(REPLY_GAME, msgType) ? "replied to your post-game comment" : "mentioned you in a post-game comment";
         } else if (StringUtils.equals(TOPIC_APPLY, msgType) || StringUtils.equals(TOPIC_APPROVED, msgType)
                 || StringUtils.equals(TOPIC_REJECTED, msgType)) {
             // msgId=专题 id：content 存专题名，供"我的消息"展示与跳转
             com.dream.basketball.entity.ForumTopic topic = forumTopicMapper.selectById(msgId);
-            content = topic == null ? "专题已删除" : topic.getName();
+            content = topic == null ? "Deleted topic" : topic.getName();
             if (StringUtils.equals(TOPIC_APPLY, msgType)) {
-                contentMsg = "申请加入你的专题";
+                contentMsg = "asked to join your topic";
             } else if (StringUtils.equals(TOPIC_APPROVED, msgType)) {
-                contentMsg = "通过了你的加入申请";
+                contentMsg = "approved your request to join";
             } else {
-                contentMsg = "驳回了你的加入申请";
+                contentMsg = "declined your request to join";
             }
         }
         userInformation.setContent(content);

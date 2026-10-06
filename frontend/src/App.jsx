@@ -45,7 +45,6 @@ import UserManageDetail from './pages/admin/UserManageDetail'
  * - /login、/403 是独立页（不套外壳）。
  * - "/" 套 AppLayout 外壳，子页面渲染进它的 <Outlet/>。
  * - 公开页直接放；需登录的用 <ProtectedRoute>；需角色的用 <RoleRoute>。
- * 业务页现用 <Placeholder> 占位，P5-2 逐屏替换为真实页面。
  */
 /** 落地页：默认进百家说；若该用户被禁用百家说，顺延到下一个可用模块，避免与守卫来回弹造成循环。 */
 function HomeRedirect() {

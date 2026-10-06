@@ -8,7 +8,6 @@ import { userInformationApi } from '../../api/userInformation'
 import { useAuth } from '../../auth/AuthContext'
 import { actionTextOf, detailOf, linkOf } from '../../utils/notification'
 import PushToggle from '../../components/PushToggle'
-import { useTranslation } from 'react-i18next'
 
 const fmt = (v) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '')
 
@@ -21,7 +20,6 @@ const fmt = (v) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '')
  * 时把它传给后端即标记已读（复用老逻辑，无需单独的已读接口）。
  */
 export default function MyMessages() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const { dn } = useAuth() // 备注名：我给谁备注过，这里也要显示备注名
   const actionRef = useRef()
@@ -29,11 +27,11 @@ export default function MyMessages() {
   const readAll = async () => {
     try {
       const res = await userInformationApi.readAll()
-      message.success(res?.msg || t("已全部标记为已读"))
+      message.success(res?.msg || 'All marked as read')
       actionRef.current?.reload()
       window.dispatchEvent(new Event('unread-changed')) // 顶栏红点同步归零
     } catch (e) {
-      message.error(e?.msg || t("操作失败"))
+      message.error(e?.msg || 'Action failed')
     }
   }
 
@@ -41,12 +39,12 @@ export default function MyMessages() {
     <ProList
       actionRef={actionRef}
       rowKey="userInformationId"
-      headerTitle={t("我的消息")}
+      headerTitle="Notifications"
       toolBarRender={() => [
         // 推送开关放这儿：这一页就是「我的通知」，想开关通知的人自然会来这儿找，
         // 埋进设置页反而没人找得到
         <PushToggle key="push" />,
-        <Button key="readall" icon={<CheckOutlined />} onClick={readAll}>{t("一键已读")}</Button>,
+        <Button key="readall" icon={<CheckOutlined />} onClick={readAll}>Mark all read</Button>,
       ]}
       pagination={{ pageSize: 10 }}
       request={async (params) => {
@@ -61,18 +59,18 @@ export default function MyMessages() {
               <a onClick={() => navigate(linkOf(m))}>
                 {unread && <Badge status="processing" style={{ marginRight: 6 }} />}
                 <span style={{ fontWeight: unread ? 600 : 400 }}>
-                  {dn(m.operatorId, m.operatorName) || t("有人")} {actionTextOf(m, t)}
+                  {dn(m.operatorId, m.operatorName) || 'Someone'} {actionTextOf(m)}
                 </span>
               </a>
             )
           },
         },
         description: {
-          render: (_, m) => detailOf(m, t),
+          render: (_, m) => detailOf(m),
         },
         actions: {
           render: (_, m) => [
-            m.whetherRead === 'toRead' ? <Tag key="s" color="blue">{t("未读")}</Tag> : <Tag key="s">{t("已读")}</Tag>,
+            m.whetherRead === 'toRead' ? <Tag key="s" color="blue">Unread</Tag> : <Tag key="s">Read</Tag>,
             <span key="t" style={{ color: '#aaa' }}>{fmt(m.msgDate)}</span>,
           ],
         },

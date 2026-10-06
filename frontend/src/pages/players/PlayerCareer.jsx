@@ -6,9 +6,9 @@ import { BarChartOutlined, FireOutlined, IdcardOutlined, TrophyOutlined } from '
 import { playerApi } from '../../api/player'
 import { withGlossary } from './statGlossary'
 import StatViewSwitch from './StatViewSwitch'
-import { CAREER_SEASON, NBA_TEAM_NAMES, PLAYOFF_TAG, fmtNum as num, fmtPair, seasonShort, fmtPct, displayName, seasonYears } from './rankConfig'
+import { CAREER_SEASON, NBA_TEAM_NAMES, PLAYOFF_TAG, fmtNum as num, fmtPair, seasonShort, fmtPct, displayName, seasonYears, teamName } from './rankConfig'
 import { CAREER_AWARDS } from './honorConfig'
-import { advColWidth, compactColumns, renderAppearance, sumColWidth } from './statColumns'
+import { advColWidth, compactColumns, renderAllTeam, renderAppearance, sumColWidth } from './statColumns'
 import { ADVANCED_STATS, fmtAdv } from './rankConfig'
 import TeamLogo, { TeamNames } from '../../components/TeamLogo'
 import SeasonProfile from './SeasonProfile'
@@ -17,15 +17,12 @@ import GameLogTable from './GameLog'
 import { SEASON_TYPE, useGameLogSeasons } from './gameLogConfig'
 import useUrlState from '../../hooks/useUrlState'
 import useIsMobile from '../../hooks/useIsMobile'
-import { useTranslation } from 'react-i18next'
-import i18n from '../../i18n'
 
 const shortSeason = (s) => seasonYears(s)
 
 /* ============ 生涯荣誉（荣誉柜） ============ */
 
 function AwardCard({ award, entries }) {
-  const { t } = useTranslation()
   const isChampion = award.key === 'champion'
   const isMobile = useIsMobile()
   return (
@@ -41,7 +38,7 @@ function AwardCard({ award, entries }) {
         <span style={{ fontSize: isMobile ? 26 : 34, lineHeight: 1 }}>{award.icon}</span>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>
-            {t(award.label)}
+            {award.label}
             <span style={{ marginLeft: 8, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: award.gold ? '#d48806' : '#fa541c' }}>
               ×{entries.length}
             </span>
@@ -60,13 +57,12 @@ function AwardCard({ award, entries }) {
 }
 
 function HonorShelf({ honors }) {
-  const { t } = useTranslation()
   if (!honors) return <Spin style={{ display: 'block', margin: '40px auto' }} />
   const owned = CAREER_AWARDS.map((a) => ({ award: a, entries: honors[a.key] || [] })).filter((x) => x.entries.length > 0)
-  if (!owned.length) return <Empty description={t("生涯暂无主要荣誉——还在拼搏的路上")} />
+  if (!owned.length) return <Empty description="No major honors yet. Still on the way" />
 
   // 顶部速览条：只列拿过的荣誉计数
-  const summary = owned.map((x) => `${x.award.icon} ${t(x.award.label)} ×${x.entries.length}`).join('　')
+  const summary = owned.map((x) => `${x.award.icon} ${x.award.label} ×${x.entries.length}`).join(' · ')
 
   return (
     <>
@@ -89,10 +85,10 @@ function HonorShelf({ honors }) {
 
 /** 逐季表的高阶列：赛季/球队/出场打头，后面接共享的高阶指标定义 */
 const advSeasonColumns = () => withGlossary([
-  { title: i18n.t("赛季"), dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? i18n.t("生涯") : seasonShort(s)) },
-  { title: i18n.t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+  { title: 'Season', dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? 'Career' : seasonShort(s)) },
+  { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
   // 出场不重复（基础表的「首发/出场」已有），时间留着——率值要配上场时间才读得懂
-  { title: i18n.t("时间"), dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
+  { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
   // 正负值原来只在这儿、还只对季后赛开（常规赛那时拿不到），现在两张基础表都有了，这里不重复
   ...ADVANCED_STATS.map((a) => ({
     title: a.label,
@@ -105,37 +101,36 @@ const advSeasonColumns = () => withGlossary([
 /* ============ Tab 1：生涯逐季数据 ============ */
 
 function CareerTable({ playerId }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [view, setView] = useState('basic')
   const basicColumns = [
-    { title: t("赛季"), dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? t("生涯") : seasonShort(s)) },
-    { title: t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
-    { title: t("位置"), dataIndex: 'playerPosition', width: 46 },
-    { title: t("首发/出场"), dataIndex: 'playerAppearance', width: 94, render: renderAppearance },
-    { title: t("时间"), dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
-    { title: t("得分"), dataIndex: 'playerAvgScore', width: 48, render: (v) => num(v) },
-    { title: t("篮板"), dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
-    { title: t("助攻"), dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
-    { title: t("投篮"), dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
-    { title: t("投篮%"), dataIndex: 'playerAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("三分"), dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
-    { title: t("三分%"), dataIndex: 'playerThreeAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("罚球"), dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
-    { title: t("罚球%"), dataIndex: 'playerFreethrowAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("前板"), dataIndex: 'playerAvgOffReb', width: 48, render: (v) => num(v) },
-    { title: t("后板"), dataIndex: 'playerAvgDefReb', width: 48, render: (v) => num(v) },
-    { title: t("盖帽"), dataIndex: 'playerAvgBlock', width: 48, render: (v) => num(v) },
-    { title: t("抢断"), dataIndex: 'playerAvgSteal', width: 48, render: (v) => num(v) },
-    { title: t("失误"), dataIndex: 'playerAvgTurnover', width: 48, render: (v) => num(v) },
-    { title: t("犯规"), dataIndex: 'playerAvgPf', width: 48, render: (v) => num(v) },
+    { title: 'Season', dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? 'Career' : seasonShort(s)) },
+    { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+    { title: 'Pos', dataIndex: 'playerPosition', width: 46 },
+    { title: 'GS/GP', dataIndex: 'playerAppearance', width: 94, render: renderAppearance },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
+    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => num(v) },
+    { title: 'REB', dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
+    { title: 'AST', dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
+    { title: 'FG', dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
+    { title: 'FG%', dataIndex: 'playerAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: '3P', dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
+    { title: '3P%', dataIndex: 'playerThreeAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: 'FT', dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
+    { title: 'FT%', dataIndex: 'playerFreethrowAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: 'ORB', dataIndex: 'playerAvgOffReb', width: 48, render: (v) => num(v) },
+    { title: 'DRB', dataIndex: 'playerAvgDefReb', width: 48, render: (v) => num(v) },
+    { title: 'BLK', dataIndex: 'playerAvgBlock', width: 48, render: (v) => num(v) },
+    { title: 'STL', dataIndex: 'playerAvgSteal', width: 48, render: (v) => num(v) },
+    { title: 'TOV', dataIndex: 'playerAvgTurnover', width: 48, render: (v) => num(v) },
+    { title: 'PF', dataIndex: 'playerAvgPf', width: 48, render: (v) => num(v) },
     // 常规赛的正负值来自逐场累加（赛季汇总表没这项），1997 起有值，更早的整季留空
-    { title: t("正负值"), dataIndex: 'playerAvgPn', width: 62, render: (v) => num(v) },
-    { title: t("效率值"), dataIndex: 'playerPer', width: 78, render: (v) => num(v) },
+    { title: '+/-', dataIndex: 'playerAvgPn', width: 62, render: (v) => num(v) },
+    { title: 'PER', dataIndex: 'playerPer', width: 78, render: (v) => num(v) },
     { title: 'MVP', dataIndex: 'mvpRank', width: 50 },
     { title: 'DPOY', dataIndex: 'dpoyRank', width: 56 },
-    { title: t("最佳阵容"), dataIndex: 'allDbaTeam', width: 72 },
-    { title: t("最佳防守"), dataIndex: 'allDefTeam', width: 72 },
+    { title: 'All-NBA', dataIndex: 'allDbaTeam', width: 72, render: renderAllTeam },
+    { title: 'All-Def', dataIndex: 'allDefTeam', width: 72, render: renderAllTeam },
   ]
 
   const columns = view === 'adv' ? advSeasonColumns() : basicColumns
@@ -172,7 +167,6 @@ function CareerTable({ playerId }) {
 /* ============ Tab 2：季后赛逐季数据 ============ */
 
 function PlayoffTable({ playerId }) {
-  const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [view, setView] = useState('basic')
   const [rows, setRows] = useState(null)
@@ -187,34 +181,35 @@ function PlayoffTable({ playerId }) {
   }, [playerId])
 
   if (rows === null) return <Spin style={{ display: 'block', margin: '40px auto' }} />
-  if (!rows.length) return <Empty description={t("生涯未进过季后赛")} />
+  if (!rows.length) return <Empty description="Never made the playoffs" />
 
   const basicColumns = [
-    { title: t("赛季"), dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? t("生涯") : seasonShort(s)) },
-    { title: t("球队"), dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
+    { title: 'Season', dataIndex: 'seasonNum', width: 64, fixed: 'left', render: (s) => (s === CAREER_SEASON ? 'Career' : seasonShort(s)) },
+    { title: 'Team', dataIndex: 'playerTeam', width: 78, render: (v) => <TeamNames value={v} /> },
     {
-      title: t("成绩"), dataIndex: 'playoffResult', width: 92,
+      // playoffResult 是库里的身份值（Champion / Finals / …），颜色按它查，文字原样显示
+      title: 'Record', dataIndex: 'playoffResult', width: 92,
       render: (v) => (v ? <Tag color={PLAYOFF_TAG[v] || 'default'}>{v}</Tag> : '-'),
     },
-    { title: t("首发/出场"), dataIndex: 'playerAppearance', width: 94, render: (_, r) => `${r.playerFrAppearance ?? 0}/${r.playerAppearance ?? 0}` },
-    { title: t("时间"), dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
-    { title: t("得分"), dataIndex: 'playerAvgScore', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{num(v)}</b> },
-    { title: t("篮板"), dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
-    { title: t("助攻"), dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
-    { title: t("投篮"), dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
-    { title: t("投篮%"), dataIndex: 'playerAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("三分"), dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
-    { title: t("三分%"), dataIndex: 'playerThreeAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("罚球"), dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
-    { title: t("罚球%"), dataIndex: 'playerFreethrowAccuracy', width: 56, render: (v) => fmtPct(v) },
-    { title: t("前板"), dataIndex: 'playerAvgOffReb', width: 48, render: (v) => num(v) },
-    { title: t("后板"), dataIndex: 'playerAvgDefReb', width: 48, render: (v) => num(v) },
-    { title: t("盖帽"), dataIndex: 'playerAvgBlock', width: 48, render: (v) => num(v) },
-    { title: t("抢断"), dataIndex: 'playerAvgSteal', width: 48, render: (v) => num(v) },
-    { title: t("失误"), dataIndex: 'playerAvgTurnover', width: 48, render: (v) => num(v) },
-    { title: t("犯规"), dataIndex: 'playerAvgPf', width: 48, render: (v) => num(v) },
-    { title: t("正负值"), dataIndex: 'playerAvgPn', width: 62, render: (v) => num(v) },
-    { title: t("效率值"), dataIndex: 'playerPer', width: 78, render: (v) => num(v) },
+    { title: 'GS/GP', dataIndex: 'playerAppearance', width: 94, render: (_, r) => `${r.playerFrAppearance ?? 0}/${r.playerAppearance ?? 0}` },
+    { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
+    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{num(v)}</b> },
+    { title: 'REB', dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
+    { title: 'AST', dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
+    { title: 'FG', dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
+    { title: 'FG%', dataIndex: 'playerAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: '3P', dataIndex: 'playerAvgTpm', width: 88, render: (_, r) => fmtPair(r.playerAvgTpm, r.playerAvgTpa) },
+    { title: '3P%', dataIndex: 'playerThreeAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: 'FT', dataIndex: 'playerAvgFtm', width: 88, render: (_, r) => fmtPair(r.playerAvgFtm, r.playerAvgFta) },
+    { title: 'FT%', dataIndex: 'playerFreethrowAccuracy', width: 56, render: (v) => fmtPct(v) },
+    { title: 'ORB', dataIndex: 'playerAvgOffReb', width: 48, render: (v) => num(v) },
+    { title: 'DRB', dataIndex: 'playerAvgDefReb', width: 48, render: (v) => num(v) },
+    { title: 'BLK', dataIndex: 'playerAvgBlock', width: 48, render: (v) => num(v) },
+    { title: 'STL', dataIndex: 'playerAvgSteal', width: 48, render: (v) => num(v) },
+    { title: 'TOV', dataIndex: 'playerAvgTurnover', width: 48, render: (v) => num(v) },
+    { title: 'PF', dataIndex: 'playerAvgPf', width: 48, render: (v) => num(v) },
+    { title: '+/-', dataIndex: 'playerAvgPn', width: 62, render: (v) => num(v) },
+    { title: 'PER', dataIndex: 'playerPer', width: 78, render: (v) => num(v) },
   ]
 
   const columns = view === 'adv' ? advSeasonColumns() : basicColumns
@@ -246,7 +241,6 @@ function PlayoffTable({ playerId }) {
  * 常规赛回补进来之后，同一个开关会自动长在常规赛页签上，不用改代码。
  */
 function StagePane({ playerId, seasonType, seasons, children }) {
-  const { t } = useTranslation()
   // 同样写进 URL——从「逐场数据」点开一场比赛再返回，要回到逐场表而不是逐季汇总
   const [view, setView] = useUrlState('view', 'season')
   const hasLog = !!seasons?.length
@@ -262,7 +256,7 @@ function StagePane({ playerId, seasonType, seasons, children }) {
           <Segmented
             value={shown}
             onChange={setView}
-            options={[{ label: t("逐季汇总"), value: 'season' }, { label: t("逐场数据"), value: 'game' }]}
+            options={[{ label: 'By Season', value: 'season' }, { label: 'Game Log', value: 'game' }]}
           />
         </div>
       )}
@@ -278,15 +272,14 @@ function StagePane({ playerId, seasonType, seasons, children }) {
 
 // 分段器选项（品牌橙胶囊，与数据概览同一设计语言）
 const TAB_OPTIONS = [
-  { value: 'profile', icon: <IdcardOutlined />, text: '赛季资料卡' },
-  { value: 'career', icon: <BarChartOutlined />, text: '常规赛数据' },
-  { value: 'playoffs', icon: <FireOutlined />, text: '季后赛数据' },
-  { value: 'honors', icon: <TrophyOutlined />, text: '生涯荣誉' },
+  { value: 'profile', icon: <IdcardOutlined />, text: 'Season Profile' },
+  { value: 'career', icon: <BarChartOutlined />, text: 'Regular Season Stats' },
+  { value: 'playoffs', icon: <FireOutlined />, text: 'Playoff Stats' },
+  { value: 'honors', icon: <TrophyOutlined />, text: 'Career Honors' },
 ]
 
 /** 球员主页（/players/:playerId）：身份头 + 赛季资料卡 / 生涯数据 / 生涯荣誉 */
 export default function PlayerCareer() {
-  const { t } = useTranslation()
   const { playerId } = useParams()
   const isMobile = useIsMobile()
   const [honors, setHonors] = useState(null)
@@ -352,19 +345,16 @@ export default function PlayerCareer() {
                 <span style={{ marginLeft: 8, fontSize: isMobile ? 13 : 14, fontWeight: 800, color: '#fa541c' }}>#{honors.playerNumber}</span>
               )}
             </div>
-            {/* 英文原名独立一行（未汉化时两者相同则不重复展示） */}
-            {/* 副标题永远是「另一种」名字：中文界面下配英文原名，英文界面下配中文名 */}
-            {honors?.nameEn && honors.nameEn !== honors.playerName && (
-              <div style={{ color: '#999', fontSize: 13, fontStyle: 'italic' }}>{i18n.language === 'en' ? honors.playerName : honors.nameEn}</div>
-            )}
+            {/* 名字下面原来还有一行「另一种名字」（中文界面配英文原名、英文界面配中文名）。
+                网站改成只保留英文、主名字已经是英文原名，那一行只剩中文译名，读者用不上，整行去掉 */}
             {/* 手机上省掉括号里的注解，否则右边那枚队标一挤，这行会从「冠军」中间断开 */}
             <div style={{ color: '#999', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               {/* 选秀标签排在荣誉说明前面：它是这名球员的出身，先于他后来打成什么样 */}
               <DraftTag draft={honors?.draft} size={isMobile ? 'small' : 'normal'} />
               <span>
                 {goldCount > 0
-                  ? t("顶级荣誉 ×{{goldCount}}{{v1}}", { goldCount, v1: isMobile ? '' : t('（冠军/MVP/DPOY）') })
-                  : t("生涯逐季数据与荣誉")}
+                  ? `Top honors ×${goldCount}${isMobile ? '' : ' (titles/MVP/DPOY)'}`
+                  : 'Career stats & honors by season'}
               </span>
             </div>
           </div>
@@ -373,7 +363,7 @@ export default function PlayerCareer() {
           // 点队标进这支球队的页面，并停在资料卡当前选中的那个赛季（生涯档没有单一赛季，不带参数）
           <Link
             to={`/players/team/${teamCode}${seasonNum && seasonNum !== CAREER_SEASON ? `?seasonNum=${seasonNum}` : ''}`}
-            title={t("查看 {{v0}}", { v0: NBA_TEAM_NAMES[teamCode] })}
+            title={`View ${teamName(teamCode)}`}
             style={{ flexShrink: 0, lineHeight: 0 }}
           >
             <TeamLogo code={teamCode} size={isMobile ? 60 : 76} />

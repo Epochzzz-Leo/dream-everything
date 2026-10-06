@@ -17,10 +17,10 @@ import LolBind from '../pages/lol/LolBind'
  * 绑定是一辈子点一次的——把一次性的功能放在第一个会让人每次进来都先看见它。
  */
 export const LOL_SECTIONS = [
-  { key: null, label: '讨论区', icon: <CommentOutlined />, render: null },
-  { key: 'feed', label: '战绩流', icon: <UnorderedListOutlined />, render: () => <LolFeed /> },
-  { key: 'board', label: '榜单', icon: <TrophyOutlined />, render: () => <LolBoard /> },
-  { key: 'bind', label: '绑定账号', icon: <LinkOutlined />, render: () => <LolBind /> },
+  { key: null, label: 'Discussion', icon: <CommentOutlined />, render: null },
+  { key: 'feed', label: 'Match Feed', icon: <UnorderedListOutlined />, render: () => <LolFeed /> },
+  { key: 'board', label: 'Leaderboards', icon: <TrophyOutlined />, render: () => <LolBoard /> },
+  { key: 'bind', label: 'Link Account', icon: <LinkOutlined />, render: () => <LolBind /> },
 ]
 
 /**

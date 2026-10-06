@@ -102,13 +102,13 @@ public class TopicFileController {
     /** 这个专题的文件功能开着、而且这个人能看它，返回 null；否则给出拒绝理由 */
     private String gateView(DreamUser me, ForumTopic t) {
         if (t == null) {
-            return "专题不存在";
+            return "Topic not found";
         }
         if (!ON.equals(t.getFilesEnabled())) {
-            return "该专题未开放文件系统";
+            return "This topic's Files section is turned off";
         }
         if (!perms.canView(me, t)) {
-            return "无权查看该专题";
+            return "You don't have permission to view this topic";
         }
         return null;
     }
@@ -121,7 +121,7 @@ public class TopicFileController {
         ForumTopicFile p = fileMapper.selectById(parentId.trim());
         if (p == null || !KIND_FOLDER.equals(p.getKind())
                 || !StringUtils.equals(p.getTopicId(), topicId)) {
-            throw new IllegalArgumentException("目标文件夹不存在");
+            throw new IllegalArgumentException("Target folder not found");
         }
         return p;
     }
@@ -201,7 +201,7 @@ public class TopicFileController {
         data.put("files", files);
         data.put("path", new ArrayList<>(crumbs));
         data.put("canManage", perms.canManage(me, t));
-        return new Result<>(0, "成功", data);
+        return new Result<>(0, "OK", data);
     }
 
     @RequiresRole(Role.USER)
@@ -214,14 +214,14 @@ public class TopicFileController {
             return new Result<>(1, no, null);
         }
         if (!perms.canManage(me, t)) {
-            return new Result<>(1, "只有题主能管理文件", null);
+            return new Result<>(1, "Only the owner can manage files", null);
         }
         String nm = StringUtils.trimToEmpty(name);
         if (nm.isEmpty()) {
-            return new Result<>(1, "文件夹名不能为空", null);
+            return new Result<>(1, "Folder name can't be empty", null);
         }
         if (nm.length() > NAME_MAX) {
-            return new Result<>(1, "名字最多 " + NAME_MAX + " 个字", null);
+            return new Result<>(1, "Names can be up to " + NAME_MAX + " characters", null);
         }
         ForumTopicFile folder;
         try {
@@ -243,10 +243,10 @@ public class TopicFileController {
         Map<String, Object> data = new HashMap<>();
         if (exist != null) {
             data.put("fileId", exist.getFileId());
-            return new Result<>(0, "已存在", data);
+            return new Result<>(0, "Already exists", data);
         }
         if (countIn(t.getTopicId(), folder) >= FOLDER_CAP) {
-            return new Result<>(1, "这个文件夹放不下了（上限 " + FOLDER_CAP + " 项）", null);
+            return new Result<>(1, "This folder is full (limit " + FOLDER_CAP + " items)", null);
         }
         ForumTopicFile f = new ForumTopicFile();
         f.setFileId(UUID.randomUUID().toString());
@@ -258,7 +258,7 @@ public class TopicFileController {
         f.setCreateTime(new Date());
         fileMapper.insert(f);
         data.put("fileId", f.getFileId());
-        return new Result<>(0, "已创建", data);
+        return new Result<>(0, "Created", data);
     }
 
     /**
@@ -277,7 +277,7 @@ public class TopicFileController {
             return new Result<>(1, no, null);
         }
         if (!perms.canManage(me, t)) {
-            return new Result<>(1, "只有题主能管理文件", null);
+            return new Result<>(1, "Only the owner can manage files", null);
         }
         ForumTopicFile folder;
         try {
@@ -286,7 +286,7 @@ public class TopicFileController {
             return new Result<>(1, e.getMessage(), null);
         }
         if (countIn(t.getTopicId(), folder) >= FOLDER_CAP) {
-            return new Result<>(1, "这个文件夹放不下了（上限 " + FOLDER_CAP + " 项）", null);
+            return new Result<>(1, "This folder is full (limit " + FOLDER_CAP + " items)", null);
         }
         String url;
         try {
@@ -294,7 +294,7 @@ public class TopicFileController {
         } catch (IllegalArgumentException e) {
             return new Result<>(1, e.getMessage(), null);
         } catch (IOException e) {
-            return new Result<>(1, "存储失败，请重试", null);
+            return new Result<>(1, "Couldn't save the file. Please try again", null);
         }
         // 原始名只留最后一段，去掉控制字符；空了就退回落盘名
         String raw = StringUtils.defaultString(file.getOriginalFilename());
@@ -322,7 +322,7 @@ public class TopicFileController {
         Map<String, Object> data = new HashMap<>();
         data.put("fileId", f.getFileId());
         data.put("url", url);
-        return new Result<>(0, "已上传", data);
+        return new Result<>(0, "Uploaded", data);
     }
 
     @RequiresRole(Role.USER)
@@ -331,22 +331,22 @@ public class TopicFileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopicFile f = fileMapper.selectById(StringUtils.trimToEmpty(fileId));
         if (f == null) {
-            return new Result<>(1, "文件不存在", null);
+            return new Result<>(1, "File not found", null);
         }
         ForumTopic t = perms.getTopic(f.getTopicId());
         if (t == null || !perms.canManage(me, t)) {
-            return new Result<>(1, "只有题主能管理文件", null);
+            return new Result<>(1, "Only the owner can manage files", null);
         }
         String nm = StringUtils.trimToEmpty(name);
         if (nm.isEmpty()) {
-            return new Result<>(1, "名字不能为空", null);
+            return new Result<>(1, "Name can't be empty", null);
         }
         if (nm.length() > NAME_MAX) {
-            return new Result<>(1, "名字最多 " + NAME_MAX + " 个字", null);
+            return new Result<>(1, "Names can be up to " + NAME_MAX + " characters", null);
         }
         f.setName(nm);
         fileMapper.updateById(f);
-        return new Result<>(0, "已改名", null);
+        return new Result<>(0, "Renamed", null);
     }
 
     /**
@@ -361,11 +361,11 @@ public class TopicFileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopicFile f = fileMapper.selectById(StringUtils.trimToEmpty(fileId));
         if (f == null) {
-            return new Result<>(0, "已删除", null);   // 已经没了，当成功
+            return new Result<>(0, "Deleted", null);   // 已经没了，当成功
         }
         ForumTopic t = perms.getTopic(f.getTopicId());
         if (t == null || !perms.canManage(me, t)) {
-            return new Result<>(1, "只有题主能管理文件", null);
+            return new Result<>(1, "Only the owner can manage files", null);
         }
         // 宽度优先收集整棵子树。一层一查而不是递归到库里逐个点名，
         // 文件夹一般就几层，几次查询完事
@@ -402,7 +402,7 @@ public class TopicFileController {
                 store.delete(FileUtils.keyOf(url));
             }
         }
-        return new Result<>(0, "已删除", null);
+        return new Result<>(0, "Deleted", null);
     }
 
     /**
@@ -439,16 +439,16 @@ public class TopicFileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopicFile f = fileMapper.selectById(StringUtils.trimToEmpty(fileId));
         ForumTopic t = f == null ? null : perms.getTopic(f.getTopicId());
-        String no = f == null ? "文件不存在" : gateView(me, t);
+        String no = f == null ? "File not found" : gateView(me, t);
         if (no != null) {
             return new Result<>(1, no, null);
         }
         if (!KIND_FILE.equals(f.getKind())) {
-            return new Result<>(1, "文件夹请用打包下载", null);
+            return new Result<>(1, "Use Download as zip for folders", null);
         }
         String url = store.presignedGet(FileUtils.keyOf(f.getUrl()), f.getName(), presignTtl);
         return url == null
-                ? new Result<>(1, "直链不可用", null)
+                ? new Result<>(1, "A direct link isn't available", null)
                 : new Result<>(0, "ok", Collections.singletonMap("url", url));
     }
 
@@ -458,7 +458,7 @@ public class TopicFileController {
         DreamUser me = SecUtil.getLoginUserToSession(request);
         ForumTopicFile f = fileMapper.selectById(StringUtils.trimToEmpty(fileId));
         ForumTopic t = f == null ? null : perms.getTopic(f.getTopicId());
-        String no = f == null ? "文件不存在" : gateView(me, t);
+        String no = f == null ? "File not found" : gateView(me, t);
         if (no != null) {
             response.setStatus(404);
             response.setContentType("application/json;charset=UTF-8");

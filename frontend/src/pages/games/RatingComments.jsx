@@ -5,7 +5,6 @@ import dayjs from 'dayjs'
 import { scoreColor } from '../../api/gameRating'
 import MentionTextArea from '../../components/MentionTextArea'
 import { renderMentions } from '../../components/mentionText'
-import { useTranslation } from 'react-i18next'
 
 /**
  * 短评列表 + 回复。比赛短评和球员短评共用这一个。
@@ -37,10 +36,10 @@ const avatarColor = (name) => {
 }
 
 function UserAvatar({ name, src, size }) {
-  const { t } = useTranslation()
   return src ? <Avatar size={size} src={src} style={{ flexShrink: 0 }} /> : (
     <Avatar size={size} style={{ flexShrink: 0, background: avatarColor(name), fontWeight: 700 }}>
-      {String(name || t("匿"))[0].toUpperCase()}
+      {/* 不对译文取首字：没名字时直接显示「匿」这个 key 的译文 */}
+      {name ? String(name)[0].toUpperCase() : 'Anon'}
     </Avatar>
   )
 }
@@ -48,9 +47,8 @@ function UserAvatar({ name, src, size }) {
 export default function RatingComments({
   comments, replies, meId, onReply, onDeleteReply, onDeleteComment, emptyText: emptyTextProp,
 }) {
-  const { t } = useTranslation()
   // 默认值不能写在参数列表里：那时 hook 还没跑，t 不存在
-  const emptyText = emptyTextProp ?? t("还没有人说话")
+  const emptyText = emptyTextProp ?? 'No comments yet'
   const [page, setPage] = useState(1)
   // 哪一条的回复框开着，以及回复给谁。开一个而不是全开：
   // 全部展开的话每条短评下面都挂一个输入框，列表读起来全是空盒子
@@ -88,12 +86,12 @@ export default function RatingComments({
             <UserAvatar name={c.nickname} src={c.avatar} size={32} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 600, fontSize: 13 }}>{c.nickname || t("（未知）")}</span>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>{c.nickname || '(unknown)'}</span>
                 {/* 作者当前的分。**现查不是快照**——分可以改，存快照的话
                     同一个人的两条短评会显示两个不同的分 */}
                 {c.myScore != null && (
                   <span style={{ color: scoreColor(c.myScore), fontWeight: 800, fontSize: 14 }}>
-                    {t("{{score}} 分", { score: c.myScore })}
+                    {`${c.myScore}/5`}
                   </span>
                 )}
                 <span style={{ color: '#ccc', fontSize: 12, marginLeft: 'auto' }}>
@@ -111,10 +109,11 @@ export default function RatingComments({
                     <div key={r.replyId} style={{ display: 'flex', gap: 7, padding: '5px 0' }}>
                       <UserAvatar name={r.nickname} src={r.avatar} size={22} />
                       <div style={{ flex: 1, minWidth: 0, fontSize: 13 }}>
-                        <span style={{ fontWeight: 600 }}>{r.nickname || t("（未知）")}</span>
+                        <span style={{ fontWeight: 600 }}>{r.nickname || '(unknown)'}</span>
                         {r.replyToName && (
                           <span style={{ color: '#999' }}>
-                            {' '}{t("回复")}{' '}
+                            {/* 这里是「replied to @某人」，和按钮上的 Reply 是两回事 */}
+                            {' '}replied to{' '}
                             <span style={{ color: '#1677ff' }}>@{r.replyToName}</span>
                           </span>
                         )}
@@ -128,12 +127,12 @@ export default function RatingComments({
                             onClick={() => openReply(c.commentId, r.userId, r.nickname)}
                             style={{ color: '#bbb', fontSize: 12 }}
                           >
-                            <MessageOutlined /> {t("回复")}
+                            <MessageOutlined /> Reply
                           </a>
                           {r.userId === meId && (
-                            <Popconfirm title={t("删除这条回复？")} okText={t("删除")} okButtonProps={{ danger: true }}
+                            <Popconfirm title="Delete this reply?" okText="Delete" okButtonProps={{ danger: true }}
                               onConfirm={() => onDeleteReply(r.replyId)}>
-                              <a style={{ color: '#ff4d4f', fontSize: 12 }}><DeleteOutlined /> {t("删除")}</a>
+                              <a style={{ color: '#ff4d4f', fontSize: 12 }}><DeleteOutlined /> Delete</a>
                             </Popconfirm>
                           )}
                         </div>
@@ -148,14 +147,14 @@ export default function RatingComments({
                   <MentionTextArea
                     value={draft}
                     onChange={setDraft}
-                    placeholder={replyAt.toName ? t("回复 @{{toName}}", { toName: replyAt.toName }) : t("回复 {{v0}}", { v0: c.nickname || '' })}
+                    placeholder={replyAt.toName ? `Reply to @${replyAt.toName}` : `Reply ${c.nickname || ''}`}
                     maxLength={300}
                     autoSize={{ minRows: 1, maxRows: 4 }}
                     autoFocus
                     style={{ minWidth: 160 }}
                   />
-                  <Button size="small" type="primary" onClick={submit}>{t("发送")}</Button>
-                  <Button size="small" onClick={() => setReplyAt(null)}>{t("取消")}</Button>
+                  <Button size="small" type="primary" onClick={submit}>Send</Button>
+                  <Button size="small" onClick={() => setReplyAt(null)}>Cancel</Button>
                 </div>
               ) : (
                 <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
@@ -163,15 +162,15 @@ export default function RatingComments({
                     onClick={() => openReply(c.commentId, null, null)}
                     style={{ color: '#bbb', fontSize: 12 }}
                   >
-                    <MessageOutlined /> {t("回复")}{rs.length > 0 ? ` (${rs.length})` : ''}
+                    <MessageOutlined /> Reply{rs.length > 0 ? ` (${rs.length})` : ''}
                   </a>
                   {/* 只能删不能改：改会让别人已经回复过的话悄悄变成另一句，
                       删不会——回复跟着一起消失，不留答非所问的残句 */}
                   {c.userId === meId && (
-                    <Popconfirm title={t("删除这条短评？底下的回复一并删除")} okText={t("删除")}
+                    <Popconfirm title="Delete this comment? Its replies go too" okText="Delete"
                       okButtonProps={{ danger: true }}
                       onConfirm={() => onDeleteComment?.(c.commentId)}>
-                      <a style={{ color: '#ff4d4f', fontSize: 12 }}><DeleteOutlined /> {t("删除")}</a>
+                      <a style={{ color: '#ff4d4f', fontSize: 12 }}><DeleteOutlined /> Delete</a>
                     </Popconfirm>
                   )}
                 </div>
