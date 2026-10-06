@@ -49,7 +49,7 @@ DOMAINS = OrderedDict([
         'forum_category', 'forum_topic', 'forum_topic_member', 'forum_topic_join_request',
         'forum_topic_file', 'topic_subscription', 'topic_pin', 'topic_seen',
         'topic_chat_message', 'topic_chat_read',
-        'dream_news', 'dream_news_comment', 'news_favorite', 'news_viewer',
+        'dream_news', 'dream_news_comment', 'news_favorite', 'news_viewer', 'user_event',
         'forum_rating_item', 'forum_rating_vote', 'forum_poll_item', 'forum_poll_vote',
     ]),
     ('日程', ['schedule_event', 'schedule_recur_done']),
@@ -98,6 +98,8 @@ RELATIONS = {
         'dream_news_comment ||--o{ dream_news_comment : "COMMENT_REL_ID 楼中楼"',
         'dream_news ||--o{ news_favorite : "收藏"',
         'dream_news ||--o{ news_viewer : "浏览去重"',
+        'dream_news ||--o{ user_event : "行为记录"',
+        'dream_user ||--o{ user_event : "USER_ID（访客为空）"',
         'dream_news ||--o{ forum_rating_item : "帖内打分项"',
         'forum_rating_item ||--o{ forum_rating_vote : "打分票"',
         'dream_news ||--o{ forum_poll_item : "帖内投票项"',
@@ -143,6 +145,11 @@ RELATIONS = {
 
 # 各域图下面的补充说明（图说不清的口径写在这里）
 NOTES = {
+    '论坛社区': [
+        '`user_event` 是推荐首页的行为记录（2026-10-06 起）：点赞、评论、收藏由服务端经 RabbitMQ 写入；'
+        '展示（impression）和点开（click）等首页上线后由页面上报，访客那时用 `ANON_ID`（浏览器里的匿名编号）。',
+        '`dream_news.publish_date` 同日起是 datetime（精确到秒），老帖的时间从 ES 回填。',
+    ],
     'NBA 数据': [
         '`player_game_stats.GAME_ID` 形如 `202604180CLE`（B-R 的日期+主队码）；`GAME_STAT_ID` 主键含球队码（1978 年有一场重赛，同一人同一场为两队各出场一次）。',
         '`nba_career_totals` 覆盖 1947 年至今全联盟（含大量本库没有资料卡的人），是 B-R slug → 本库球员 id 的**唯一**映射点。',
