@@ -21,12 +21,24 @@ public class BeanResolveConfiguration implements WebMvcConfigurer {
     @org.springframework.beans.factory.annotation.Autowired
     private com.dream.basketball.mapper.UserMapper userMapper;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.data.redis.core.StringRedisTemplate redis;
+
+    /** 没登录的访客每分钟最多请求 NBA 接口几次（见 GuestRateLimitInterceptor） */
+    @Value("${nba.guest-requests-per-minute:120}")
+    private int guestRequestsPerMinute;
+
     /**
-     * One interceptor over everything; access rules are declared per endpoint
-     * with @RequiresRole / @RequiresFeature (P2-5). Un-annotated handlers remain public.
+     * Access rules are declared per endpoint with @RequiresRole / @RequiresFeature (P2-5) and
+     * enforced by one interceptor over everything; un-annotated handlers remain public.
+     *
+     * <p>The NBA data endpoints are open to visitors since 2026-10-06, so anonymous requests to
+     * them go through a per-IP rate limit first. Signed-in users are not counted.
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new GuestRateLimitInterceptor(redis, guestRequestsPerMinute))
+                .addPathPatterns("/player/**", "/team/**", "/gameRating/**");
         registry.addInterceptor(new AuthInterceptor(userMapper)).addPathPatterns("/**");
     }
 

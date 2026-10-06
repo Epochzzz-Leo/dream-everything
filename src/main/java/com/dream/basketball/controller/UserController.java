@@ -159,7 +159,7 @@ public class UserController extends BaseUtils {
         dreamUser.setUserStatus(Constants.USABLE);
         dreamUser.setUserRole(Constants.NORMAL_USER);
         // FEAT_DATA 一律留空。**不要在这里写 "0"**：Feature.NBA_DATA 的语义翻转之后
-        // （「默认关、逐个放行」→「登录即可用、超管可按人封禁」），"0" 的含义从
+        // （「默认关、逐个放行」→「登录即可用、超管可按人封禁」→ 2026-10-06 起连访客也能用），"0" 的含义从
         // 「还没放行」变成了「被点名封禁」——照原样写下去，等于每个新注册的人在注册那一刻
         // 就被主动封掉 NBA 模块。null 才是「没设置过」，也就是放行。
         // 新闻/百家说/私信同理，都不设。

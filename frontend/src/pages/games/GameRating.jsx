@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button, Card, Empty, Segmented, Spin, message } from 'antd'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import { useAuth } from '../../auth/AuthContext'
@@ -10,6 +9,7 @@ import RatingComments from './RatingComments'
 import { ScoreDots, ScorePanel } from './ratingParts'
 import MentionTextArea from '../../components/MentionTextArea'
 import { displayName } from '../players/rankConfig'
+import useLoginRedirect from '../../auth/useLoginRedirect'
 
 const BRAND = '#fa541c'
 
@@ -40,7 +40,7 @@ const BRAND = '#fa541c'
  */
 export default function GameRating({ gameId, teams, isMobile, onPlayer, userInformationId }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const [data, setData] = useState(undefined)
   const [draft, setDraft] = useState('')
   const [saving, setSaving] = useState(false)
@@ -61,7 +61,7 @@ export default function GameRating({ gameId, teams, isMobile, onPlayer, userInfo
   const requireLogin = () => {
     if (user) return true
     message.info('Please log in')
-    navigate('/login')
+    goLogin()
     return false
   }
 

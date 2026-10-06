@@ -14,6 +14,7 @@ import useIsMobile from '../hooks/useIsMobile'
 // @ 昵称渲染成链接：和每日赛场的短评区共用一份（见 mentionText.jsx）
 import { renderMentions as renderContent } from './mentionText'
 import { assetUrl } from '../config/origin'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 const fmt = (v) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '')
 
@@ -114,7 +115,7 @@ function MetaRow({ c, authorId, topicOwnerIds, showFloor }) {
  */
 function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, onCountDelta }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const isMobile = useIsMobile()
   const [rows, setRows] = useState(null)
   const [page, setPage] = useState(1)
@@ -123,7 +124,7 @@ function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, 
   const totalRef = useRef(0)
   const bumpRef = useRef(bump)
 
-  const requireLogin = () => { message.info('Please log in'); navigate('/login') }
+  const requireLogin = () => { message.info('Please log in'); goLogin() }
 
   const load = useCallback(async (p) => {
     try {
@@ -288,13 +289,13 @@ function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, 
  */
 function FloorNode({ comment, newsId, authorId, topicOwnerIds, locked, ratingItem, onVoteRating, onDeleteRating, ratingCanDelete, pollItem, onVotePoll, onDeletePoll, onRemoved }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const [c, setC] = useState(comment) // 本楼数据（含 goodNum/badNum/totalReplyNum），就地更新
   const [replyOpen, setReplyOpen] = useState(false)
   const [showReplies, setShowReplies] = useState(false)
   const [bump, setBump] = useState(0) // 直接回楼成功 → +1，让 FloorReplies 跳最后一页刷新
 
-  const requireLogin = () => { message.info('Please log in'); navigate('/login') }
+  const requireLogin = () => { message.info('Please log in'); goLogin() }
   const replyCount = c.totalReplyNum ?? c.commentNum ?? 0
 
   const like = async (type) => {
@@ -474,7 +475,7 @@ export default function CommentSection({
   pollByComment = {}, onVotePoll, onDeletePoll, onOpenPoll,
 }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const isMobile = useIsMobile()
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
@@ -552,7 +553,7 @@ export default function CommentSection({
 
   // 提交评论：成功返回 true 让 composer 清空
   const handlePost = async ({ text, mentions, attachments }) => {
-    if (!user) { message.info('Please log in'); navigate('/login'); return false }
+    if (!user) { message.info('Please log in'); goLogin(); return false }
     const res = await newsApi.postComment({
       newsId,
       content: text,
@@ -760,7 +761,7 @@ export default function CommentSection({
             padding: '16px 20px', textAlign: 'center', color: '#888', marginBottom: 20,
           }}
         >
-          <a onClick={() => navigate('/login')}>Sign in</a> to leave a comment
+          <a onClick={() => goLogin()}>Sign in</a> to leave a comment
         </div>
       )}
 

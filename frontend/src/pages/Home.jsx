@@ -13,6 +13,7 @@ import TeamLogo, { TeamCell } from '../components/TeamLogo'
 import useIsMobile from '../hooks/useIsMobile'
 import useUrlState from '../hooks/useUrlState'
 import { LATEST_SEASON, displayName, fmtDelta, fmtNum, numOrNull, playoffRecord, qualifiedBoard, teamName, teamRegion } from './players/rankConfig'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 /**
  * 首页（P5-2 现代化改版 v2）：赛季维度的联盟总览仪表盘
@@ -273,6 +274,7 @@ function HotList({ posts }) {
 export default function Home() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const [seasonNum, setSeasonNum] = useUrlState('seasonNum', LATEST_SEASON, true) // 写进 URL，返回时保留
   const [forum, setForum] = useState(null) //      论坛帖（热帖榜；不随赛季变）
   const [topicNameMap, setTopicNameMap] = useState({}) // topicId → 话题名（热帖榜标注所属话题）
@@ -348,7 +350,7 @@ export default function Home() {
           <span style={{ fontSize: 20 }}>👋</span>
           <span style={{ color: '#873800', fontWeight: 500 }}>Sign in to post, comment and like</span>
           <span style={{ flex: 1 }} />
-          <Button type="primary" onClick={() => navigate('/login')}>Sign in</Button>
+          <Button type="primary" onClick={() => goLogin()}>Sign in</Button>
           <Button onClick={() => navigate('/register')}>Sign up</Button>
         </div>
       )}

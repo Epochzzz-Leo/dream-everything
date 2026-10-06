@@ -244,6 +244,26 @@ public class TopicController {
     }
 
     /** 一条专题 + 权限位 + owner 名 + 帖数，供列表/详情复用。 */
+    /**
+     * 专题卡上的帖子数，要和点进专题后列表里看到的对得上。列表的过滤规则在
+     * NewsController 的帖子列表接口：隐藏帖只有该专题的管理者看得见，草稿只有作者本人看得见。
+     * 原来这里是 COUNT 全部，NBA 专题卡写 65、点进去只有 64，差的就是那 1 篇隐藏帖。
+     */
+    private Integer visiblePostCount(ForumTopic t, DreamUser me) {
+        QueryWrapper<DreamNews> q = new QueryWrapper<DreamNews>().eq("TOPIC_ID", t.getTopicId());
+        if (!perms.canManage(me, t)) {
+            q.and(w -> w.isNull("HIDDEN").or().ne("HIDDEN", "1"));
+        }
+        String meId = me == null ? null : me.getUserId();
+        q.and(w -> {
+            w.isNull("DRAFT").or().ne("DRAFT", "1");
+            if (meId != null) {
+                w.or().eq("AUTHOR_ID", meId);
+            }
+        });
+        return dreamNewsMapper.selectCount(q);
+    }
+
     private Map<String, Object> topicView(ForumTopic t, DreamUser me) {
         Map<String, Object> m = new HashMap<>();
         m.put("topicId", t.getTopicId());
@@ -295,7 +315,7 @@ public class TopicController {
         m.put("filesEnabled", ON.equals(t.getFilesEnabled()));
         m.put("openPost", ON.equals(t.getOpenPost()));
         m.put("openComment", ON.equals(t.getOpenComment()));
-        m.put("postCount", dreamNewsMapper.selectCount(new QueryWrapper<DreamNews>().eq("TOPIC_ID", t.getTopicId())));
+        m.put("postCount", visiblePostCount(t, me));
         // 卡片左下角的「x 人正在讨论」：发过帖或留过言的人数（去重）
         m.put("participantCount", dreamNewsMapper.countTopicParticipants(t.getTopicId()));
         m.put("canView", perms.canView(me, t));

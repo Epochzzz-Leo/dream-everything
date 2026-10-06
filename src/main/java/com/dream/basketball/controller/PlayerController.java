@@ -40,10 +40,10 @@ import java.util.TreeSet;
  * 球员相关 JSON 接口（P4-1 REST 化）。写接口另需 superManager（P2-5）。
  * 异常交由 GlobalExceptionHandler 统一处理（P4-2），不再逐方法 try/catch。
  *
- * 整个 NBA 模块不再公开：**必须登录**。登录之后默认就能用，超管可以在用户管理里
- * 按人封禁（写入 FEAT_DATA='0'）。早先是「默认关、逐个放行」，2026 年翻转过来的——
- * 入口挪进 NBA 专题之后，想看的人自己点进去就能用，不该再卡一道人工审批。
- * 挂在类上而不是逐方法挂——这里每一个接口都是 NBA 数据，漏一个就等于没关。
+ * 整个 NBA 模块**对所有人公开**（2026-10-06 起，访客不登录也能看），超管仍可在用户管理里
+ * 对个别登录用户隐藏（写入 FEAT_DATA='0'），规则见 {@link Feature#NBA_DATA}。
+ * 门禁注解挂在类上而不是逐方法挂：这里每一个接口都是 NBA 数据，以后要再收紧，改一处就全收住。
+ * 没登录的请求先过按 IP 的限流（GuestRateLimitInterceptor），分页接口单次最多 {@link #MAX_PAGE_SIZE} 行。
  */
 @RequiresFeature(Feature.NBA_DATA)
 @RestController
@@ -60,10 +60,21 @@ public class PlayerController extends BaseUtils {
     @Value("${picPath.uploadPath:}")
     private String uploadPath;
 
+    /**
+     * 分页接口单次最多返回几行。页面自己最多要 2,000 行（一个赛季的全联盟球员，约 600 人，
+     * 留足余量）；以前不设上限，一次请求就能把三万行的赛季表整个拉走。
+     */
+    static final int MAX_PAGE_SIZE = 2000;
+
+    /** 把调用方给的条数夹在 1 到 {@link #MAX_PAGE_SIZE} 之间 */
+    static int pageSize(int limit) {
+        return Math.max(1, Math.min(limit, MAX_PAGE_SIZE));
+    }
+
     /** 球员列表数据（按赛季） */
     @GetMapping("/getPlayerData")
     public Object getData(DreamPlayerDto param, int page, int limit) {
-        PageHelper.startPage(page, limit);
+        PageHelper.startPage(page, pageSize(limit));
         if (param.getSeasonNum() == null) {
             param.setSeasonNum(1);
         }
@@ -74,7 +85,7 @@ public class PlayerController extends BaseUtils {
     /** 单个球员生涯逐季数据 */
     @GetMapping("/getPlayerSeasonStatsList")
     public Object getPlayerSeasonStatsList(PlayerStatsDto param, int page, int limit) {
-        PageHelper.startPage(page, limit);
+        PageHelper.startPage(page, pageSize(limit));
         // 排序：白名单校验后再拼接，既真正生效又防注入（P3-1）
         param.setField(SortUtil.safeStatsOrderBy(param.getField(), param.getOrder()));
         List<PlayerStatsDto> rows = playerService.findPlayerStats(param);
@@ -84,7 +95,7 @@ public class PlayerController extends BaseUtils {
     /** 全体球员某赛季数据榜 */
     @GetMapping("/getAllPlayersSeasonStatsList")
     public Object getAllPlayersSeasonStatsList(PlayerStatsDto param, int page, int limit) {
-        PageHelper.startPage(page, limit);
+        PageHelper.startPage(page, pageSize(limit));
         param.setField(SortUtil.safeStatsOrderBy(param.getField(), param.getOrder()));
         // 只发调用方真要渲染的列：排行卡读 6 列却拿走全部 64 列时，整季 2000 行是 2.89MB
         param.setFields(SortUtil.safeStatsProjection(param.getFields()));
@@ -215,7 +226,7 @@ public class PlayerController extends BaseUtils {
     /** 全体球员某赛季季后赛数据榜（公开，排序走 P3-1 白名单） */
     @GetMapping("/getAllPlayersPlayoffSeasonStatsList")
     public Object getAllPlayersPlayoffSeasonStatsList(PlayerStatsDto param, int page, int limit) {
-        PageHelper.startPage(page, limit);
+        PageHelper.startPage(page, pageSize(limit));
         param.setField(SortUtil.safeStatsOrderBy(param.getField(), param.getOrder()));
         param.setFields(SortUtil.safeStatsProjection(param.getFields()));
         if (param.getSeasonNum() == null) {

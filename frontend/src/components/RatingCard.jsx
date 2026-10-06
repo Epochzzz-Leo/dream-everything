@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Image, Popconfirm, Rate, Upload, message } from 'antd'
 import { CloseCircleFilled, DeleteOutlined, LoadingOutlined, PictureOutlined, StarFilled } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import useIsMobile from '../hooks/useIsMobile'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 /**
  * 打分对象配图选择器（开分表单用，发帖页/评论区共用）：虚线上传方块（橙色调，与打分卡同系），
@@ -102,7 +102,7 @@ export function RatingImagePicker({ value, onChange, upload }) {
  */
 export default function RatingCard({ item, onVote, onDelete, canDelete, disabled }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const isMobile = useIsMobile()
   const count = item.count || 0
   const avg = Number(item.avg || 0)
@@ -110,7 +110,7 @@ export default function RatingCard({ item, onVote, onDelete, canDelete, disabled
 
   const handleVote = (score) => {
     if (!score) return // Rate 点同星会回 0（清除），打分场景忽略
-    if (!user) { message.info('Please log in'); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); goLogin(); return }
     if (disabled) { message.info('This post is locked. Rating is off'); return }
     onVote?.(item.itemId, score)
   }

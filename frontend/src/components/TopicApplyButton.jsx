@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Button, Input, Modal, Tag, message } from 'antd'
 import { CheckCircleOutlined, UserAddOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
 import { topicApi } from '../api/topic'
 import { useAuth } from '../auth/AuthContext'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 /**
  * 申请加入/申请权限按钮（自决显隐 + 上下文文案）：
@@ -15,7 +15,7 @@ import { useAuth } from '../auth/AuthContext'
  */
 export default function TopicApplyButton({ topic, onApplied, banner, block, size }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const [open, setOpen] = useState(false)
   const [msg, setMsg] = useState('')
   const [saving, setSaving] = useState(false)
@@ -68,7 +68,7 @@ export default function TopicApplyButton({ topic, onApplied, banner, block, size
         block={block}
         size={size}
         icon={<UserAddOutlined />}
-        onClick={() => (user ? setOpen(true) : navigate('/login'))}
+        onClick={() => (user ? setOpen(true) : goLogin())}
         style={banner ? { flexShrink: 0 } : undefined}
       >
         {user ? label : 'Sign in to apply'}

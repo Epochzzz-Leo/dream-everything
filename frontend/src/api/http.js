@@ -2,6 +2,7 @@ import axios from 'axios'
 import { message } from 'antd'
 import { getToken } from '../auth/token'
 import { API_BASE, absolutizeData, relativizeData } from '../config/origin'
+import { loginPathFrom } from '../auth/useLoginRedirect'
 
 /**
  * 全局唯一的 axios 实例——所有接口请求都走它。
@@ -74,7 +75,8 @@ http.interceptors.response.use(
       // 跳转会把所有游客踢出公开页面（公开浏览是设计能力，别拦）
       const probe = String(error.config?.url || '').includes('/user/current')
       if (!probe && window.location.pathname !== '/login') {
-        window.location.href = '/login'
+        // 带上现在这一页，登录完能回来（这里不在组件里，只能整页跳，所以用地址栏参数而不是 state）
+        window.location.href = loginPathFrom(window.location.pathname + window.location.search)
       }
     } else if (status === 403) {
       message.error('No permission')

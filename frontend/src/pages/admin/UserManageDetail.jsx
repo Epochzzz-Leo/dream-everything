@@ -202,9 +202,10 @@ export default function UserManageDetail() {
 
       {/* 功能模块 */}
       <Card title="Features" style={{ borderRadius: 12 }} extra={<span style={{ color: '#999', fontSize: 12 }}>When off, it disappears from this user's navigation and direct links stop working too</span>}>
-        {/* NBA 和其余几项现在是同一套语义：默认开放，在这里关掉才是封禁。
-            游客仍然看不到（这一档要求必须登录，防爬虫）。 */}
-        {permRow('NBA Data', 'featData', 'On by default for anyone signed in. Turning it off here blocks this user. Visitors never see it. Covers League / Stats / League Rankings / History / Compare')}
+        {/* NBA 和其余几项是同一套语义：默认开放，在这里关掉只是对这个人隐藏。
+            2026-10-06 起游客也能看（后端对没登录的请求按 IP 限流），所以这里关掉不是访问控制：
+            这个人退出登录照样能看到。 */}
+        {permRow('NBA Data', 'featData', 'Open to everyone, including visitors who are not signed in. Turning it off hides it for this user only. Covers League / Stats / League Rankings / History / Compare')}
         {permRow('News', 'featNews')}
         {permRow('Chat Everything', 'featForum')}
         {permRow('Messages', 'featPm')}

@@ -56,7 +56,7 @@ public class ScheduleEvent extends Model<ScheduleEvent> implements Serializable 
     @TableField("EXPIRY_NOTIFIED")
     private String expiryNotified;
 
-    /** optional category: 工作/学习/课程/生活/娱乐 (whitelisted at create) */
+    /** optional category: Work/Study/Class/Life/Fun (whitelisted at create) */
     @TableField("CATEGORY")
     private String category;
 

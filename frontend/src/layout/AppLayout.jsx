@@ -31,9 +31,11 @@ import AnnouncementEditModal from '../components/AnnouncementEditModal'
 import PushToggle from '../components/PushToggle'
 import useIsMobile from '../hooks/useIsMobile'
 import MobileTabBar, { TAB_BAR_HEIGHT, TOP_BAR_HEIGHT } from './MobileTabBar'
-import { showTabBar, showTopBar } from './mobileNav'
+import { isNbaDataPath, showTabBar, showTopBar } from './mobileNav'
+import DataCredit from '../components/DataCredit'
 import useNavigationPaint from './useNavigationPaint'
 import useAppSwipe from './useAppSwipe'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 /**
  * 整体外壳（P5-3 美化）：ProLayout 的 mix 布局 = 顶栏品牌 + 可折叠侧栏菜单，
@@ -47,6 +49,7 @@ import useAppSwipe from './useAppSwipe'
 export default function AppLayout() {
   const { user, loading: authLoading, logout, canUse } = useAuth()
   const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const location = useLocation()
   const isMobile = useIsMobile()
   // 换页后的滚动位置与重绘（见 useNavigationPaint 里的长注释：
@@ -405,7 +408,7 @@ export default function AppLayout() {
         ...(user
           ? []
           : [
-              <Button key="login" type="primary" size="small" onClick={() => navigate('/login')}>Sign in</Button>,
+              <Button key="login" type="primary" size="small" onClick={() => goLogin()}>Sign in</Button>,
               <Button key="reg" size="small" onClick={() => navigate('/register')}>Sign up</Button>,
             ]),
       ]}
@@ -487,6 +490,8 @@ export default function AppLayout() {
         <ErrorBoundary resetKey={location.pathname}>
           <Outlet />
         </ErrorBoundary>
+        {/* NBA 数据页底部注明数据来源（2026-10-06 NBA 对访客公开，来源方的条款要求注明） */}
+        {isNbaDataPath(location.pathname) && <DataCredit />}
       </div>
       {user?.isSuperManager && (
         <AnnouncementEditModal open={announceOpen} onClose={() => setAnnounceOpen(false)} />

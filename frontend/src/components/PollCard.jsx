@@ -1,8 +1,8 @@
 import { Popconfirm, message } from 'antd'
 import { BarChartOutlined, CheckCircleFilled, DeleteOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import useIsMobile from '../hooks/useIsMobile'
+import useLoginRedirect from '../auth/useLoginRedirect'
 
 /**
  * 投票卡（蓝色系，与橙色打分卡区分）：主题 + 选项行（票数条 + 百分比），点选项即投/改票，
@@ -11,14 +11,14 @@ import useIsMobile from '../hooks/useIsMobile'
  */
 export default function PollCard({ item, onVote, onDelete, canDelete, disabled }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const isMobile = useIsMobile()
   const count = item.count || 0
   const counts = item.counts || {}
   const my = item.myChoice
 
   const handleVote = (idx) => {
-    if (!user) { message.info('Please log in'); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); goLogin(); return }
     if (disabled) { message.info('This post is locked. Voting is off'); return }
     if (my === idx) return // 点自己已选的不重复提交
     onVote?.(item.itemId, idx)

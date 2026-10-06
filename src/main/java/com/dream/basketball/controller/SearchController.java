@@ -68,7 +68,8 @@ public class SearchController {
         DreamUser meFresh = me == null ? null : userMapper.selectById(me.getUserId());
         boolean isSuper = meFresh != null
                 && com.dream.basketball.config.Role.fromUserRole(meFresh.getUserRole()) == com.dream.basketball.config.Role.SUPER_MANAGER;
-        // NBA 是「默认关、超管放行」，与下面两项相反：未登录也搜不到球员（模块本身就不对游客开放）
+        // NBA 和下面两项同一套语义：访客能搜到球员（2026-10-06 起模块对访客公开），
+        // 被超管对他隐藏了 NBA 的登录用户搜不到
         boolean featData = isSuper || com.dream.basketball.config.Feature.NBA_DATA.granted(meFresh);
         boolean featForum = meFresh == null || isSuper || !"0".equals(meFresh.getFeatForum()); // 百家说：论坛帖
         // 官方新闻整站关闭中：不管谁搜都不返回（Constants.NEWS_MODULE_ENABLED）
@@ -305,8 +306,8 @@ public class SearchController {
     public Result<List<Map<String, Object>>> mentionPlayers(String keyword,
                                                             javax.servlet.http.HttpServletRequest request) {
         String kw = keyword == null ? "" : keyword.trim();
-        // 没被放行 NBA 模块的人也能进 NBA 专区发帖，但 @ 不出球员——@ 出来的金标点进去是资料卡，
-        // 他本来就进不去。这里静默返回空列表而不是 403：@ 面板每敲一个字都会调，弹一串「权限不足」很吵
+        // 被超管隐藏了 NBA 模块的人也能进 NBA 专区发帖，但 @ 不出球员——@ 出来的金标点进去是资料卡，
+        // 对他是隐藏的。这里静默返回空列表而不是 403：@ 面板每敲一个字都会调，弹一串「权限不足」很吵
         DreamUser me = com.dream.basketball.utils.SecUtil.getLoginUserToSession(request);
         DreamUser meFresh = me == null ? null : userMapper.selectById(me.getUserId());
         boolean isSuper = meFresh != null

@@ -32,6 +32,7 @@ import { lolSectionRenderer } from '../../components/lolSections'
 import LolModuleEntry from '../../components/LolModuleEntry'
 import { onPostPublished } from '../../utils/postBus'
 import TopicFilesEntry from '../../components/TopicFilesEntry'
+import useLoginRedirect from '../../auth/useLoginRedirect'
 
 /**
  * 帖子列表（公开，P5-2 内容流改版），按频道复用：
@@ -216,6 +217,7 @@ function HotRail({ rows, official }) {
  */
 export default function NewsList({ channel = 'forum', topic = null, onApplied, nbaSection = null, lolSection = null }) {
   const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const location = useLocation()
   const { user, dn } = useAuth()
   const isMobile = useIsMobile()
@@ -324,7 +326,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
 
   const canPost = isTopic ? !!topic.canPost : official ? user?.isManagerOrOver : true
   const goPost = () => {
-    if (!user) return navigate('/login')
+    if (!user) return goLogin()
     // 带上当前 location：发帖器会浮在这一页上面，而不是把它换掉（见 App.jsx 的说明）
     navigate(
       isTopic ? `/news/new?topicId=${topicId}` : official ? '/news/new?channel=official' : '/news/new',

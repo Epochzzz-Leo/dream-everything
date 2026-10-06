@@ -10,6 +10,7 @@ import { userInformationApi } from '../../api/userInformation'
 import { topicApi } from '../../api/topic'
 import PushToggle from '../../components/PushToggle'
 import AnnouncementEditModal from '../../components/AnnouncementEditModal'
+import useLoginRedirect from '../../auth/useLoginRedirect'
 
 const BRAND = '#fa541c'
 
@@ -67,6 +68,7 @@ function Divider() {
  */
 export default function Mine() {
   const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const { user, logout, canUse } = useAuth()
   const [unread, setUnread] = useState(0)
   const [subs, setSubs] = useState([])
@@ -84,7 +86,7 @@ export default function Mine() {
     return (
       <Card style={{ borderRadius: 14 }}>
         <Empty description="Sign in to see your notifications, subscriptions and settings">
-          <Button type="primary" onClick={() => navigate('/login')}>Sign in</Button>
+          <Button type="primary" onClick={() => goLogin()}>Sign in</Button>
         </Empty>
       </Card>
     )

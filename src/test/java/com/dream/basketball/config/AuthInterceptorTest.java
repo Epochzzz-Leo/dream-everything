@@ -212,11 +212,29 @@ class AuthInterceptorTest {
         org.mockito.Mockito.when(userMapper.selectById("test-user-id")).thenReturn(fresh);
     }
 
+    /** NBA 数据 2026-10-06 起对访客公开：只挂了功能门禁的接口，没登录也放行，而且不该为此查库。 */
     @Test
-    void anonymous_gets401OnFeatureEndpoint() throws Exception {
+    void anonymous_passesPublicFeatureEndpoint() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        assertTrue(interceptor.preHandle(ajaxRequest(), response,
+                handler(DummyController.class, "nbaEndpoint")));
+        assertEquals(200, response.getStatus());
+        org.mockito.Mockito.verify(userMapper, org.mockito.Mockito.never()).selectById(org.mockito.ArgumentMatchers.any());
+    }
+
+    /** 挂在类上的功能门禁同样对访客放行 */
+    @Test
+    void anonymous_passesClassLevelPublicFeature() throws Exception {
+        assertTrue(interceptor.preHandle(ajaxRequest(), new MockHttpServletResponse(),
+                handler(FeatureAnnotatedController.class, "inheritedEndpoint")));
+    }
+
+    /** 同时要求身份的（比如 NBA 的管理接口），没登录照样 401：功能对访客开放不等于身份门禁失效 */
+    @Test
+    void anonymous_gets401WhenRoleAlsoRequired() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
         assertFalse(interceptor.preHandle(ajaxRequest(), response,
-                handler(DummyController.class, "nbaEndpoint")));
+                handler(DummyController.class, "nbaManagerEndpoint")));
         assertEquals(401, response.getStatus());
     }
 
@@ -289,12 +307,11 @@ class AuthInterceptorTest {
     }
 
     @Test
-    void featureRule_isDefaultOnWithPerUserBan() {
-        // NBA 数据：**必须登录 + 默认放行 + 可按人封禁**。
-        // 只有显式 '0' 才是封禁；null（没设置过）和 '1' 都能用。
-        // 未登录那道门在 preHandle 里（401 优先于 403），不在这个方法里判。
+    void featureRule_isOpenToVisitorsWithPerUserHide() {
+        // NBA 数据：**对所有人公开（含访客）+ 超管可对个别登录用户隐藏**（2026-10-06）。
+        // 只有显式 '0' 才是隐藏；null（没设置过）和 '1' 都能用；user 为 null 表示访客，也能用。
         DreamUser u = new DreamUser();
-        assertFalse(Feature.NBA_DATA.granted(null), "查不到用户 = 不放行");
+        assertTrue(Feature.NBA_DATA.granted(null), "访客 = 能用");
         assertTrue(Feature.NBA_DATA.granted(u), "没设置过 = 默认能用");
         u.setFeatData("0");
         assertFalse(Feature.NBA_DATA.granted(u), "显式 '0' = 被封禁");

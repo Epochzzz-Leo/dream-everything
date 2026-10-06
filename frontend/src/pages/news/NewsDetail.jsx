@@ -19,6 +19,7 @@ import { SuperAdminBadge, TopicOwnerBadge, OpBadge } from '../../components/Role
 import UserTitles from '../../components/UserTitles'
 import useIsMobile from '../../hooks/useIsMobile'
 import { MENTION_CSS, MENTION_SELECTOR, markPlayerMentions, mentionHref, readMentionInfo } from '../../utils/mention'
+import useLoginRedirect from '../../auth/useLoginRedirect'
 
 /**
  * 资讯详情（公开，/news/:newsId，P5-2 文章页改版）。
@@ -178,6 +179,7 @@ export default function NewsDetail() {
   // 从"我的消息"深链进来时带 userInformationId，请求详情即顺便标记该消息已读
   const userInformationId = searchParams.get('userInformationId') || undefined
   const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const location = useLocation()
   const goBack = useGoBack() // 返回画在正文卡片里（backNav 的 SELF_BACK 因此排除了这一页）
   const { user, dn } = useAuth() // dn：我给谁备注过，全站显示的就是备注名
@@ -203,7 +205,7 @@ export default function NewsDetail() {
 
   // 帖子点赞/点踩：登录才行；计数经 RabbitMQ 异步更新，这里按 delta 乐观更新
   const likePost = async (type) => {
-    if (!user) { message.info('Please log in'); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); goLogin(); return }
     const res = await (type === 'good' ? newsApi.goodPost(newsId) : newsApi.badPost(newsId))
     if (res?.result) {
       const d = res.delta || 0 // 后端给的计数增量（+1 点亮 / -1 取消）
@@ -308,7 +310,7 @@ export default function NewsDetail() {
 
   // 收藏/取消收藏：登录后 toggle，接口回最新状态
   const toggleFavorite = async () => {
-    if (!user) { message.info('Please log in'); navigate('/login'); return }
+    if (!user) { message.info('Please log in'); goLogin(); return }
     try {
       const res = await newsApi.favorite(newsId)
       setFav({ favorited: !!res.favorited, count: res.count ?? 0 })

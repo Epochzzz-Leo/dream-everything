@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { message } from 'antd'
 import { useAuth } from '../../auth/AuthContext'
 import { gameRatingApi } from '../../api/gameRating'
+import useLoginRedirect from '../../auth/useLoginRedirect'
 
 /**
  * 一局开黑的打分与短评：整局一份，十个人各一份。
@@ -27,7 +27,7 @@ import { gameRatingApi } from '../../api/gameRating'
  */
 export default function useMatchRating(matchId) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const goLogin = useLoginRedirect()
   const [data, setData] = useState(undefined)   // undefined=加载中 null=拉不到
 
   const load = useCallback(() => {
@@ -45,7 +45,7 @@ export default function useMatchRating(matchId) {
   /** 没登录时别让人白填一遍再被拒——点第一下就说清楚 */
   const requireLogin = () => {
     message.info('Sign in to rate')
-    navigate('/login')
+    goLogin()
     return false
   }
 

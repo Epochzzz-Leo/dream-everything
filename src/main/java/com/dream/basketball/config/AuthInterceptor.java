@@ -21,6 +21,8 @@ import java.io.IOException;
  *
  * @RequiresFeature is checked the same way and is orthogonal: role says who you are,
  * feature says whether the admin opened that module for you. A handler may carry both.
+ * A feature that is open to visitors ({@code Feature.granted(null)} is true) lets anonymous
+ * requests through, as long as the handler has no @RequiresRole as well.
  *
  * P4-1: now a pure JSON API — there is no FreeMarker login page to redirect to, so
  * unauthenticated requests always get 401 JSON (the React client routes to its own
@@ -52,6 +54,11 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         DreamUser user = SecUtil.getLoginUserToSession(request);
         if (!SecUtil.isLogin(request) || user == null) {
+            // 只挂了功能门禁、而且这个模块对访客开放（NBA 数据，2026-10-06 起）：没登录也放行。
+            // 同时挂了 @RequiresRole 的（比如 NBA 的管理接口）照样要登录
+            if (rule == null && feature != null && feature.value().granted(null)) {
+                return true;
+            }
             reject(response, HttpServletResponse.SC_UNAUTHORIZED, "You're not signed in or your session has expired. Please sign in again");
             return false;
         }

@@ -49,6 +49,22 @@ const NBA_PATTERNS = [
 ]
 
 
+/**
+ * NBA 数据页（不含开黑战绩）：AppLayout 在这些页面底部挂数据来源说明（components/DataCredit）。
+ * 和上面的 NBA_PATTERNS 分开写：那份管底部栏，连开黑战绩分区也算在里面。
+ */
+const NBA_DATA_PATTERNS = [
+  /^\/news\/topic\/[^/]+\/nba\//,
+  /^\/league$/,
+  /^\/players(\/|$)/,
+  /^\/rankings(\/|$)/,
+  /^\/games(\/|$)/,
+  /^\/history$/,
+  /^\/compare$/,
+]
+
+export const isNbaDataPath = (pathname) => NBA_DATA_PATTERNS.some((re) => re.test(pathname))
+
 const HIDE_PATTERNS = [
   /^\/search$/,                          // 整页搜索（自带返回，且键盘一起来底部栏就会被顶飞）
   /^\/news\/new$/,                       // 发帖

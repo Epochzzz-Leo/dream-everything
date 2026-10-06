@@ -5,6 +5,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { authApi } from '../api/auth'
 import AuthShell from '../components/AuthShell'
+import { safeFrom } from '../auth/useLoginRedirect'
 import useAuthWide from '../hooks/useAuthWide'
 
 /**
@@ -51,7 +52,9 @@ export default function Login() {
     try {
       await login({ ...values, captchaId: idRef.current })
       message.success('Signed in')
-      navigate(location.state?.from || '/', { replace: true })
+      // 回到来的那一页：组件里跳过来的带 state.from，拦截器整页跳过来的带 ?from=（见 auth/useLoginRedirect）
+      const from = safeFrom(location.state?.from) || safeFrom(new URLSearchParams(location.search).get('from'))
+      navigate(from || '/', { replace: true })
     } catch {
       // 具体错误已由 http 拦截器弹出；这里只需换一张验证码
       // （后端是一次性消费的，失败之后原来那张已经作废了）

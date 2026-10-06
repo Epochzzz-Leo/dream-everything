@@ -16,7 +16,7 @@ import java.util.List;
  * 球队榜单 JSON 接口。战绩/季后赛来自 team_season，
  * 场均数据由该队球员当季数据聚合而来；东西部/分区在前端按队码归类。
  *
- * 与球员接口同属 NBA 模块：必须登录 + 被超管放行（见 {@link Feature#NBA_DATA}）。
+ * 与球员接口同属 NBA 模块：对所有人公开，超管可对个别登录用户隐藏（见 {@link Feature#NBA_DATA}）。
  */
 @RequiresFeature(Feature.NBA_DATA)
 @RestController
