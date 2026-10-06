@@ -4,7 +4,7 @@ A full-stack site I built and run on my own, live at **[dream-everything.com](ht
 
 It started in January 2024 as a place for me and a few friends to post, and it grew into the project where I try
 things I don't get to try at work: an NBA statistics database with over a million rows, web push, an iOS build,
-backups to S3, and a bilingual interface. Around 53,000 lines of code so far, all of it written by me.
+and backups to S3. Around 53,000 lines of code so far, all of it written by me.
 
 Java 17 + Spring Boot on the back, React 19 on the front, MySQL, Redis, RabbitMQ and Elasticsearch behind it,
 running in Docker on a mini PC at home.
@@ -20,10 +20,10 @@ running in Docker on a mini PC at home.
 | **LoL records** | Match history pulled from the Riot API for a small group of players |
 | **Schedule** | Personal calendar with deadlines, repeating tasks and 8am reminders |
 | **Messaging** | Private messages, a notification centre, and browser push |
-| **Payroll** | A small tool a friend uses to track shifts and settle wages for a food stall |
 | **Admin** | User roles, per-user feature switches, ban and mute controls, player data editing |
 
-The whole interface switches between Chinese and English.
+The interface is English only. Posts, comments and chat stay in whatever language people wrote them in, which is
+mostly Chinese.
 
 ---
 

@@ -265,7 +265,7 @@ public class ScheduleController {
         e.setEventTime(tm);
         e.setEndDate(ed);
         e.setEndTime(etm);
-        // 类型白名单：工作/学习/课程/生活/娱乐，非法值一律置空
+        // 类型白名单：Work/Study/Class/Life/Fun（见 CATEGORIES），非法值一律置空
         String cat = StringUtils.trimToNull(category);
         e.setCategory(cat != null && CATEGORIES.contains(cat) ? cat : null);
         e.setRecur(rc);
