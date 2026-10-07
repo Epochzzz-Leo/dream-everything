@@ -58,7 +58,7 @@ const pwa = VitePWA({
     scope: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#fa541c',
+    theme_color: '#1677ff',
     icons: [
       { src: '/pwa-192.png?v=3', sizes: '192x192', type: 'image/png' },
       { src: '/pwa-512.png?v=3', sizes: '512x512', type: 'image/png' },

@@ -4,12 +4,12 @@ import useAuthWide from '../hooks/useAuthWide'
 /**
  * 登录/注册页共用外壳（P5 重设计 v2）：分栏式大卡片 + 球场元素背景
  * - 页面背景：柔光色斑 + 细点阵 + 球场弧线（角落大圆环），填满视野但不抢表单；
- * - 左：品牌面板（品牌橙深渐变 + 装饰圆环 + 纯文字标语/特性胶囊），窄屏自动隐藏；
+ * - 左：品牌面板（品牌蓝深渐变 + 装饰圆环 + 纯文字标语/特性胶囊），窄屏自动隐藏；
  * - 右：白底表单区，标题/副标题 + children（Login/Register 塞自己的 Form）。
  * 内层 ConfigProvider 把控件加高到 44、圆角 10，让表单更"落地页"一点。
  */
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 /** 页面背景装饰：色斑 / 点阵 / 球场弧线圆环，全部 absolute，不参与布局 */
 function Backdrop() {
@@ -24,8 +24,8 @@ function Backdrop() {
   return (
     <>
       {/* 柔光色斑 */}
-      <div style={blob(460, 'rgba(250,84,28,.16)', { top: -140, left: -120 })} />
-      <div style={blob(420, 'rgba(250,140,22,.14)', { bottom: -150, right: -100 })} />
+      <div style={blob(460, 'rgba(22,119,255,.16)', { top: -140, left: -120 })} />
+      <div style={blob(420, 'rgba(64,150,255,.14)', { bottom: -150, right: -100 })} />
       <div style={blob(300, 'rgba(47,84,235,.07)', { top: '30%', right: '12%' })} />
       {/* 细点阵 */}
       <div
@@ -36,10 +36,10 @@ function Backdrop() {
         }}
       />
       {/* 球场弧线：左下"三分线"同心圆 + 右上"中圈" */}
-      <div style={ring(680, 'rgba(250,84,28,.12)', 2, { left: -280, bottom: -300 })} />
-      <div style={ring(520, 'rgba(250,84,28,.10)', 2, { left: -210, bottom: -230 })} />
-      <div style={ring(380, 'rgba(250,84,28,.08)', 2, { left: -140, bottom: -160 })} />
-      <div style={ring(300, 'rgba(250,84,28,.10)', 2, { top: -120, right: -90 })} />
+      <div style={ring(680, 'rgba(22,119,255,.12)', 2, { left: -280, bottom: -300 })} />
+      <div style={ring(520, 'rgba(22,119,255,.10)', 2, { left: -210, bottom: -230 })} />
+      <div style={ring(380, 'rgba(22,119,255,.08)', 2, { left: -140, bottom: -160 })} />
+      <div style={ring(300, 'rgba(22,119,255,.10)', 2, { top: -120, right: -90 })} />
       <div style={ring(210, 'rgba(20,30,50,.06)', 2, { top: -75, right: -35 })} />
     </>
   )
@@ -55,7 +55,7 @@ function BrandPanel() {
       style={{
         width: 380, flexShrink: 0, position: 'relative', overflow: 'hidden', color: '#fff',
         padding: '40px 36px', display: 'flex', flexDirection: 'column',
-        background: 'linear-gradient(165deg, #fa541c 0%, #d4380d 55%, #871400 100%)',
+        background: 'linear-gradient(165deg, #1677ff 0%, #0958d9 55%, #002c8c 100%)',
       }}
     >
       <div style={ring(230, { top: -80, right: -70 })} />
@@ -96,7 +96,7 @@ export default function AuthShell({ title, subtitle, children }) {
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: wide ? 16 : 12,
           position: 'relative', overflow: 'hidden',
-          background: 'linear-gradient(160deg, #fff6f1 0%, #f6f7f9 45%, #edf0f5 100%)',
+          background: 'linear-gradient(160deg, #f3f8ff 0%, #f6f7f9 45%, #edf0f5 100%)',
         }}
       >
         <Backdrop />

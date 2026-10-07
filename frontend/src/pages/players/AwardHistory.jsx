@@ -92,7 +92,7 @@ export default function AwardHistory() {
     { title: 'Team', dataIndex: 'playerTeam', width: 84, render: (v) => <TeamNames value={v} /> },
     { title: 'GP', dataIndex: 'games', width: 56 },
     ...(isCrown
-      ? [{ title: stat.col, dataIndex: 'val', width: 76, render: (v) => <b style={{ color: '#fa541c' }}>{fmtVal(v)}</b> }]
+      ? [{ title: stat.col, dataIndex: 'val', width: 76, render: (v) => <b style={{ color: '#1677ff' }}>{fmtVal(v)}</b> }]
       : [
           { title: 'PTS', dataIndex: 'pts', width: 56, render: (v) => fmtNum(v) },
           { title: 'REB', dataIndex: 'reb', width: 56, render: (v) => fmtNum(v) },

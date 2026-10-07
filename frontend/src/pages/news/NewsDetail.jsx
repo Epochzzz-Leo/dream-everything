@@ -496,8 +496,8 @@ export default function NewsDetail() {
                       <span
                         key={tag}
                         style={{
-                          fontSize: 13, color: '#fa541c', background: '#fff4ec',
-                          border: '1px solid #ffd8bf', borderRadius: 999, padding: '3px 13px', lineHeight: 1.5,
+                          fontSize: 13, color: '#1677ff', background: '#f0f7ff',
+                          border: '1px solid #bae0ff', borderRadius: 999, padding: '3px 13px', lineHeight: 1.5,
                         }}
                       >
                         #{tag}

@@ -35,7 +35,7 @@ const TEAM_STATS = [
 function RankBadge({ rank, scope = 'league' }) {
   const color = rank <= 3 ? MEDAL[rank - 1] : '#999'
   return (
-    <span style={{ fontSize: 12, fontWeight: 600, color, background: rank <= 3 ? 'rgba(250,84,28,.08)' : '#f5f5f5', padding: '2px 8px', borderRadius: 10 }}>
+    <span style={{ fontSize: 12, fontWeight: 600, color, background: rank <= 3 ? 'rgba(22,119,255,.08)' : '#f5f5f5', padding: '2px 8px', borderRadius: 10 }}>
       {scope === 'playoffs' ? `Playoffs #${rank}` : `League #${rank}`}
     </span>
   )
@@ -88,7 +88,7 @@ function SeasonOverview({ teamCode, seasonNum }) {
                 type="circle"
                 size={110}
                 percent={Math.round(winRate * 100)}
-                strokeColor="#fa541c"
+                strokeColor="#1677ff"
                 format={(p) => (
                   <div style={{ lineHeight: 1.3 }}>
                     <div style={{ fontSize: 20, fontWeight: 700 }}>{p}%</div>
@@ -125,7 +125,7 @@ function SeasonOverview({ teamCode, seasonNum }) {
               const rank = rankOf(s)
               const val = s.get ? s.get(me) : Number(me[s.key])
               const display = s.signed ? `${val >= 0 ? '+' : ''}${val.toFixed(1)}` : fmtNum(val)
-              const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#fa541c'
+              const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#1677ff'
               return (
                 <Col key={s.key} xs={12} sm={6}>
                   <Card styles={{ body: { padding: '14px 16px' } }}>
@@ -198,7 +198,7 @@ function PlayoffOverview({ teamCode, seasonNum }) {
                   type="circle"
                   size={110}
                   percent={Math.round(winRate * 100)}
-                  strokeColor={isChamp ? '#d4a017' : '#fa541c'}
+                  strokeColor={isChamp ? '#d4a017' : '#1677ff'}
                   format={(p) => (
                     <div style={{ lineHeight: 1.3 }}>
                       <div style={{ fontSize: 20, fontWeight: 700 }}>{p}%</div>
@@ -237,7 +237,7 @@ function PlayoffOverview({ teamCode, seasonNum }) {
             const rank = rankOf(s)
             const val = s.get ? s.get(me) : Number(me[s.key])
             const display = s.signed ? `${val >= 0 ? '+' : ''}${val.toFixed(1)}` : fmtNum(val)
-            const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#fa541c'
+            const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#1677ff'
             return (
               <Col key={s.key} xs={12} sm={6}>
                 <Card styles={{ body: { padding: '14px 16px' } }}>
@@ -452,7 +452,7 @@ function TeamHistory({ teamCode }) {
         if (!k) return '-'
         return (
           <span style={{ whiteSpace: 'nowrap' }}>
-            <b style={{ color: k.league <= 3 ? '#fa541c' : undefined }}>{`League #${k.league}`}</b>
+            <b style={{ color: k.league <= 3 ? '#1677ff' : undefined }}>{`League #${k.league}`}</b>
             {confShort && <span style={{ color: '#999', fontSize: 12, marginLeft: 6 }}>{`${confShort} #${k.conf}`}</span>}
           </span>
         )

@@ -1,14 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Empty, Popover, Segmented, Select, Skeleton } from 'antd'
-import { GithubOutlined, LineChartOutlined, QuestionCircleOutlined, ReloadOutlined } from '@ant-design/icons'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Button, Card, Col, Empty, Grid, Row, Segmented, Select, Skeleton } from 'antd'
+import {
+  AppstoreOutlined, FireOutlined, GithubOutlined, LikeOutlined, LineChartOutlined, MessageOutlined, ReloadOutlined, RightOutlined,
+} from '@ant-design/icons'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { feedApi } from '../../api/feed'
+import { searchApi } from '../../api/search'
+import { topicApi } from '../../api/topic'
+import { assetUrl } from '../../config/origin'
 import { useAuth } from '../../auth/AuthContext'
 import PostCard from '../../components/PostCard'
 import PullRefreshIndicator from '../../components/PullRefreshIndicator'
 import useIsMobile from '../../hooks/useIsMobile'
 import usePullToRefresh from '../../hooks/usePullToRefresh'
 import { getAnonId } from '../../utils/anonId'
+import { clamp } from '../../utils/postText'
 import { trackClick, trackImpression } from '../../utils/feedEvents'
 
 /**
@@ -16,6 +22,7 @@ import { trackClick, trackImpression } from '../../utils/feedEvents'
  *
  * 三个标签：For you（算法排的，后端 FeedService + FeedRanker）、Latest（时间倒序）、
  * Following（关注的人，登录才有）。访客额外看到一条介绍横幅。
+ * 桌面端右栏两张卡：推荐专题、热帖榜（2026-10-08 加，手机上不显示）。
  *
  * 列表状态按「谁 + 标签 + 专题」缓存在模块里 10 分钟：点进帖子再退回来，接着原来的列表，
  * 不重新拉、翻到的位置也还在。后端的「为你推荐」快照能活 30 分钟，所以缓存里的游标接着用没问题。
@@ -23,6 +30,8 @@ import { trackClick, trackImpression } from '../../utils/feedEvents'
  */
 
 const PAGE = 10
+const BRAND = '#1677ff'
+const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 const GITHUB_URL = 'https://github.com/Epochzzz-Leo/dream-everything'
 const TABS = ['foryou', 'latest', 'following']
 const SOURCE = { foryou: 'feed_for_you', latest: 'feed_latest', following: 'feed_following' }
@@ -31,17 +40,11 @@ const cache = new Map()
 /** 最近一次拿到的专题筛选项：换标签时先用着，免得下拉框一闪变空 */
 let lastTopics = []
 
-const HOW_IT_WORKS = (
-  <div style={{ maxWidth: 300, fontSize: 13, lineHeight: 1.6 }}>
-    For you mixes four sources: the newest posts, hot posts (likes × 2 + comments × 3, halving every 7 days),
-    posts a topic owner has commented on, and people you follow. Posts from one topic are spread out so no
-    single topic takes over, and posts you have already opened move down. Each card says why it is here.
-  </div>
-)
-
 export default function FeedHome() {
   const { user, loading: authLoading } = useAuth()
   const isMobile = useIsMobile()
+  // 右栏只在 lg（≥992px）以上渲染：窄屏连组件都不挂，免得手机上白发两个请求
+  const wide = Grid.useBreakpoint().lg
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const rawTab = params.get('tab')
@@ -71,7 +74,7 @@ export default function FeedHome() {
   const { pull, refreshing, threshold } = usePullToRefresh(refresh, isMobile)
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
       <PullRefreshIndicator pull={pull} refreshing={refreshing} threshold={threshold} />
 
       {/* 只有访客看得到：从简历点进来的人第一眼要知道这是什么站 */}
@@ -79,7 +82,7 @@ export default function FeedHome() {
         <div
           style={{
             borderRadius: 16, color: '#fff', marginBottom: 16, padding: isMobile ? '16px 14px' : '22px 26px',
-            background: 'linear-gradient(120deg, #fa541c 0%, #d4380d 60%, #ad2102 100%)',
+            background: 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
           }}
         >
           <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800 }}>Dream Everything</div>
@@ -97,44 +100,155 @@ export default function FeedHome() {
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-        <Segmented
-          value={tab}
-          onChange={(v) => setParam('tab', v, 'foryou')}
-          options={[
-            { label: 'For you', value: 'foryou' },
-            { label: 'Latest', value: 'latest' },
-            ...(user ? [{ label: 'Following', value: 'following' }] : []),
-          ]}
-        />
-        <Popover content={HOW_IT_WORKS} title="How For you is ranked" trigger={isMobile ? 'click' : 'hover'}>
-          <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
-        </Popover>
-        <span style={{ flex: 1 }} />
-        <Select
-          allowClear
-          placeholder="All topics"
-          value={topicId || undefined}
-          onChange={(v) => setParam('topic', v || '', '')}
-          options={topics.map((t) => ({ value: t.topicId, label: t.name }))}
-          style={{ minWidth: isMobile ? 130 : 180 }}
-        />
-        {!isMobile && <Button icon={<ReloadOutlined />} onClick={refresh} title="Refresh" />}
-      </div>
+      <Row gutter={isMobile ? [0, 16] : [16, 16]}>
+        <Col xs={24} lg={16} xl={17}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+            <Segmented
+              value={tab}
+              onChange={(v) => setParam('tab', v, 'foryou')}
+              options={[
+                { label: 'For you', value: 'foryou' },
+                { label: 'Latest', value: 'latest' },
+                ...(user ? [{ label: 'Following', value: 'following' }] : []),
+              ]}
+            />
+            <span style={{ flex: 1 }} />
+            <Select
+              allowClear
+              placeholder="All topics"
+              value={topicId || undefined}
+              onChange={(v) => setParam('topic', v || '', '')}
+              options={topics.map((t) => ({ value: t.topicId, label: t.name }))}
+              style={{ minWidth: isMobile ? 130 : 180 }}
+            />
+            {!isMobile && <Button icon={<ReloadOutlined />} onClick={refresh} title="Refresh" />}
+          </div>
 
-      {authLoading ? (
-        <Skeleton active paragraph={{ rows: 6 }} />
-      ) : (
-        <FeedList
-          key={`${cacheKey}|${refreshTick}`}
-          cacheKey={cacheKey}
-          tab={tab}
-          topicId={topicId}
-          onTopics={onTopics}
-          onRetry={refresh}
-        />
-      )}
+          {authLoading ? (
+            <Skeleton active paragraph={{ rows: 6 }} />
+          ) : (
+            <FeedList
+              key={`${cacheKey}|${refreshTick}`}
+              cacheKey={cacheKey}
+              tab={tab}
+              topicId={topicId}
+              onTopics={onTopics}
+              onRetry={refresh}
+            />
+          )}
+        </Col>
+
+        {/* 右栏：推荐专题 + 热帖榜。跟着页面滚动时停在顶栏下面 */}
+        {wide && (
+          <Col lg={8} xl={7}>
+            <div style={{ position: 'sticky', top: 76, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <TopicsRail />
+              <HotPostsRail />
+            </div>
+          </Col>
+        )}
+      </Row>
     </div>
+  )
+}
+
+/** 右栏：推荐专题。公开且没下架的专题，帖子多的在前，最多 6 个；私密专题从侧栏和 Topics 进 */
+function TopicsRail() {
+  const [topics, setTopics] = useState(null)
+  // 992 到 1199 宽时右栏只有两百多像素，完整标题会被截成「Recommended t…」，换成短的
+  const xl = Grid.useBreakpoint().xl
+  useEffect(() => {
+    let alive = true
+    topicApi.list()
+      .then((r) => {
+        if (!alive) return
+        const list = (Array.isArray(r) ? r : r?.records || [])
+          .filter((t) => t.visibility !== 'private' && t.listed !== false)
+          .sort((a, b) => (b.postCount ?? 0) - (a.postCount ?? 0) || String(a.name).localeCompare(String(b.name)))
+        setTopics(list.slice(0, 6))
+      })
+      .catch(() => { if (alive) setTopics([]) })
+    return () => { alive = false }
+  }, [])
+  return (
+    <Card
+      title={<span><AppstoreOutlined style={{ color: BRAND, marginRight: 6 }} />{xl ? 'Recommended topics' : 'Topics'}</span>}
+      extra={<Link to="/news" style={{ fontSize: 13, color: '#888' }}>All <RightOutlined style={{ fontSize: 10 }} /></Link>}
+      loading={topics === null}
+      style={{ borderRadius: 14 }}
+      styles={{ body: { padding: '6px 18px 10px' } }}
+    >
+      {topics?.length ? topics.map((t, i) => (
+        <Link
+          key={t.topicId}
+          to={`/news/topic/${t.topicId}`}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', color: 'inherit',
+            borderBottom: i === topics.length - 1 ? 'none' : '1px solid #f5f5f5',
+          }}
+        >
+          {t.banner ? (
+            <img src={assetUrl(t.banner)} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#f5f5f5' }} />
+          ) : (
+            <span
+              style={{
+                width: 36, height: 36, borderRadius: 8, flexShrink: 0, display: 'inline-flex', alignItems: 'center',
+                justifyContent: 'center', background: '#e6f4ff', color: BRAND, fontWeight: 800,
+              }}
+            >
+              {String(t.name || '?').slice(0, 1).toUpperCase()}
+            </span>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, ...clamp(1) }}>{t.name}</div>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 2, ...clamp(1) }}>{t.description || 'No description yet'}</div>
+          </div>
+          <span style={{ fontSize: 12, color: '#bbb', flexShrink: 0 }}>{`${t.postCount ?? 0} posts`}</span>
+        </Link>
+      )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No topics yet" />}
+    </Card>
+  )
+}
+
+/** 右栏：热帖榜。全站公开专题的帖子按「点赞×2 + 评论×3」排（后端 /search/hotPosts，和搜索页的热榜同一份） */
+function HotPostsRail() {
+  const [rows, setRows] = useState(null)
+  useEffect(() => {
+    let alive = true
+    searchApi.hotPosts(8)
+      .then((r) => { if (alive) setRows(Array.isArray(r) ? r : []) })
+      .catch(() => { if (alive) setRows([]) })
+    return () => { alive = false }
+  }, [])
+  return (
+    <Card
+      title={<span><FireOutlined style={{ color: '#f5222d', marginRight: 6 }} />Hot posts</span>}
+      loading={rows === null}
+      style={{ borderRadius: 14 }}
+      styles={{ body: { padding: '6px 18px 10px' } }}
+    >
+      {rows?.length ? rows.map((p, i) => (
+        <Link
+          key={p.newsId}
+          to={`/news/${p.newsId}`}
+          onClick={() => trackClick({ newsId: p.newsId, source: 'hot', position: i })}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', color: 'inherit',
+            borderBottom: i === rows.length - 1 ? 'none' : '1px solid #f5f5f5',
+          }}
+        >
+          <span style={{ width: 18, textAlign: 'center', fontStyle: 'italic', fontWeight: 800, color: i < 3 ? MEDAL[i] : '#c8c8c8' }}>
+            {i + 1}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: i < 3 ? 600 : 400, ...clamp(1) }}>{p.title || '(untitled)'}</div>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 2, ...clamp(1) }}>
+              {p.topicName ? `${p.topicName} · ` : ''}<LikeOutlined /> {p.goodNum ?? 0} · <MessageOutlined /> {p.commentNum ?? 0}
+            </div>
+          </div>
+        </Link>
+      )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nothing here yet" />}
+    </Card>
   )
 }
 

@@ -151,7 +151,7 @@ export default function CommentComposer({ newsId, placeholder, submitText: submi
                 key={f.id}
                 onMouseDown={(e) => { e.preventDefault(); pickMention(f) }}
                 style={{ padding: '7px 12px', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#fff7f0' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#f0f7ff' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = '#fff' }}
               >
                 <span style={{ fontWeight: 600 }}>@{f.name}</span>
@@ -171,7 +171,7 @@ export default function CommentComposer({ newsId, placeholder, submitText: submi
                 <Image src={att.url} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} />
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', background: '#f5f5f5', borderRadius: 8, maxWidth: 200, height: 72, boxSizing: 'border-box' }}>
-                  <FileOutlined style={{ color: '#fa541c', fontSize: 18 }} />
+                  <FileOutlined style={{ color: '#1677ff', fontSize: 18 }} />
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</div>
                     <div style={{ fontSize: 11, color: '#999' }}>{humanSize(att.size)}</div>

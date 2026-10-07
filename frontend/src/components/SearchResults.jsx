@@ -68,7 +68,7 @@ function RowBody({ type, d, dn }) {
       </span>
     )
   }
-  if (type === 'news') return newsRow(d, <ReadOutlined style={{ color: '#fa541c' }} />)
+  if (type === 'news') return newsRow(d, <ReadOutlined style={{ color: '#1677ff' }} />)
   if (type === 'forum') return newsRow(d, <FileTextOutlined style={{ color: '#999' }} />)
   return (
     <span>
@@ -94,7 +94,7 @@ export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick 
       )}
       {!loading && rows.map((r, i) =>
         r.kind === 'group' ? (
-          <div key={r.key} style={{ padding: '10px 12px 4px', fontSize: 12, fontWeight: 600, color: '#fa541c', letterSpacing: 1 }}>
+          <div key={r.key} style={{ padding: '10px 12px 4px', fontSize: 12, fontWeight: 600, color: '#1677ff', letterSpacing: 1 }}>
             {r.label}
           </div>
         ) : (
@@ -105,11 +105,11 @@ export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick 
             style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
               borderRadius: 8, cursor: 'pointer', fontSize: 14,
-              background: active === i ? '#fff2ea' : 'transparent',
+              background: active === i ? '#e6f4ff' : 'transparent',
             }}
           >
             <span style={{ flex: 1, minWidth: 0 }}><RowBody type={r.type} d={r.d} dn={dn} /></span>
-            {active === i && <EnterOutlined style={{ color: '#fa541c' }} />}
+            {active === i && <EnterOutlined style={{ color: '#1677ff' }} />}
           </div>
         ),
       )}

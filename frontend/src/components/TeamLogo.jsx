@@ -52,7 +52,7 @@ export default function TeamLogo({ code, size = 22, style, title }) {
  * 都用这一份——三四个地方各画一遍的话，颜色和尺寸迟早会飘。
  *
  * 光靠"客在上、主在下"的排列顺序是不够的：两行长得一样，只有知道这条约定的人
- * 才读得出来，而这条约定页面上没写。主场标品牌橙、客场标灰，扫一眼就分得清。
+ * 才读得出来，而这条约定页面上没写。主场标品牌色、客场标灰，扫一眼就分得清。
  * 宽高写死成正方形，同一列里的几个标才对得齐。
  */
 export function HomeAwayTag({ home, size = 18, style }) {
@@ -64,9 +64,9 @@ export function HomeAwayTag({ home, size = 18, style }) {
         width: size, height: size, borderRadius: 4,
         fontSize: Math.round(size * 0.61), lineHeight: `${size - 2}px`,
         textAlign: 'center', fontWeight: 700,
-        background: home ? '#fff2e8' : '#fafafa',
-        color: home ? '#fa541c' : '#aaa',
-        border: `1px solid ${home ? '#ffd8bf' : '#eee'}`,
+        background: home ? '#e6f4ff' : '#fafafa',
+        color: home ? '#1677ff' : '#aaa',
+        border: `1px solid ${home ? '#bae0ff' : '#eee'}`,
         ...style,
       }}
     >

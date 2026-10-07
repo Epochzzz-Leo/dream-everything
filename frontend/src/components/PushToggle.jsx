@@ -132,7 +132,7 @@ export default function PushToggle({ compact = false, variant }) {
    *
    * 做成按钮而不是带文字的开关，是为了和旁边的刷新钮共用同一个 32px 胶囊——
    * 顶栏那一行很挤，多一处宽度不一样的控件就会把搜索框挤变形。
-   * 状态靠颜色说：亮橙 = 开着，灰 = 没开。
+   * 状态靠颜色说：亮蓝 = 开着，灰 = 没开。
    */
   if (variant === 'icon') {
     return (
@@ -146,9 +146,9 @@ export default function PushToggle({ compact = false, variant }) {
           style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             width: 32, height: 32, flexShrink: 0, borderRadius: 16,
-            border: `1px solid ${on ? '#ffd8bf' : '#e8e8e8'}`,
-            background: on ? '#fff2e8' : '#fff',
-            color: on ? '#fa541c' : '#aaa',
+            border: `1px solid ${on ? '#bae0ff' : '#e8e8e8'}`,
+            background: on ? '#e6f4ff' : '#fff',
+            color: on ? '#1677ff' : '#aaa',
             cursor: busy ? 'default' : 'pointer', fontSize: 14, marginRight: 4,
             opacity: busy ? 0.5 : 1,
           }}
@@ -163,7 +163,7 @@ export default function PushToggle({ compact = false, variant }) {
     <Space size={8}>
       <Tooltip title={isIos && !standalone ? 'Add to Home Screen first on iPhone' : 'Get notified about mentions, replies and schedule assignments'}>
         <Space size={6}>
-          <BellOutlined style={{ color: on ? '#fa541c' : '#bbb' }} />
+          <BellOutlined style={{ color: on ? '#1677ff' : '#bbb' }} />
           <Text style={{ fontSize: 13, color: '#666' }}>Notifications</Text>
           <Switch size="small" checked={on} loading={busy} onChange={toggle} />
         </Space>

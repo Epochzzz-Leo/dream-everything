@@ -18,7 +18,7 @@ import useIsMobile from '../../hooks/useIsMobile'
 const GROUPS = [
   {
     group: 'Overall Value',
-    color: '#fa541c',
+    color: '#1677ff',
     intro: 'One number for overall contribution, comparable across positions',
     items: [
       {

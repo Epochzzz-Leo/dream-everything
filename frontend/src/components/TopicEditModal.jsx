@@ -158,7 +158,7 @@ export default function TopicEditModal({ open, onClose, onSaved, topic, categori
                 position: 'relative', width: '100%', aspectRatio: '3 / 1', borderRadius: 12,
                 overflow: 'hidden', background: bannerPreview || (banner && banner !== '')
                   ? '#f5f5f5'
-                  : 'linear-gradient(120deg, #fa541c 0%, #d4380d 60%, #ad2102 100%)',
+                  : 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
                 border: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >

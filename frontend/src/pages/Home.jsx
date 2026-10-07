@@ -23,7 +23,7 @@ import { byHotThenNewest } from '../utils/hot'
  * 数据并行拉取，各区块独立 loading；切赛季只刷新赛季维度的区块。
  */
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 
 const LEADER_STATS = [
@@ -38,7 +38,7 @@ const clamp = (lines) => ({
   display: '-webkit-box', WebkitLineClamp: lines, WebkitBoxOrient: 'vertical', overflow: 'hidden',
 })
 
-/** 区块标题：品牌橙竖条 + 标题 + 右侧"更多"链接 */
+/** 区块标题：品牌色竖条 + 标题 + 右侧"更多"链接 */
 function SectionTitle({ title, extra, onExtra }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 2px 14px' }}>
@@ -343,12 +343,12 @@ export default function Home() {
         <div
           style={{
             marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-            background: 'linear-gradient(90deg, #fff2e8 0%, #ffffff 70%)', border: '1px solid #ffd8bf',
+            background: 'linear-gradient(90deg, #e6f4ff 0%, #ffffff 70%)', border: '1px solid #bae0ff',
             borderRadius: 14, padding: '12px 20px',
           }}
         >
           <span style={{ fontSize: 20 }}>👋</span>
-          <span style={{ color: '#873800', fontWeight: 500 }}>Sign in to post, comment and like</span>
+          <span style={{ color: '#002c8c', fontWeight: 500 }}>Sign in to post, comment and like</span>
           <span style={{ flex: 1 }} />
           <Button type="primary" onClick={() => goLogin()}>Sign in</Button>
           <Button onClick={() => navigate('/register')}>Sign up</Button>

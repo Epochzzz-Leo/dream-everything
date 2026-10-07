@@ -10,7 +10,7 @@ import UserTitles from './UserTitles'
 import useIsMobile from '../hooks/useIsMobile'
 import { avatarColor, clamp, coverOf, textOf, timeAgo } from '../utils/postText'
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 /**
  * 单条帖子卡：头像 + 标题/摘要/元信息 + 首图缩略图。

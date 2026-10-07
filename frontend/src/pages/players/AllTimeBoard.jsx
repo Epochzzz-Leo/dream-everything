@@ -51,7 +51,7 @@ export default function AllTimeBoard() {
     { title: 'Season', dataIndex: 'seasons', width: 56 },
     {
       title: stat.label, dataIndex: 'val', width: 96,
-      render: (v) => <b style={{ color: '#fa541c', fontVariantNumeric: 'tabular-nums' }}>{fmtTotal(v)}</b>,
+      render: (v) => <b style={{ color: '#1677ff', fontVariantNumeric: 'tabular-nums' }}>{fmtTotal(v)}</b>,
     },
   ]
   const cols = isMobile ? compactColumns(columns) : columns

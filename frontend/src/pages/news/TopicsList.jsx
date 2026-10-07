@@ -22,7 +22,7 @@ import useIsMobile from '../../hooks/useIsMobile'
  * - owner 的成员权限管理在专题内页操作。
  */
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 const clamp = (n) => ({ display: '-webkit-box', WebkitLineClamp: n, WebkitBoxOrient: 'vertical', overflow: 'hidden' })
 
 export default function TopicsList() {
@@ -123,10 +123,10 @@ export default function TopicsList() {
 
   return (
     <>
-      <style>{'.topic-card-badge{display:block;width:100%;height:100%} .topic-card{transition:all .2s} .topic-card:hover{border-color:#ffbb96;box-shadow:0 6px 18px rgba(250,84,28,.1);transform:translateY(-2px)}'}</style>
+      <style>{'.topic-card-badge{display:block;width:100%;height:100%} .topic-card{transition:all .2s} .topic-card:hover{border-color:#91caff;box-shadow:0 6px 18px rgba(22,119,255,.1);transform:translateY(-2px)}'}</style>
 
       {/* 横幅 */}
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, color: '#fff', padding: isMobile ? '16px 14px' : '24px 28px', marginBottom: 18, background: 'linear-gradient(120deg, #fa541c 0%, #d4380d 60%, #ad2102 100%)' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, color: '#fff', padding: isMobile ? '16px 14px' : '24px 28px', marginBottom: 18, background: 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)' }}>
         <div style={ring(190, { top: -80, right: 120 })} />
         <div style={ring(120, { bottom: -50, right: 300 })} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
@@ -254,7 +254,7 @@ export default function TopicsList() {
                         {/* 图标不加 drop-shadow：`filter` 会让元素单独成一个合成层，
                             而卡片顶部那截渐变已经压到 .58，白图标本来就看得清 */}
                         {user && (tp.pinned
-                          ? <PushpinFilled title="Unpin" style={{ color: art ? '#ffa940' : BRAND, cursor: 'pointer' }} onClick={() => togglePin(tp)} />
+                          ? <PushpinFilled title="Unpin" style={{ color: art ? '#69b1ff' : BRAND, cursor: 'pointer' }} onClick={() => togglePin(tp)} />
                           : <PushpinOutlined title="Pin" style={{ color: art ? '#fff' : '#bbb', cursor: 'pointer' }} onClick={() => togglePin(tp)} />)}
                         {tp.canManage && <EditOutlined style={{ color: art ? '#fff' : '#999', cursor: 'pointer' }} onClick={() => setEditTopic(tp)} />}
                         {tp.canManage && user?.isSuperManager && (
@@ -301,7 +301,7 @@ export default function TopicsList() {
                         <TopicApplyButton topic={tp} onApplied={load} size="small" />
                       </span>
                     ) : (
-                      <span style={{ color: art ? '#ffc069' : BRAND, fontWeight: 600, textShadow: shadow }}>Enter <RightOutlined style={{ fontSize: 10 }} /></span>
+                      <span style={{ color: art ? '#91caff' : BRAND, fontWeight: 600, textShadow: shadow }}>Enter <RightOutlined style={{ fontSize: 10 }} /></span>
                     )}
                   </div>
                   </div>

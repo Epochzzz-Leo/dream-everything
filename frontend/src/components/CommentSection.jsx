@@ -78,7 +78,7 @@ function CommentAttachments({ attachmentsJson }) {
               onClick={(e) => e.stopPropagation()}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#f5f5f5', borderRadius: 8, color: 'inherit', maxWidth: 280 }}
             >
-              <FileOutlined style={{ color: '#fa541c', fontSize: 18 }} />
+              <FileOutlined style={{ color: '#1677ff', fontSize: 18 }} />
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'File'}</span>
               {a.size != null && <span style={{ fontSize: 11, color: '#999', flexShrink: 0 }}>{humanSize(a.size)}</span>}
             </a>
@@ -214,7 +214,7 @@ function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, 
                 <span style={{ color: '#8c8c8c' }}>
                   Reply{' '}
                   {r.replyToUserId
-                    ? <Link to={`/users/${r.replyToUserId}`} onClick={(e) => e.stopPropagation()} style={{ color: '#fa541c', fontWeight: 600 }}>@{r.replyToName}</Link>
+                    ? <Link to={`/users/${r.replyToUserId}`} onClick={(e) => e.stopPropagation()} style={{ color: '#1677ff', fontWeight: 600 }}>@{r.replyToName}</Link>
                     : <b>@{r.replyToName}</b>}
                   {': '}
                 </span>
@@ -238,7 +238,7 @@ function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, 
                   type="text"
                   size="small"
                   icon={<MessageOutlined />}
-                  style={{ color: replyingId === r.commentId ? '#fa541c' : '#8c8c8c' }}
+                  style={{ color: replyingId === r.commentId ? '#1677ff' : '#8c8c8c' }}
                   onClick={() => (user ? setReplyingId((id) => (id === r.commentId ? null : r.commentId)) : requireLogin())}
                 >
                   Reply
@@ -420,7 +420,7 @@ function FloorNode({ comment, newsId, authorId, topicOwnerIds, locked, ratingIte
               type="text"
               size="small"
               icon={<MessageOutlined />}
-              style={{ color: replyOpen ? '#fa541c' : '#8c8c8c' }}
+              style={{ color: replyOpen ? '#1677ff' : '#8c8c8c' }}
               onClick={() => (user ? setReplyOpen((o) => !o) : requireLogin())}
             >
               Reply
@@ -589,7 +589,7 @@ export default function CommentSection({
                 style={{
                   padding: '2px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', userSelect: 'none',
                   whiteSpace: 'nowrap', transition: 'all .15s',
-                  color: sortBy === v ? '#fa541c' : '#8c8c8c',
+                  color: sortBy === v ? '#1677ff' : '#8c8c8c',
                   background: sortBy === v ? '#fff' : 'transparent',
                   fontWeight: sortBy === v ? 700 : 400,
                   boxShadow: sortBy === v ? '0 1px 3px rgba(0,0,0,.08)' : 'none',
@@ -642,9 +642,9 @@ export default function CommentSection({
                 padding: isMobile ? '4px 10px' : '4px 14px', borderRadius: 999,
                 fontSize: isMobile ? 12 : 13, fontWeight: 500, whiteSpace: 'nowrap',
                 color: onlyAuthor ? '#fff' : '#8c8c8c',
-                background: onlyAuthor ? '#fa541c' : '#f5f5f5',
-                border: `1px solid ${onlyAuthor ? '#fa541c' : '#ececec'}`,
-                boxShadow: onlyAuthor ? '0 2px 8px rgba(250,84,28,.25)' : 'none',
+                background: onlyAuthor ? '#1677ff' : '#f5f5f5',
+                border: `1px solid ${onlyAuthor ? '#1677ff' : '#ececec'}`,
+                boxShadow: onlyAuthor ? '0 2px 8px rgba(22,119,255,.25)' : 'none',
                 transition: 'all .15s',
               }}
             >

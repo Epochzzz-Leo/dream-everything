@@ -4,7 +4,7 @@
  * 没用 Segmented：它是一整条不换行的横条，类别一多就在手机上溢出屏幕
  * （赛季选择器踩过同样的坑）。胶囊自然换行，多少个都放得下。
  */
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 export default function CategoryFilter({ options, value, onChange, extra }) {
   if (!options?.length) return null

@@ -62,7 +62,7 @@ export default function TopicApplyButton({ topic, onApplied, banner, block, size
   return (
     <>
       <Button
-        /* 横幅上（banner）走玻璃样式，卡片里仍是普通主按钮——白底上的实心橙才是对的 */
+        /* 横幅上（banner）走玻璃样式，卡片里仍是普通主按钮——白底上的实心主色才是对的 */
         className={banner ? 'banner-btn' : undefined}
         type={banner ? 'default' : 'primary'}
         block={block}

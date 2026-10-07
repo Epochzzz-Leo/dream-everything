@@ -11,7 +11,7 @@ import PositionFilter from './PositionFilter'
 
 /**
  * 某数据项的完整排行（/rankings/:field）：按该项降序、不分页一滚到底，
- * 展示球员的全量数据列（排行项高亮为橙色）。
+ * 展示球员的全量数据列（排行项高亮为主色）。
  */
 export default function RankingDetail() {
   const { field } = useParams()
@@ -65,7 +65,7 @@ export default function RankingDetail() {
         ? {
             ...c,
             render: (v, row, idx) => (
-              <span style={{ fontWeight: 700, color: '#fa541c' }}>
+              <span style={{ fontWeight: 700, color: '#1677ff' }}>
                 {c.render ? c.render(v, row, idx) : stat.pct || stat.rate ? fmtAdv(v, stat) : fmtNum(v, stat.digits)}
               </span>
             ),

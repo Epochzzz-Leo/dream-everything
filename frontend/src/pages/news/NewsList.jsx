@@ -35,14 +35,14 @@ import { clamp } from '../../utils/postText'
 
 /**
  * 帖子列表（公开，P5-2 内容流改版），按频道复用：
- * - channel="forum"（默认）：百家说（品牌橙横幅），登录用户皆可发帖；
+ * - channel="forum"（默认）：百家说（品牌色横幅），登录用户皆可发帖；
  * - channel="official"：官方新闻（权威蓝横幅），只有 manager+ 能发布。
  * 布局：频道横幅 + 搜索/最新最热工具栏 + 帖子卡片流（字母头像/摘要/首图缩略图/互动数）
  *      + 右栏热榜与发帖引导。
  * 后端列表接口是 ES 全量返回（page/limit 不生效），故一次拉全，前端自己搜索/排序/分页。
  */
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 const PAGE_SIZE = 8
 // 移动端每次「上拉」多放出来的条数。比桌面翻页多给一些：手机上滑一屏很快，
@@ -240,7 +240,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
   return (
     <>
       <style>{`
-        .post-card:hover { border-color: #ffbb96; box-shadow: 0 6px 18px rgba(250,84,28,.10); transform: translateY(-2px); }
+        .post-card:hover { border-color: #91caff; box-shadow: 0 6px 18px rgba(22,119,255,.10); transform: translateY(-2px); }
         .post-card:hover .post-title { color: ${BRAND}; }
       `}</style>
 
@@ -248,7 +248,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           压在横幅上的话就成了"盖住"而不是"下拉" */}
       <PullRefreshIndicator pull={pull} refreshing={refreshing} threshold={threshold} />
 
-      {/* 横幅：官方新闻=权威蓝；专题=题主设的背景图，没设就退回品牌橙渐变。
+      {/* 横幅：官方新闻=权威蓝；专题=题主设的背景图，没设就退回品牌色渐变。
           + 名称/简介/可见性 + 返回 + 成员管理 */}
       <div
         style={{
@@ -275,7 +275,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           gap: bannerUrl ? 10 : undefined,
           background: official
             ? 'linear-gradient(120deg, #1d39c4 0%, #2f54eb 60%, #597ef7 100%)'
-            : 'linear-gradient(120deg, #fa541c 0%, #d4380d 60%, #ad2102 100%)',
+            : 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
         }}
       >
         {bannerUrl && (
@@ -544,7 +544,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                 width: 52, height: 52, borderRadius: 26,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: official ? '#2f54eb' : BRAND, color: '#fff', fontSize: 22,
-                boxShadow: official ? '0 6px 18px rgba(47,84,235,.4)' : '0 6px 18px rgba(250,84,28,.4)',
+                boxShadow: official ? '0 6px 18px rgba(47,84,235,.4)' : '0 6px 18px rgba(22,119,255,.4)',
                 cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
               }}
             >

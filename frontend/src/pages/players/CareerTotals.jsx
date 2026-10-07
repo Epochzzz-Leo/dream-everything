@@ -52,7 +52,7 @@ export default function CareerTotals({ playerId }) {
               <div style={{ border: '1px solid #f0f0f0', borderRadius: 10, padding: isMobile ? '7px 6px' : '10px 12px', background: '#fff' }}>
                 <div style={{ color: '#888', fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>{s.label}</div>
                 <div style={{
-                  fontSize: isMobile ? 16 : 20, fontWeight: 800, color: '#fa541c',
+                  fontSize: isMobile ? 16 : 20, fontWeight: 800, color: '#1677ff',
                   margin: '2px 0 4px', fontVariantNumeric: 'tabular-nums',
                 }}>
                   {fmtTotal(v)}

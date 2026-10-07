@@ -7,7 +7,7 @@ import useIsMobile from '../../hooks/useIsMobile'
 import GameDayNav from './GameDayNav'
 import { seasonYearLabel } from '../players/rankConfig'
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /**
@@ -17,7 +17,7 @@ const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: '
  * 按今天打开多半是空的，看着像页面坏了。日期通过 ?date= 挂在地址栏上，
  * 这样从单场详情按浏览器返回能回到同一天，分享链接也带得走。
  *
- * 小日历里有比赛的日子标成橙底：不然只能一天天点过去试，很难找到有内容的日期。
+ * 小日历里有比赛的日子标成主色浅底：不然只能一天天点过去试，很难找到有内容的日期。
  */
 export default function DailyGames() {
   const navigate = useNavigate()

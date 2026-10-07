@@ -17,7 +17,7 @@ export const MAX_TAGS = 10
 // 没有现成话题时兜底的推荐项（通用分类，不绑定具体主题）。话题是自由文本，后端不认具体值
 const FALLBACK_TAGS = ['Discussion', 'Sharing', 'Help', 'Announcement', 'Resources', 'Tutorial', 'Feedback', 'Chat', 'Breaking', 'Highlights']
 
-/** 一枚话题胶囊。选中=品牌橙实心边框，未选=灰底 */
+/** 一枚话题胶囊。选中=品牌色实心边框，未选=灰底 */
 function TagChip({ text, count, active, onClick }) {
   return (
     <span
@@ -25,14 +25,14 @@ function TagChip({ text, count, active, onClick }) {
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none',
         padding: '5px 12px', borderRadius: 999, fontSize: 13, lineHeight: 1.4,
-        color: active ? '#d4380d' : '#595959',
-        background: active ? '#fff1e6' : '#f5f5f5',
-        border: `1px solid ${active ? '#ffbb96' : 'transparent'}`,
+        color: active ? '#0958d9' : '#595959',
+        background: active ? '#e6f4ff' : '#f5f5f5',
+        border: `1px solid ${active ? '#91caff' : 'transparent'}`,
         transition: 'all .15s',
       }}
     >
       #{text}
-      {count > 0 && <span style={{ fontSize: 11, color: active ? '#fa8c16' : '#bbb' }}>{count}</span>}
+      {count > 0 && <span style={{ fontSize: 11, color: active ? '#4096ff' : '#bbb' }}>{count}</span>}
     </span>
   )
 }
@@ -139,7 +139,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer',
               padding: '5px 12px', borderRadius: 999, fontSize: 13,
-              color: '#d4380d', background: '#fff7e6', border: '1px dashed #ffbb96',
+              color: '#0958d9', background: '#e6f4ff', border: '1px dashed #91caff',
             }}
           >
             {`Create "#${kw.trim().replace(/^#+/, '')}"`}

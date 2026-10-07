@@ -168,7 +168,7 @@ function GameCommentMeta({ c }) {
       {c.myScore != null && (
         <>
           <span style={{ margin: '0 8px' }}>·</span>
-          <span style={{ color: '#fa541c', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
+          <span style={{ color: '#1677ff', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
         </>
       )}
       <span style={{ margin: '0 8px' }}>·</span>{fmtDate(c.commentDate)}
@@ -196,7 +196,7 @@ function LolCommentMeta({ c }) {
       {c.myScore != null && (
         <>
           <span style={{ margin: '0 8px' }}>·</span>
-          <span style={{ color: '#fa541c', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
+          <span style={{ color: '#1677ff', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
         </>
       )}
       <span style={{ margin: '0 8px' }}>·</span>{fmtDate(c.commentDate)}
@@ -273,7 +273,7 @@ function FollowListModal({ userId, tab, onClose, onTabChange }) {
               onClick={() => { onClose(); navigate(`/users/${r.userId}`) }}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 4px', borderBottom: '1px solid #fafafa', cursor: 'pointer' }}
             >
-              <Avatar size={34} src={r.avatar || undefined} style={{ background: '#fa541c', fontWeight: 700, flexShrink: 0 }}>
+              <Avatar size={34} src={r.avatar || undefined} style={{ background: '#1677ff', fontWeight: 700, flexShrink: 0 }}>
                 {String(dn(r.userId, r.userNickname) || '?')[0].toUpperCase()}
               </Avatar>
               <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
@@ -512,7 +512,7 @@ export default function UserProfile() {
       {/* 渐变横幅：身份区。桌面按钮在右上角；移动端缩小尺寸、按钮挪到下方一行，避免挤在一起 */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #fa541c 0%, #ff7a45 55%, #ffa940 100%)',
+          background: 'linear-gradient(135deg, #1677ff 0%, #4096ff 55%, #69b1ff 100%)',
           borderRadius: 12, padding: isMobile ? '20px 18px 36px' : '30px 30px 52px', color: '#fff', position: 'relative',
         }}
       >
@@ -523,7 +523,7 @@ export default function UserProfile() {
           <Avatar
             size={isMobile ? 58 : 76}
             src={user.avatar || undefined}
-            style={{ background: '#fff', color: '#fa541c', fontWeight: 800, fontSize: isMobile ? 26 : 32, flexShrink: 0 }}
+            style={{ background: '#fff', color: '#1677ff', fontWeight: 800, fontSize: isMobile ? 26 : 32, flexShrink: 0 }}
           >
             {displayName.slice(0, 1).toUpperCase()}
           </Avatar>
@@ -571,7 +571,7 @@ export default function UserProfile() {
             <Row gutter={isMobile ? 4 : 16}>
               <Col xs={4} sm={4}>{cell('Posts', stats.posts ?? 0)}</Col>
               <Col xs={4} sm={4}>{cell('Comments', stats.comments ?? 0)}</Col>
-              <Col xs={4} sm={4}>{cell('Likes', stats.likes ?? 0, { color: '#fa541c', prefix: <LikeOutlined /> })}</Col>
+              <Col xs={4} sm={4}>{cell('Likes', stats.likes ?? 0, { color: '#1677ff', prefix: <LikeOutlined /> })}</Col>
               <Col xs={4} sm={4}>{cell('Following', followingCount ?? 0, { onClick: followGuard('following'), titleAttr: 'View following' })}</Col>
               <Col xs={4} sm={4}>{cell('Followers', followerCount ?? 0, { onClick: followGuard('followers'), titleAttr: 'View followers' })}</Col>
               <Col xs={4} sm={4}>{cell('Days here', daysSince(user.registTime))}</Col>
@@ -661,7 +661,7 @@ export default function UserProfile() {
               <Avatar
                 size={64}
                 src={avatarPreview || user.avatar || undefined}
-                style={{ background: '#fff2ea', color: '#fa541c', fontWeight: 800, fontSize: 26 }}
+                style={{ background: '#e6f4ff', color: '#1677ff', fontWeight: 800, fontSize: 26 }}
               >
                 {displayName.slice(0, 1).toUpperCase()}
               </Avatar>

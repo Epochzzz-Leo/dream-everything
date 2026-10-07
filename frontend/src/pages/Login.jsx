@@ -106,7 +106,7 @@ export default function Login() {
           block
           size={wide ? 'large' : 'middle'}
           loading={submitting}
-          style={{ fontWeight: 700, boxShadow: '0 6px 16px rgba(250,84,28,.3)' }}
+          style={{ fontWeight: 700, boxShadow: '0 6px 16px rgba(22,119,255,.3)' }}
         >
           Sign in
         </Button>

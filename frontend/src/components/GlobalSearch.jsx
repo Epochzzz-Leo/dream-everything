@@ -181,12 +181,12 @@ export default function GlobalSearch({ variant = 'pill' }) {
         style={{
           display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'center' : 'flex-start',
           gap: 8, height: 32, padding: isMobile ? 0 : '0 6px 0 12px',
-          border: `1px solid ${hoverTrigger ? '#fa541c' : '#e8e8e8'}`, borderRadius: 16,
+          border: `1px solid ${hoverTrigger ? '#1677ff' : '#e8e8e8'}`, borderRadius: 16,
           background: '#fff', color: '#999', fontSize: 13, cursor: 'pointer',
           transition: 'border-color .2s', userSelect: 'none', width: isMobile ? 32 : 220,
         }}
       >
-        <SearchOutlined style={{ color: hoverTrigger ? '#fa541c' : '#aaa', transition: 'color .2s' }} />
+        <SearchOutlined style={{ color: hoverTrigger ? '#1677ff' : '#aaa', transition: 'color .2s' }} />
         {/* 胶囊只有 220px，英文整句放不下：这里用短文案，再加单行省略兜底 */}
         {!isMobile && <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Search…</span>}
         {!isMobile && <span style={kbd}>/</span>}
@@ -214,7 +214,7 @@ export default function GlobalSearch({ variant = 'pill' }) {
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="What are you looking for?"
-          prefix={<SearchOutlined style={{ color: '#fa541c', fontSize: 18, marginRight: 6 }} />}
+          prefix={<SearchOutlined style={{ color: '#1677ff', fontSize: 18, marginRight: 6 }} />}
           style={{ padding: '14px 18px', fontSize: 16, borderBottom: '1px solid #f0f0f0', borderRadius: 0 }}
         />
         <div style={{ maxHeight: 420, overflowY: 'auto', padding: rows.length ? 8 : 0 }}>

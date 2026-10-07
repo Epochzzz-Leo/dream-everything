@@ -118,7 +118,7 @@ export default function DateMarkPicker({
         const has = marks?.has(current.format('YYYY-MM-DD'))
         return (
           <div className="ant-picker-cell-inner" style={has
-            ? { background: '#fff1e6', color: '#d4380d', fontWeight: 700, borderRadius: 4 }
+            ? { background: '#e6f4ff', color: '#0958d9', fontWeight: 700, borderRadius: 4 }
             : undefined}
           >
             {current.date()}

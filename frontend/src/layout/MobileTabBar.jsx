@@ -2,7 +2,7 @@ import { Badge } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TABS, activeTab } from './mobileNav'
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 /**
  * 移动端底部 Tab 栏：图标在上、小字在下，五个入口常驻沉底（2026-10-07 加了首页）。

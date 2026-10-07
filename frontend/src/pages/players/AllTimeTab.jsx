@@ -52,7 +52,7 @@ function AllTimeCard({ stat }) {
             {displayName(r)}
           </Link>
           <span style={{ color: '#999', fontSize: 12, marginRight: 14 }}>{r.lastYear}</span>
-          <span style={{ fontWeight: 700, color: '#fa541c', fontVariantNumeric: 'tabular-nums' }}>{fmtTotal(r.val)}</span>
+          <span style={{ fontWeight: 700, color: '#1677ff', fontVariantNumeric: 'tabular-nums' }}>{fmtTotal(r.val)}</span>
         </div>
       )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No data" />}
     </Card>

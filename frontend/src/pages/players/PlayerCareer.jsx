@@ -39,7 +39,7 @@ function AwardCard({ award, entries }) {
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>
             {award.label}
-            <span style={{ marginLeft: 8, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: award.gold ? '#d48806' : '#fa541c' }}>
+            <span style={{ marginLeft: 8, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: award.gold ? '#d48806' : '#1677ff' }}>
               ×{entries.length}
             </span>
           </div>
@@ -67,7 +67,7 @@ function HonorShelf({ honors }) {
   return (
     <>
       <Card
-        style={{ marginBottom: 16, background: 'linear-gradient(120deg, #fa541c 0%, #fa8c16 100%)', border: 'none' }}
+        style={{ marginBottom: 16, background: 'linear-gradient(120deg, #1677ff 0%, #4096ff 100%)', border: 'none' }}
         styles={{ body: { padding: '14px 20px' } }}
       >
         <span style={{ color: '#fff', fontWeight: 600, fontSize: 15, lineHeight: 2 }}>{summary}</span>
@@ -193,7 +193,7 @@ function PlayoffTable({ playerId }) {
     },
     { title: 'GS/GP', dataIndex: 'playerAppearance', width: 94, render: (_, r) => `${r.playerFrAppearance ?? 0}/${r.playerAppearance ?? 0}` },
     { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
-    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{num(v)}</b> },
+    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => <b style={{ color: '#1677ff' }}>{num(v)}</b> },
     { title: 'REB', dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
     { title: 'AST', dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
     { title: 'FG', dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
@@ -270,7 +270,7 @@ function StagePane({ playerId, seasonType, seasons, children }) {
 
 /* ============ 页面 ============ */
 
-// 分段器选项（品牌橙胶囊，与数据概览同一设计语言）
+// 分段器选项（品牌色胶囊，与数据概览同一设计语言）
 const TAB_OPTIONS = [
   { value: 'profile', icon: <IdcardOutlined />, text: 'Season Profile' },
   { value: 'career', icon: <BarChartOutlined />, text: 'Regular Season Stats' },
@@ -328,7 +328,7 @@ export default function PlayerCareer() {
           ) : (
             <div
               style={{
-                width: 56, height: 56, borderRadius: '50%', background: 'rgba(250,84,28,.1)', color: '#fa541c',
+                width: 56, height: 56, borderRadius: '50%', background: 'rgba(22,119,255,.1)', color: '#1677ff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20,
               }}
             >
@@ -342,7 +342,7 @@ export default function PlayerCareer() {
               {displayName(honors) || '…'}
               {/* 圆牌让位给照片时，球衣号跟到名字后面，信息不丢 */}
               {honors?.photo && honors?.playerNumber && (
-                <span style={{ marginLeft: 8, fontSize: isMobile ? 13 : 14, fontWeight: 800, color: '#fa541c' }}>#{honors.playerNumber}</span>
+                <span style={{ marginLeft: 8, fontSize: isMobile ? 13 : 14, fontWeight: 800, color: '#1677ff' }}>#{honors.playerNumber}</span>
               )}
             </div>
             {/* 名字下面原来还有一行「另一种名字」（中文界面配英文原名、英文界面配中文名）。
@@ -377,12 +377,12 @@ export default function PlayerCareer() {
           token: { borderRadius: 22, borderRadiusSM: 18 },
           components: {
             Segmented: {
-              itemSelectedBg: '#fa541c',
+              itemSelectedBg: '#1677ff',
               itemSelectedColor: '#ffffff',
               trackBg: '#efefef',
               itemColor: '#666',
-              itemHoverColor: '#fa541c',
-              itemHoverBg: 'rgba(250,84,28,0.08)',
+              itemHoverColor: '#1677ff',
+              itemHoverBg: 'rgba(22,119,255,0.08)',
             },
           },
         }}

@@ -61,7 +61,7 @@ function TeamGrid() {
 
 /**
  * 数据概览首页：胶囊分段切换（比默认 Tabs 更现代）——
- * 球队卡片墙在前，球员数据概览（原赛季榜）在后；选中态为品牌橙圆角滑块。
+ * 球队卡片墙在前，球员数据概览（原赛季榜）在后；选中态为品牌色圆角滑块。
  */
 export default function PlayersHome() {
   const [tab, setTab] = useState('teams')
@@ -73,12 +73,12 @@ export default function PlayersHome() {
           token: { borderRadius: 22, borderRadiusSM: 18 },
           components: {
             Segmented: {
-              itemSelectedBg: '#fa541c',
+              itemSelectedBg: '#1677ff',
               itemSelectedColor: '#ffffff',
               trackBg: '#efefef',
               itemColor: '#666',
-              itemHoverColor: '#fa541c',
-              itemHoverBg: 'rgba(250,84,28,0.08)',
+              itemHoverColor: '#1677ff',
+              itemHoverBg: 'rgba(22,119,255,0.08)',
             },
           },
         }}

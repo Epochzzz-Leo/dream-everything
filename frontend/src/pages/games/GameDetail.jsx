@@ -12,7 +12,7 @@ import { fmtMadePct, fmtPair, seasonYearLabel, displayName } from '../players/ra
 import GameRating from './GameRating'
 import { groupByKind, KIND_LABEL, reasonText } from './absence'
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /** 第 5 节起是加时：只有一个加时叫「加时」，多个才编号 */

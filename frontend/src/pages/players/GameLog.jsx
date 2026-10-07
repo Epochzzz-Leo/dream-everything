@@ -28,7 +28,7 @@ function buildColumns(seasonType, isMobile, openGame) {
       // 结果这一格点得动：跳到这场比赛的详情（两队完整 box score + 每节得分）。
       // 挂在这一列是因为比分本来就在这儿——"想知道这场到底怎么打的"就是看着比分产生的念头。
       //
-      // 用 span 不用 <a>：<a> 会吃到 antd 的链接色（主色是橙），和左边红色的「负」撞在一起。
+      // 用 span 不用 <a>：<a> 会吃到 antd 的链接色（主色是蓝），和左边红色的「负」撞在一起。
       // 这一格不加任何链接装饰，就是纯数字（见 index.css 的 .game-link）。
       // 没有 gameId 的行（理论上不该有）退回纯文本，不给一个点不动的假链接
       title: 'Result', dataIndex: 'win', width: 84,
@@ -54,7 +54,7 @@ function buildColumns(seasonType, isMobile, openGame) {
     },
     { title: 'Starter', dataIndex: 'starter', width: 48, render: (v) => (Number(v) ? '✓' : '-') },
     { title: 'MIN', dataIndex: 'playingTime', width: 48 },
-    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: '#fa541c' }}>{v}</b> },
+    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: '#1677ff' }}>{v}</b> },
     { title: 'REB', dataIndex: 'reb', width: 48 },
     { title: 'AST', dataIndex: 'ast', width: 48 },
     // 命中数和命中率分开成列，和单场详情、场均表同一套写法。

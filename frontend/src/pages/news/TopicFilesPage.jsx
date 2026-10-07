@@ -23,7 +23,7 @@ import useUrlState from '../../hooks/useUrlState'
  * 普通成员就是个只读的资料柜——点文件夹进去，点文件下载。
  */
 
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 const fmtSize = (n) => {
   const v = Number(n)
@@ -284,7 +284,7 @@ export default function TopicFilesPage() {
       onDragOver={(e) => { e.preventDefault(); if (canManage) setDragOver(true) }}
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(false) }}
       onDrop={onDrop}
-      style={{ borderRadius: 14, outline: dragOver ? '2px dashed #fa541c' : 'none', outlineOffset: -2 }}
+      style={{ borderRadius: 14, outline: dragOver ? '2px dashed #1677ff' : 'none', outlineOffset: -2 }}
       styles={{ body: { padding: isMobile ? '4px 0 10px' : '4px 8px 12px' } }}
       title={(
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>

@@ -210,7 +210,7 @@ const buildColumns = () => [
         <div style={{ whiteSpace: 'nowrap' }}>
           {/* 站内成员显示昵称并标色，路人显示游戏 ID */}
           {r.nickname
-            ? <span style={{ fontWeight: 700, color: '#fa541c' }}>{r.nickname}</span>
+            ? <span style={{ fontWeight: 700, color: '#1677ff' }}>{r.nickname}</span>
             : <span style={{ color: '#666' }}>{r.riotId}</span>}
           {r.teamPosition && (
             <span style={{ color: '#bbb', fontSize: 11, marginLeft: 6 }}>

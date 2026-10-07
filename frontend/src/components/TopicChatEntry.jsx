@@ -15,7 +15,7 @@ import { useAuth } from '../auth/AuthContext'
  * 样式刻意和旁边的「最新/最热/精华/题主」不同：那四个是换一种看法，
  * 这个是进另一个地方，做成第五个 tab 会误导。
  */
-const BRAND = '#fa541c'
+const BRAND = '#1677ff'
 
 export default function TopicChatEntry({ topic }) {
   const { user } = useAuth()
@@ -46,7 +46,7 @@ export default function TopicChatEntry({ topic }) {
         icon={<MessageOutlined />}
         // 带上 fromTopic：群聊页的「回专题」靠它决定能不能安全地走历史回退（见 TopicChatPage.backToTopic）
         onClick={() => navigate(`/news/topic/${topicId}/chat`, { state: { fromTopic: true } })}
-        style={{ fontWeight: 600, borderRadius: 999, color: BRAND, borderColor: '#ffbb96', background: '#fff7f0' }}
+        style={{ fontWeight: 600, borderRadius: 999, color: BRAND, borderColor: '#91caff', background: '#f0f7ff' }}
       >
         Group chat
       </Button>

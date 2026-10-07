@@ -72,7 +72,7 @@ function StatRankCard({ stat, seasonNum, stage, pos }) {
               {displayName(r)}
             </Link>
             <span style={{ color: '#999', fontSize: 12, marginRight: 14 }}><TeamCell value={r.playerTeam} size={14} /></span>
-            <span style={{ fontWeight: 700, color: '#fa541c', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontWeight: 700, color: '#1677ff', fontVariantNumeric: 'tabular-nums' }}>
               {stat.pct || stat.rate ? fmtAdv(r[stat.field], stat) : fmtNum(r[stat.field], stat.digits)}
             </span>
           </div>

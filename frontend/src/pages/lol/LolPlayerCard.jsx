@@ -158,8 +158,8 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
                 style={{
                   padding: '3px 9px', margin: 0,
                   cursor: accounts.length > 1 ? 'pointer' : 'default',
-                  borderColor: on ? '#fa541c' : undefined,
-                  background: on ? '#fff2e8' : '#fafafa',
+                  borderColor: on ? '#1677ff' : undefined,
+                  background: on ? '#e6f4ff' : '#fafafa',
                   opacity: on ? 1 : 0.5,
                 }}
               >
@@ -281,14 +281,14 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                 onClick={() => togglePos(p.pos)}
                 style={{
                   padding: '3px 9px', margin: 0, cursor: 'pointer', fontSize: 13,
-                  borderColor: on ? '#fa541c' : undefined,
-                  background: on ? '#fff2e8' : '#fafafa',
+                  borderColor: on ? '#1677ff' : undefined,
+                  background: on ? '#e6f4ff' : '#fafafa',
                   // 有选中项时才把没选的压暗——一个都没选是「全都算」，
                   // 那时整排压暗会让人以为什么都没生效
                   opacity: poses.length && !on ? 0.5 : 1,
                 }}
               >
-                <span style={{ color: on ? '#fa541c' : '#666' }}>{POSITION_LABEL[p.pos] || 'Other'}</span>
+                <span style={{ color: on ? '#1677ff' : '#666' }}>{POSITION_LABEL[p.pos] || 'Other'}</span>
                 <span style={{ fontWeight: 700, marginLeft: 5 }}>{p.games}</span>
                 <span style={{ color: '#bbb', marginLeft: 4 }}>{pct(p.wins, p.games)}</span>
               </Tag>
@@ -389,7 +389,7 @@ function ChampionTable({ rows, active, onPick }) {
       columns={[
         { title: 'Champion', dataIndex: 'championName', width: 108,
           render: (v) => (
-            <span style={{ fontWeight: 600, color: v === active ? '#fa541c' : undefined }}>
+            <span style={{ fontWeight: 600, color: v === active ? '#1677ff' : undefined }}>
               {v}
             </span>
           ) },

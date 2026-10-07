@@ -1,8 +1,8 @@
 import { ConfigProvider, Segmented } from 'antd'
 
 /**
- * 品牌橙胶囊分段器（全站统一的"现代化 Tab"）：
- * options: [{ value, icon, label }]。选中=橙色圆角滑块白字，浅灰内凹轨道。
+ * 品牌色胶囊分段器（全站统一的"现代化 Tab"）：
+ * options: [{ value, icon, label }]。选中=主色圆角滑块白字，浅灰内凹轨道。
  */
 export default function PillTabs({ value, onChange, options, style }) {
   return (
@@ -11,12 +11,12 @@ export default function PillTabs({ value, onChange, options, style }) {
         token: { borderRadius: 22, borderRadiusSM: 18 },
         components: {
           Segmented: {
-            itemSelectedBg: '#fa541c',
+            itemSelectedBg: '#1677ff',
             itemSelectedColor: '#ffffff',
             trackBg: '#efefef',
             itemColor: '#666',
-            itemHoverColor: '#fa541c',
-            itemHoverBg: 'rgba(250,84,28,0.08)',
+            itemHoverColor: '#1677ff',
+            itemHoverBg: 'rgba(22,119,255,0.08)',
           },
         },
       }}

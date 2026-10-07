@@ -53,7 +53,7 @@ export default function SeasonPicker({ value, onChange, includeCareer = true, co
   const grid = (
     <div style={{ width: 268 }}>
       {/* 芯片 hover 描边走一小段局部样式（inline 写不了 :hover） */}
-      <style>{'.season-chip:hover{border-color:#fa541c;color:#fa541c}'}</style>
+      <style>{'.season-chip:hover{border-color:#1677ff;color:#1677ff}'}</style>
       {/*
         年代切换原来用 Segmented block：六个年代时刚好，补完 1946 年起的老赛季后变成九个
         （40s-20s），一行平分下来每格 30px，标签被省略号截断。加宽弹层治标不治本——真按
@@ -70,7 +70,7 @@ export default function SeasonPicker({ value, onChange, includeCareer = true, co
               onClick={() => setEra(e)}
               style={{
                 ...chipBase, padding: '3px 10px', fontSize: 12,
-                ...(on ? { background: '#fa541c', borderColor: '#fa541c', color: '#fff', fontWeight: 700 } : { color: '#666' }),
+                ...(on ? { background: '#1677ff', borderColor: '#1677ff', color: '#fff', fontWeight: 700 } : { color: '#666' }),
               }}
             >
               {eraLabel(e)}
@@ -91,7 +91,7 @@ export default function SeasonPicker({ value, onChange, includeCareer = true, co
                 onClick={() => { onChange(n); setOpen(false) }}
                 style={{
                   ...chipBase,
-                  ...(sel ? { background: '#fa541c', borderColor: '#fa541c', color: '#fff', fontWeight: 700 } : { color: '#555' }),
+                  ...(sel ? { background: '#1677ff', borderColor: '#1677ff', color: '#fff', fontWeight: 700 } : { color: '#555' }),
                 }}
               >
                 {seasonShort(n)}
@@ -105,7 +105,7 @@ export default function SeasonPicker({ value, onChange, includeCareer = true, co
           onClick={() => { onChange(CAREER_SEASON); setOpen(false) }}
           style={{
             ...chipBase, marginTop: 8,
-            ...(isCareer ? { background: '#fa541c', borderColor: '#fa541c', color: '#fff', fontWeight: 700 } : { color: '#555' }),
+            ...(isCareer ? { background: '#1677ff', borderColor: '#1677ff', color: '#fff', fontWeight: 700 } : { color: '#555' }),
           }}
         >
           🏅 Career
@@ -120,7 +120,7 @@ export default function SeasonPicker({ value, onChange, includeCareer = true, co
       onMouseLeave={() => setHover(false)}
       style={{
         display: 'inline-flex', alignItems: 'center', height: 32, background: '#fff',
-        border: `1px solid ${hover || open ? '#fa541c' : '#e8e8e8'}`, borderRadius: 16,
+        border: `1px solid ${hover || open ? '#1677ff' : '#e8e8e8'}`, borderRadius: 16,
         transition: 'border-color .2s', overflow: 'hidden', verticalAlign: 'middle', flexShrink: 0,
       }}
     >
