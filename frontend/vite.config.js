@@ -109,6 +109,9 @@ export default defineConfig({
       '/news': api(),
       '/userInformation': api(),
       '/search': api(),
+      // 首页推荐流和行为上报（2026-10-07）。页面本身在 /home，不和接口同名
+      '/feed': api(),
+      '/event': api(),
       '/topic': api(),
       '/picImg': api(),
       '/pm': api(),

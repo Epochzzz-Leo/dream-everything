@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Avatar, Badge, Button, Card, Col, Empty, Input, Pagination, Row, Segmented, Tag, Tooltip } from 'antd'
+import { Badge, Button, Card, Col, Empty, Input, Pagination, Row, Segmented, Tag, Tooltip } from 'antd'
 import {
-  ClockCircleOutlined, CrownOutlined, EditOutlined, EyeInvisibleOutlined, FireOutlined, LikeOutlined, LockOutlined,
+  ClockCircleOutlined, CrownOutlined, EditOutlined, FireOutlined, LikeOutlined,
   MessageOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined, SettingOutlined,
   StarFilled, StarOutlined,
 } from '@ant-design/icons'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
 import { newsApi } from '../../api/news'
 import { topicApi } from '../../api/topic'
 import { useAuth } from '../../auth/AuthContext'
 import BackButton from '../../components/BackButton'
-import { assetUrl } from '../../config/origin'
 import usePullToRefresh from '../../hooks/usePullToRefresh'
 import PullRefreshIndicator from '../../components/PullRefreshIndicator'
 import TopicMemberModal from '../../components/TopicMemberModal'
@@ -19,8 +17,6 @@ import TopicEditModal from '../../components/TopicEditModal'
 import TopicApplyButton from '../../components/TopicApplyButton'
 import CategoryFilter from '../../components/CategoryFilter'
 import TopicBadges from '../../components/TopicBadges'
-import { SuperAdminBadge, TopicOwnerBadge } from '../../components/RoleBadges'
-import UserTitles from '../../components/UserTitles'
 import useIsMobile from '../../hooks/useIsMobile'
 import { TAB_BAR_HEIGHT } from '../../layout/MobileTabBar'
 import { showTopBar } from '../../layout/mobileNav'
@@ -34,6 +30,8 @@ import { onPostPublished } from '../../utils/postBus'
 import TopicFilesEntry from '../../components/TopicFilesEntry'
 import useLoginRedirect from '../../auth/useLoginRedirect'
 import { byHotThenNewest } from '../../utils/hot'
+import PostCard from '../../components/PostCard'
+import { clamp } from '../../utils/postText'
 
 /**
  * 帖子列表（公开，P5-2 内容流改版），按频道复用：
@@ -50,119 +48,6 @@ const PAGE_SIZE = 8
 // 移动端每次「上拉」多放出来的条数。比桌面翻页多给一些：手机上滑一屏很快，
 // 给 8 条会一直在加载
 const MOBILE_PAGE = 12
-
-// 封面图是从正文 HTML 里抠出来的第一张图，抠出来的是相对路径 —— 套壳后要补全
-// （assetUrl 在网页端是恒等函数）
-const coverOf = (html) => assetUrl(/<img[^>]+src=["']([^"']+)["']/i.exec(html || '')?.[1] || null)
-const textOf = (html) =>
-  (html || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim()
-const clamp = (n) => ({
-  display: '-webkit-box', WebkitLineClamp: n, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-})
-
-const timeAgo = (v) => {
-  if (!v) return ''
-  const d = dayjs(v)
-  const mins = dayjs().diff(d, 'minute')
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins} min ago`
-  const hrs = dayjs().diff(d, 'hour')
-  if (hrs < 24) return `${hrs} h ago`
-  const days = dayjs().diff(d, 'day')
-  if (days < 30) return `${days} d ago`
-  return d.format('YYYY-MM-DD')
-}
-
-// 作者名 → 稳定的头像底色（列表行没有头像字段，用首字母彩底代替）
-const avatarColor = (name) => {
-  let h = 0
-  for (const c of String(name || '?')) h = (h * 31 + c.codePointAt(0)) % 360
-  return `hsl(${h}, 52%, 52%)`
-}
-
-
-/** 单条帖子卡：头像 + 标题/摘要/元信息 + 首图缩略图 */
-function PostCard({ post, topicOwnerIds, categoryName }) {
-  const { dn } = useAuth() // 备注名：我给谁备注过，全站看到的就是备注名
-  const isMobile = useIsMobile()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const cover = coverOf(post.content)
-  const excerpt = textOf(post.content)
-  // 整卡是跳帖子的 Link；点头像/名字改跳作者主页（拦掉卡片默认跳转）
-  const toProfile = post.authorId
-    ? (e) => { e.preventDefault(); e.stopPropagation(); navigate(`/users/${post.authorId}`) }
-    : undefined
-  return (
-    <Link
-      // 草稿点进去直接是编辑器：继续写、或者在那儿点「发布」
-      to={post.draft === '1' ? `/news/edit/${post.newsId}` : `/news/${post.newsId}`}
-      // 草稿走编辑器，那就和「发帖」一样浮在这一页上面（见 App.jsx）
-      state={post.draft === '1' ? { composerBackground: location } : undefined}
-      className="post-card"
-      style={{
-        // 手机上左右内边距和间距都收紧：正文区实测只有 116px 宽（屏 390 减掉
-        // 页面内边距、栅格间距、卡片内边距、头像、封面图），两行摘要放不下几个字，
-        // 卡片因此又窄又矮。竖直方向反而加大，让卡片本身更"有分量"
-        display: 'flex', gap: isMobile ? 10 : 14, alignItems: 'flex-start', color: 'inherit',
-        background: '#fff', border: '1px solid #f0f0f0', borderRadius: 14,
-        padding: isMobile ? '18px 14px' : '16px 18px',
-        transition: 'all .2s',
-      }}
-    >
-      <span onClick={toProfile} style={{ cursor: toProfile ? 'pointer' : undefined, flexShrink: 0 }}>
-        {post.authorAvatar ? (
-          <Avatar size={isMobile ? 38 : 42} src={post.authorAvatar} />
-        ) : (
-          <Avatar size={isMobile ? 38 : 42} style={{ background: avatarColor(post.author), fontWeight: 700 }}>
-            {String(post.author || '?').slice(0, 1).toUpperCase()}
-          </Avatar>
-        )}
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* 作者行：头像旁对齐——名字 + 身份标识（超管/题主）+ 头衔 + 时间 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#999', flexWrap: 'wrap' }}>
-          <span onClick={toProfile} style={{ color: '#333', fontWeight: 600, fontSize: 13, cursor: toProfile ? 'pointer' : undefined }}>{dn(post.authorId, post.author) || 'Anonymous'}</span>
-          {post.authorSuperManager && <SuperAdminBadge />}
-          {topicOwnerIds?.includes(post.authorId) && <TopicOwnerBadge />}
-          <UserTitles titles={post.authorTitles} size="sm" />
-          <span style={{ color: '#bbb' }}>{timeAgo(post.publishDate)}</span>
-        </div>
-        {/* 标题（含置顶/精华/锁定/隐藏标） */}
-        <div className="post-title" style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.4, marginTop: 6, transition: 'color .2s', ...clamp(1) }}>
-          {post.top === '1' && <Tag color="red" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Pinned</Tag>}
-          {post.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Featured</Tag>}
-          {post.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Locked</Tag>}
-          {post.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Hidden</Tag>}
-          {/* 草稿只会出现在作者自己的列表里（后端过滤），所以这里不用再判断身份 */}
-          {post.draft === '1' && <Tag icon={<EditOutlined />} color="gold" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Draft</Tag>}
-          {categoryName && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{categoryName}</Tag>}
-          {post.title || '(untitled)'}
-        </div>
-        {excerpt && (
-          <div style={{ fontSize: 13.5, color: '#8c8c8c', marginTop: 6, lineHeight: 1.7, ...clamp(isMobile ? 3 : 2) }}>
-            {excerpt}
-          </div>
-        )}
-        {/* 底部：点赞/评论/收藏（标签在列表卡片不再展示——移动端排版反复折腾，进详情页看） */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 10, fontSize: 12, color: '#999' }}>
-          <span style={{ flexShrink: 0, display: 'inline-flex', gap: 10, whiteSpace: 'nowrap' }}>
-            <span><LikeOutlined /> {post.goodNum ?? 0}</span>
-            <span><MessageOutlined /> {post.commentNum ?? 0}</span>
-            <span><StarOutlined /> {post.favoriteCount ?? 0}</span>
-          </span>
-        </div>
-      </div>
-      {cover && (
-        <img
-          src={cover}
-          alt=""
-          style={{ width: isMobile ? 100 : 128, height: isMobile ? 92 : 88, objectFit: 'cover', borderRadius: 10, flexShrink: 0, background: '#f5f5f5' }}
-        />
-      )}
-    </Link>
-  )
-}
 
 /** 右栏热榜：热度 Top5 */
 function HotRail({ rows, official }) {
@@ -220,7 +105,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
   const location = useLocation()
   const { user, dn } = useAuth()
   const isMobile = useIsMobile()
-  // 顶栏（带刷新）只在四个 Tab 首页有；没有顶栏的页面把刷新挂到右下角的悬浮钮上
+  // 顶栏（带刷新）只在底部那几个 Tab 的首页有；没有顶栏的页面把刷新挂到右下角的悬浮钮上
   const showRefreshFab = isMobile && !showTopBar(location.pathname, location.search)
   const isTopic = !!topic
   const official = !isTopic && channel === 'official'

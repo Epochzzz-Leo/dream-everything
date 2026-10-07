@@ -5,7 +5,7 @@ import { TABS, activeTab } from './mobileNav'
 const BRAND = '#fa541c'
 
 /**
- * 移动端底部 Tab 栏：图标在上、小字在下，四个入口常驻沉底。
+ * 移动端底部 Tab 栏：图标在上、小字在下，五个入口常驻沉底（2026-10-07 加了首页）。
  *
  * 哪些页面不显示由 mobileNav.showTabBar 决定（那份规则拿全部路由跑过），
  * 这个组件只管画。

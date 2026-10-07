@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
  * AppLayout 用它决定要不要渲染，useGoBack 用它在没有站内历史时回落。
  */
 export const NAV_ROOTS = [
-  '/', '/news', '/league', '/players', '/rankings', '/games', '/history', '/compare',
+  '/', '/home', '/news', '/league', '/players', '/rankings', '/games', '/history', '/compare',
   '/official', '/messages', '/schedule', '/search',
   '/login', '/register', '/403', '/admin/players', '/admin/users',
 ]

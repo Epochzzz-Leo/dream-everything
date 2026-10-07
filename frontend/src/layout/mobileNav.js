@@ -1,5 +1,5 @@
 import {
-  CalendarOutlined, MessageOutlined, ReadOutlined, UserOutlined,
+  CalendarOutlined, HomeOutlined, MessageOutlined, ReadOutlined, UserOutlined,
 } from '@ant-design/icons'
 
 /**
@@ -10,7 +10,8 @@ import {
  */
 
 export const TABS = [
-  { key: 'forum', path: '/news', label: 'Chat Everything', icon: ReadOutlined },
+  { key: 'home', path: '/home', label: 'Home', icon: HomeOutlined },
+  { key: 'forum', path: '/news', label: 'Topics', icon: ReadOutlined },
   { key: 'schedule', path: '/schedule', label: 'Schedule', icon: CalendarOutlined },
   { key: 'pm', path: '/messages', label: 'Messages', icon: MessageOutlined },
   { key: 'mine', path: '/mine', label: 'Me', icon: UserOutlined },
@@ -110,9 +111,9 @@ export const tabIndexOf = (pathname, search = '') => {
 /**
  * 这一页要不要显示 App 顶栏（全局搜索框 + 刷新）。
  *
- * **只有四个 Tab 首页有。** 早先是"除了 /search 全都有"，结果是发帖器、帖子详情、
+ * **只有底部那几个 Tab 的首页有**（首页、专题、日程、私信、我）。 早先是"除了 /search 全都有"，结果是发帖器、帖子详情、
  * 专题内页、NBA 数据页顶上都顶着一条搜索框——那些页面里"搜全站"根本不是下一步动作，
- * 白占掉手机上最值钱的一行。搜索属于逛的时候，逛的入口就是这四个 Tab。
+ * 白占掉手机上最值钱的一行。搜索属于逛的时候，逛的入口就是底部这几个 Tab。
  *
  * 私信要连查询串一起看：带 peerId 是聊天窗（沉浸式），不是 Tab 首页。
  * 判据直接借 `tabIndexOf`，和底部栏、左右滑手势用的是同一份定义，不会各说各的。
@@ -130,6 +131,7 @@ export const showTopBar = (pathname, search = '') => tabIndexOf(pathname, search
  * 正是以后加个抽屉高亮就会踩的坑。
  */
 export const activeTab = (pathname) => {
+  if (pathname === '/home') return 'home'
   if (pathname === '/mine') return 'mine'
   if (pathname.startsWith('/messages')) return 'pm'
   if (pathname.startsWith('/schedule')) return 'schedule'

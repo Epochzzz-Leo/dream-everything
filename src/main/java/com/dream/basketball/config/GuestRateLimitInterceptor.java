@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.util.function.LongSupplier;
 
 /**
- * 没登录的访客访问 NBA 数据接口时的限流。
+ * 没登录的访客访问 NBA 数据接口、首页推荐流（/feed）和行为上报（/event）时的限流，三者共用一份额度。
  *
  * <p>2026-10-06 NBA 模块改成对访客公开（见 {@link Feature#NBA_DATA}）。原来挡在前面的登录门槛
  * 有一半是为了防爬虫，门槛拿掉以后用这个顶上：按 IP、按分钟计数，一分钟超过上限就回 429。

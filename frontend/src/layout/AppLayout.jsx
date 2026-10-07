@@ -8,6 +8,7 @@ import {
   MessageOutlined,
   ReloadOutlined,
   DatabaseOutlined,
+  HomeOutlined,
   LogoutOutlined,
   NotificationOutlined,
   PushpinFilled,
@@ -144,7 +145,7 @@ export default function AppLayout() {
     const p = location.pathname
     const blocked =
       (!canUse('featNews') && p.startsWith('/official')) ||
-      (user.featForum === false && p.startsWith('/news')) ||
+      (user.featForum === false && (p.startsWith('/news') || p === '/home')) ||
       (user.featPm === false && p.startsWith('/messages')) ||
       (user.featSchedule === false && p.startsWith('/schedule'))
     if (blocked) navigate('/', { replace: true })
@@ -157,8 +158,9 @@ export default function AppLayout() {
     () => ({
       path: '/',
       routes: [
-        // 百家说（论坛）是落地页与首要入口，放最前
-        ...(canUse('featForum') ? [{ path: '/news', name: 'Chat Everything', icon: <ReadOutlined /> }] : []),
+        // 首页推荐流是落地页，放最前；原来的专题卡片墙改叫 Topics，紧跟其后
+        ...(canUse('featForum') ? [{ path: '/home', name: 'Home', icon: <HomeOutlined /> }] : []),
+        ...(canUse('featForum') ? [{ path: '/news', name: 'Topics', icon: <ReadOutlined /> }] : []),
         // NBA 数据不再出现在侧栏：不是每个人都看球，一整组菜单挂在那儿对多数人是噪音。
         // 入口改在 NBA 专题的横幅上（components/NbaModuleEntry.jsx）——想看的人进那个专题就看得见。
         // 路由和后端门禁都没动，直连 /players 之类照样能进（登录且没被封禁的话）。
@@ -187,7 +189,7 @@ export default function AppLayout() {
 
   // 移动端底部 Tab 栏：显示规则在 mobileNav.showTabBar（已按全部路由验证过）
   const tabBar = isMobile && showTabBar(location.pathname, location.search)
-  // 顶栏（全局搜索 + 刷新）：只有四个 Tab 首页有，规则见 mobileNav.showTopBar
+  // 顶栏（全局搜索 + 刷新）：只有底部那五个 Tab 的首页有，规则见 mobileNav.showTopBar
   const topBar = isMobile && showTopBar(location.pathname, location.search)
   // 顶部占位块要不要给"顶栏那么高"：搜索页没有 App 顶栏，但它自己画了一条等高的固定栏，
   // 占位块一样要留满，否则公告条会被压在栏底下

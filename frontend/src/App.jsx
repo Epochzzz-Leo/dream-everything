@@ -27,6 +27,7 @@ import PlayerStatsManage from './pages/players/PlayerStatsManage'
 import SearchPage from './pages/search/SearchPage'
 import NewsList from './pages/news/NewsList'
 import TopicsList from './pages/news/TopicsList'
+import FeedHome from './pages/feed/FeedHome'
 import TopicPosts from './pages/news/TopicPosts'
 import TopicChatPage from './pages/news/TopicChatPage'
 import TopicFilesPage from './pages/news/TopicFilesPage'
@@ -46,10 +47,13 @@ import UserManageDetail from './pages/admin/UserManageDetail'
  * - "/" 套 AppLayout 外壳，子页面渲染进它的 <Outlet/>。
  * - 公开页直接放；需登录的用 <ProtectedRoute>；需角色的用 <RoleRoute>。
  */
-/** 落地页：默认进百家说；若该用户被禁用百家说，顺延到下一个可用模块，避免与守卫来回弹造成循环。 */
+/**
+ * 落地页：默认进首页推荐流（/home，2026-10-07 起；以前是专题卡片墙 /news）。
+ * 若该用户被禁用论坛，顺延到下一个可用模块，避免与守卫来回弹造成循环。
+ */
 function HomeRedirect() {
-  const { user, canUse } = useAuth() // canUse 的规则统一在 AuthContext（NBA 是「默认关」）
-  const to = canUse('featForum') ? '/news'
+  const { user, canUse } = useAuth() // canUse 的规则统一在 AuthContext
+  const to = canUse('featForum') ? '/home'
     : canUse('featData') ? '/league'
     : canUse('featNews') ? '/official'
     : user ? '/me' : '/login'
@@ -87,10 +91,12 @@ export default function App() {
       <Route path="/403" element={<Forbidden />} />
 
       <Route path="/" element={<AppLayout />}>
-        {/* 落地页=百家说（论坛）；旧的篮球看板挪到 /league（NBA 模块里的「联盟概览」） */}
+        {/* 落地页 = 首页推荐流 /home；旧的篮球看板在 /league（NBA 模块里的「联盟概览」） */}
         <Route index element={<HomeRedirect />} />
+        {/* 首页推荐流：跨专题的帖子流，访客也能看（vault 82） */}
+        <Route path="home" element={<FeedHome />} />
 
-        {/* NBA 模块：不再公开。必须登录 + 超管在用户管理里放行；游客直接跳登录页。
+        {/* NBA 模块：2026-10-06 起对访客公开（b277）；超管仍可在用户管理里对某个用户关掉。
             用一个布局路由罩住整组，比逐个包一层清爽，也不会漏掉某一页 */}
         <Route element={<FeatureRoute feature="featData" />}>
           <Route path="league" element={<Home />} />

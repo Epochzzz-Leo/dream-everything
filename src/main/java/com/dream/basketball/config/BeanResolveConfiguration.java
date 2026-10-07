@@ -33,12 +33,13 @@ public class BeanResolveConfiguration implements WebMvcConfigurer {
      * enforced by one interceptor over everything; un-annotated handlers remain public.
      *
      * <p>The NBA data endpoints are open to visitors since 2026-10-06, so anonymous requests to
-     * them go through a per-IP rate limit first. Signed-in users are not counted.
+     * them go through a per-IP rate limit first. The homepage feed and the page-event endpoint
+     * (2026-10-07) share the same per-IP budget. Signed-in users are not counted.
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new GuestRateLimitInterceptor(redis, guestRequestsPerMinute))
-                .addPathPatterns("/player/**", "/team/**", "/gameRating/**");
+                .addPathPatterns("/player/**", "/team/**", "/gameRating/**", "/feed/**", "/event/**");
         registry.addInterceptor(new AuthInterceptor(userMapper)).addPathPatterns("/**");
     }
 
