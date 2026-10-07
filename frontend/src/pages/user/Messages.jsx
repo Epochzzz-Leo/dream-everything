@@ -25,7 +25,7 @@ const MAX_ATTACH = 9
  * - 深链 /messages?peerId=xxx 直接打开会话（从个人主页"发私信"进来，没聊过也能开新会话）。
  */
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 const PAGE = 30
 
 const avatarColor = (name) => {
@@ -105,7 +105,7 @@ function MessageAttachments({ attachmentsJson, mine }) {
           download={a.name || true}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: '#fff', border: '1px solid #eef0f2', borderRadius: 12, color: 'inherit', maxWidth: 260, boxShadow: '0 1px 4px rgba(0,0,0,.05)' }}
         >
-          <FileOutlined style={{ color: '#1677ff', fontSize: 18 }} />
+          <FileOutlined style={{ color: '#4096ff', fontSize: 18 }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'File'}</span>
           {a.size != null && <span style={{ fontSize: 11, color: '#999', flexShrink: 0 }}>{humanSize(a.size)}</span>}
         </a>
@@ -391,7 +391,7 @@ export default function Messages() {
         style={{
           display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', margin: '2px 8px',
           borderRadius: 12, cursor: 'pointer', transition: 'background .15s',
-          background: active ? 'linear-gradient(135deg, rgba(22,119,255,.13), rgba(22,119,255,.05))' : 'transparent',
+          background: active ? 'linear-gradient(135deg, rgba(64,150,255,.13), rgba(64,150,255,.05))' : 'transparent',
         }}
       >
         <Badge count={c.unread} size="small" offset={[-3, 4]}>
@@ -474,11 +474,11 @@ export default function Messages() {
                 <div
                   style={{
                     padding: '10px 14px', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                    background: mine ? 'linear-gradient(135deg, #4096ff 0%, #1677ff 100%)' : '#fff',
-                    color: mine ? '#fff' : '#333',
-                    border: mine ? 'none' : '1px solid #eef0f2',
+                    background: mine ? '#e6f4ff' : '#fff',
+                    color: '#1f1f1f',
+                    border: mine ? '1px solid #d6e8ff' : '1px solid #eef0f2',
                     borderRadius: mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                    boxShadow: mine ? '0 2px 10px rgba(22,119,255,.22)' : '0 1px 4px rgba(0,0,0,.05)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,.05)',
                   }}
                 >
                   {m.content}
@@ -564,7 +564,7 @@ export default function Messages() {
         style={{
           flex: 1, display: isMobile && !peerId ? 'none' : 'flex', flexDirection: 'column', minWidth: 0,
           background: [
-            'radial-gradient(circle at 16% 14%, rgba(22,119,255,.08), transparent 40%)',
+            'radial-gradient(circle at 16% 14%, rgba(64,150,255,.08), transparent 40%)',
             'radial-gradient(circle at 86% 86%, rgba(47,84,235,.06), transparent 42%)',
             'radial-gradient(rgba(20,30,50,.045) 1px, transparent 1px)',
             'linear-gradient(180deg, #fbfbfc 0%, #f1f2f5 100%)',
@@ -654,7 +654,7 @@ export default function Messages() {
                         <Image src={att.url} width={60} height={60} preview={false} style={{ objectFit: 'cover', borderRadius: 8 }} />
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px', background: '#f5f5f5', borderRadius: 8, maxWidth: 180, height: 60, boxSizing: 'border-box' }}>
-                          <FileOutlined style={{ color: '#1677ff', fontSize: 16 }} />
+                          <FileOutlined style={{ color: '#4096ff', fontSize: 16 }} />
                           <div style={{ minWidth: 0 }}>
                             <div style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</div>
                             <div style={{ fontSize: 11, color: '#999' }}>{humanSize(att.size)}</div>
@@ -705,7 +705,7 @@ export default function Messages() {
                   loading={sending}
                   disabled={!text.trim() && !attachments.length}
                   onClick={send}
-                  style={{ flexShrink: 0, width: 34, height: 34, minWidth: 34, boxShadow: (text.trim() || attachments.length) ? '0 4px 12px rgba(22,119,255,.3)' : 'none' }}
+                  style={{ flexShrink: 0, width: 34, height: 34, minWidth: 34, boxShadow: (text.trim() || attachments.length) ? '0 4px 12px rgba(64,150,255,.25)' : 'none' }}
                 />
               </div>
             </div>

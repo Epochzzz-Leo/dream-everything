@@ -73,12 +73,13 @@ export default function PlayersHome() {
           token: { borderRadius: 22, borderRadiusSM: 18 },
           components: {
             Segmented: {
-              itemSelectedBg: '#1677ff',
-              itemSelectedColor: '#ffffff',
+              // 选中 = 灰轨道上一块白色滑块、深色字（2026-10-08 起不再用实心主色块）
+              itemSelectedBg: '#ffffff',
+              itemSelectedColor: '#1f1f1f',
               trackBg: '#efefef',
               itemColor: '#666',
-              itemHoverColor: '#1677ff',
-              itemHoverBg: 'rgba(22,119,255,0.08)',
+              itemHoverColor: '#1f1f1f',
+              itemHoverBg: 'rgba(0,0,0,0.04)',
             },
           },
         }}

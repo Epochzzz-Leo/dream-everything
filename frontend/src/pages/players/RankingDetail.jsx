@@ -65,7 +65,7 @@ export default function RankingDetail() {
         ? {
             ...c,
             render: (v, row, idx) => (
-              <span style={{ fontWeight: 700, color: '#1677ff' }}>
+              <span style={{ fontWeight: 700, color: '#262626' }}>
                 {c.render ? c.render(v, row, idx) : stat.pct || stat.rate ? fmtAdv(v, stat) : fmtNum(v, stat.digits)}
               </span>
             ),

@@ -42,7 +42,9 @@ import { clamp } from '../../utils/postText'
  * 后端列表接口是 ES 全量返回（page/limit 不生效），故一次拉全，前端自己搜索/排序/分页。
  */
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
+// 浅色横幅的底色，和 index.css 里的 .banner-light 同一个渐变
+const PASTEL_BANNER = 'linear-gradient(120deg, #eaf4ff 0%, #f6faff 100%)'
 const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 const PAGE_SIZE = 8
 // 移动端每次「上拉」多放出来的条数。比桌面翻页多给一些：手机上滑一屏很快，
@@ -218,13 +220,15 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
     )
   }
 
-  const ring = (size, pos) => ({
+  const ring = (size, pos, color = 'rgba(255,255,255,.16)') => ({
     position: 'absolute', width: size, height: size, borderRadius: '50%',
-    border: '2px solid rgba(255,255,255,.16)', ...pos,
+    border: `2px solid ${color}`, ...pos,
   })
 
   // 专题背景图（题主在专题设置里传）。官方新闻没有这一说，永远走蓝色渐变
   const bannerUrl = isTopic ? topic.banner : null
+  // 没设背景图的专题横幅用浅色（淡蓝底 + 深色字，2026-10-08 起）；有背景图的、官方新闻的仍是深色那一套
+  const lightBanner = !bannerUrl && !official
 
   // 认不出来的分区（手打错、老链接）当作没选，退回帖子流。
   // 两个模块各有一份注册表，但同一时刻只可能命中一个——路由决定了传进来的是哪个。
@@ -240,7 +244,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
   return (
     <>
       <style>{`
-        .post-card:hover { border-color: #91caff; box-shadow: 0 6px 18px rgba(22,119,255,.10); transform: translateY(-2px); }
+        .post-card:hover { border-color: #bae0ff; box-shadow: 0 6px 18px rgba(64,150,255,.08); transform: translateY(-2px); }
         .post-card:hover .post-title { color: ${BRAND}; }
       `}</style>
 
@@ -252,7 +256,8 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           + 名称/简介/可见性 + 返回 + 成员管理 */}
       <div
         style={{
-          position: 'relative', overflow: 'hidden', borderRadius: 16, color: '#fff',
+          position: 'relative', overflow: 'hidden', borderRadius: 16, color: lightBanner ? '#1f1f1f' : '#fff',
+          border: lightBanner ? '1px solid #d6e8ff' : undefined,
           padding: isMobile ? '16px 14px' : '24px 28px', marginBottom: 16,
           // 有背景图时给一个下限高度。这个数调过三轮：132/178 → 176/240 → 现在。
           // 反复太矮的根因是 `object-fit: cover` ——图比框宽的时候，两边裁掉的部分
@@ -275,7 +280,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           gap: bannerUrl ? 10 : undefined,
           background: official
             ? 'linear-gradient(120deg, #1d39c4 0%, #2f54eb 60%, #597ef7 100%)'
-            : 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
+            : lightBanner ? PASTEL_BANNER : '#333',
         }}
       >
         {bannerUrl && (
@@ -303,8 +308,8 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
           </>
         )}
         {/* 装饰圆环只在纯色渐变上出现——压在照片上就是两道莫名其妙的白圈 */}
-        {!bannerUrl && <div style={ring(190, { top: -80, right: 120 })} />}
-        {!bannerUrl && <div style={ring(120, { bottom: -50, right: 300 })} />}
+        {!bannerUrl && <div style={ring(190, { top: -80, right: 120 }, lightBanner ? 'rgba(64,150,255,.12)' : undefined)} />}
+        {!bannerUrl && <div style={ring(120, { bottom: -50, right: 300 }, lightBanner ? 'rgba(64,150,255,.12)' : undefined)} />}
         {/* 返回：贴在横幅左上角。有背景图时它是唯一能落脚的地方，
             所以用 overlay 皮肤（半透明黑底 + 白描边），亮图暗图上都看得见。
 
@@ -313,7 +318,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
             这一格的语义是"离开这个专题"，那就应该一步到位。 */}
         {isTopic && (
           <BackButton
-            variant="overlay"
+            variant={lightBanner ? 'plain' : 'overlay'}
             onClick={() => navigate('/news')}
             style={{
               position: 'relative', alignSelf: 'flex-start',
@@ -327,7 +332,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
               {isTopic ? topic.name : official ? 'Official News' : 'Chat Everything'}
               {/* 和专题列表卡片同一个组件：状态标记是一排裸图标，不是彩色 Tag。
                   横幅压在背景图上，所以走 light */}
-              {isTopic && <TopicBadges topic={topic} light style={{ fontSize: 13 }} />}
+              {isTopic && <TopicBadges topic={topic} light={!lightBanner} style={{ fontSize: 13 }} />}
               {/* 改专题设置的第二个入口：原来只有专题列表页的编辑图标，进来之后想改还得退出去。
                   类别列表点开才拉——弹窗里的「专题类别」下拉要用，但普通访客用不上 */}
               {isTopic && topic.canManage && (
@@ -337,7 +342,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                     setEditOpen(true)
                     topicApi.categoryList().then((r) => setCats(Array.isArray(r) ? r : [])).catch(() => setCats([]))
                   }}
-                  style={{ fontSize: 15, color: 'rgba(255,255,255,.8)', cursor: 'pointer' }}
+                  style={{ fontSize: 15, color: lightBanner ? '#8c8c8c' : 'rgba(255,255,255,.8)', cursor: 'pointer' }}
                 />
               )}
             </div>
@@ -361,7 +366,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                       onApplied?.()
                     } catch { /* 拦截器已提示 */ }
                   }}
-                  style={{ cursor: 'pointer', fontSize: 17, lineHeight: 1, color: topic.subscribed ? '#ffd591' : 'rgba(255,255,255,.85)' }}
+                  style={{ cursor: 'pointer', fontSize: 17, lineHeight: 1, color: topic.subscribed ? (lightBanner ? '#faad14' : '#ffd591') : (lightBanner ? '#8c8c8c' : 'rgba(255,255,255,.85)') }}
                 >
                   {topic.subscribed ? <StarFilled /> : <StarOutlined />}
                 </span>
@@ -372,7 +377,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                 <Badge count={topic.pendingCount || 0} size="small" offset={[-2, 2]}>
                   <span
                     onClick={() => setMemberOpen(true)}
-                    style={{ cursor: 'pointer', fontSize: 17, lineHeight: 1, color: 'rgba(255,255,255,.85)' }}
+                    style={{ cursor: 'pointer', fontSize: 17, lineHeight: 1, color: lightBanner ? '#8c8c8c' : 'rgba(255,255,255,.85)' }}
                   >
                     <SettingOutlined />
                   </span>
@@ -381,7 +386,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
             )}
           </span>
           {isTopic && !topic.canManage && (
-            <TopicApplyButton topic={topic} onApplied={onApplied} banner />
+            <TopicApplyButton topic={topic} onApplied={onApplied} banner={!lightBanner} />
           )}
         </div>
       </div>
@@ -544,7 +549,7 @@ export default function NewsList({ channel = 'forum', topic = null, onApplied, n
                 width: 52, height: 52, borderRadius: 26,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: official ? '#2f54eb' : BRAND, color: '#fff', fontSize: 22,
-                boxShadow: official ? '0 6px 18px rgba(47,84,235,.4)' : '0 6px 18px rgba(22,119,255,.4)',
+                boxShadow: official ? '0 6px 18px rgba(47,84,235,.4)' : '0 6px 18px rgba(64,150,255,.3)',
                 cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
               }}
             >

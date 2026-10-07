@@ -12,7 +12,6 @@ import { fmtMadePct, fmtPair, seasonYearLabel, displayName } from '../players/ra
 import GameRating from './GameRating'
 import { groupByKind, KIND_LABEL, reasonText } from './absence'
 
-const BRAND = '#1677ff'
 const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /** 第 5 节起是加时：只有一个加时叫「加时」，多个才编号 */
@@ -135,7 +134,7 @@ export default function GameDetail() {
                           {byPeriod[i + 1] ?? '-'}
                         </td>
                       ))}
-                      <td style={{ textAlign: 'center', padding: '8px', fontWeight: 800, color: win ? BRAND : '#666' }}>
+                      <td style={{ textAlign: 'center', padding: '8px', fontWeight: 800, color: win ? '#262626' : '#8c8c8c' }}>
                         {total}
                       </td>
                     </tr>
@@ -196,7 +195,7 @@ function Side({ team, score, win, isHome, isMobile }) {
         <HomeAwayTag home={isHome} size={16} />
         <TeamNames value={team} />
       </span>
-      <span style={{ fontSize: isMobile ? 30 : 38, fontWeight: 800, lineHeight: 1, color: win ? BRAND : '#bbb' }}>
+      <span style={{ fontSize: isMobile ? 30 : 38, fontWeight: 800, lineHeight: 1, color: win ? '#262626' : '#bbb' }}>
         {score}
       </span>
     </div>
@@ -221,7 +220,7 @@ function TeamBox({ team, isHome, players, absent, totals, isMobile, onPlayer }) 
     },
     { title: 'Starter', dataIndex: 'starter', width: 48, render: (v, r) => (r.totalRow ? '' : Number(v) ? '✓' : '-') },
     { title: 'MIN', dataIndex: 'playingTime', width: 48 },
-    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: BRAND }}>{v}</b> },
+    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b>{v}</b> },
     { title: 'REB', dataIndex: 'reb', width: 48 },
     { title: 'AST', dataIndex: 'ast', width: 48 },
     // 命中数和命中率分开成列，和场均表（statColumns 的「投篮 / 投篮%」）一套写法。

@@ -440,7 +440,7 @@ export default function NewsDetail() {
                       <UserTitles titles={news.authorTitles} size="sm" />
                       {official && <Tag color="blue" style={{ marginInlineEnd: 0 }}>Official</Tag>}
                       {news.top === '1' && <Tag color="red" style={{ marginInlineEnd: 0 }}>Pinned</Tag>}
-                      {news.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 0 }}>Featured</Tag>}
+                      {news.essence === '1' && <Tag color="gold" style={{ marginInlineEnd: 0 }}>Featured</Tag>}
                       {news.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 0 }}>Locked</Tag>}
                       {news.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 0 }}>Hidden</Tag>}
                     </div>

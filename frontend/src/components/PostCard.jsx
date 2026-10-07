@@ -10,7 +10,7 @@ import UserTitles from './UserTitles'
 import useIsMobile from '../hooks/useIsMobile'
 import { avatarColor, clamp, coverOf, textOf, timeAgo } from '../utils/postText'
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 
 /**
  * 单条帖子卡：头像 + 标题/摘要/元信息 + 首图缩略图。
@@ -77,12 +77,12 @@ export default function PostCard({ post, topicOwnerIds, categoryName, topicName,
         {/* 标题（含置顶/精华/锁定/隐藏标） */}
         <div className="post-title" style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.4, marginTop: 6, transition: 'color .2s', ...clamp(1) }}>
           {post.top === '1' && <Tag color="red" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Pinned</Tag>}
-          {post.essence === '1' && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Featured</Tag>}
+          {post.essence === '1' && <Tag color="gold" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Featured</Tag>}
           {post.locked === '1' && <Tag icon={<LockOutlined />} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Locked</Tag>}
           {post.hidden === '1' && <Tag icon={<EyeInvisibleOutlined />} color="purple" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Hidden</Tag>}
           {/* 草稿只会出现在作者自己的列表里（后端过滤），所以这里不用再判断身份 */}
           {post.draft === '1' && <Tag icon={<EditOutlined />} color="gold" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>Draft</Tag>}
-          {categoryName && <Tag color="volcano" style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{categoryName}</Tag>}
+          {categoryName && <Tag style={{ marginInlineEnd: 6, verticalAlign: 'middle' }}>{categoryName}</Tag>}
           {post.title || '(untitled)'}
         </div>
         {excerpt && (
@@ -93,8 +93,8 @@ export default function PostCard({ post, topicOwnerIds, categoryName, topicName,
         {/* 底部：点赞/评论/收藏（标签在列表卡片不再展示——移动端排版反复折腾，进详情页看） */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: reason ? 'space-between' : 'flex-end', gap: 10, marginTop: 10, fontSize: 12, color: '#999' }}>
           {reason && (
-            <span style={{ color: BRAND, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              <BulbOutlined /> {reason}
+            <span style={{ color: '#8c8c8c', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <BulbOutlined style={{ color: BRAND }} /> {reason}
             </span>
           )}
           <span style={{ flexShrink: 0, display: 'inline-flex', gap: 10, whiteSpace: 'nowrap' }}>

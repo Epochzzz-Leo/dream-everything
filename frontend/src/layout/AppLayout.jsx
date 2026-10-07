@@ -254,19 +254,19 @@ export default function AppLayout() {
             <div style={{ margin: '6px 12px 14px', paddingTop: 10, borderTop: '1px dashed #f0f0f0' }}>
               <div
                 onClick={() => setSubsOpen((o) => !o)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none', padding: '2px 6px', fontSize: 12, fontWeight: 700, color: '#0958d9' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none', padding: '2px 6px', fontSize: 12, fontWeight: 700, color: '#595959' }}
               >
                 <CaretRightOutlined style={{ transform: subsOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s', fontSize: 10 }} />
                 Subscribed topics
-                <span style={{ color: '#69b1ff', fontWeight: 400 }}>({subs.length})</span>
+                <span style={{ color: '#bfbfbf', fontWeight: 400 }}>({subs.length})</span>
               </div>
               {subsOpen && subs.length === 0 && (
-                <div style={{ marginTop: 4, background: '#f5faff', border: '1px dashed #bae0ff', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#69b1ff', lineHeight: 1.6 }}>
+                <div style={{ marginTop: 4, background: '#fafafa', border: '1px dashed #e8e8e8', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#8c8c8c', lineHeight: 1.6 }}>
                   Nothing subscribed yet. Open a topic you have joined and tap "Subscribe" to keep it here
                 </div>
               )}
               {subsOpen && subs.length > 0 && (
-                <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2, background: '#f5faff', border: '1px solid #bae0ff', borderRadius: 10, padding: '6px 4px' }}>
+                <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2, background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 10, padding: '6px 4px' }}>
                   {subs.map((s) => {
                     const active = location.pathname === `/news/topic/${s.topicId}`
                     return (
@@ -276,15 +276,15 @@ export default function AppLayout() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', borderRadius: 8,
                           cursor: 'pointer', fontSize: 13,
-                          color: active ? '#0958d9' : '#595959',
+                          color: active ? '#1677ff' : '#595959',
                           background: active ? '#e6f4ff' : 'transparent',
                           fontWeight: active ? 600 : 400,
                         }}
                       >
                         {/* 置顶的换成图钉，顺序由后端按各人的置顶时间排好，这里只是让人看懂为什么它在最上面 */}
                         {s.pinned
-                          ? <PushpinFilled style={{ fontSize: 11, color: '#1677ff', flexShrink: 0 }} />
-                          : <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4096ff', flexShrink: 0 }} />}
+                          ? <PushpinFilled style={{ fontSize: 11, color: '#4096ff', flexShrink: 0 }} />
+                          : <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#d9d9d9', flexShrink: 0 }} />}
                         <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                         {s.newCount > 0 && <Badge count={s.newCount} size="small" style={{ flexShrink: 0 }} />}
                       </div>
@@ -471,7 +471,7 @@ export default function AppLayout() {
           必须显式 width:100% 才能占满（maxWidth 只在超宽屏才生效）。
           底部栏是 fixed 的，同样要留出等高的内边距，否则最后一条内容被永久盖住 */}
       <div
-        className="app-content"
+        className={isNbaDataPath(location.pathname) ? 'app-content nba-scope' : 'app-content'}
         style={{
           padding: isMobile ? '12px 12px 0' : 20,
           paddingBottom: tabBar ? `calc(${TAB_BAR_HEIGHT + 12}px + env(safe-area-inset-bottom))` : (isMobile ? 12 : 20),

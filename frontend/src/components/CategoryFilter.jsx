@@ -4,7 +4,6 @@
  * 没用 Segmented：它是一整条不换行的横条，类别一多就在手机上溢出屏幕
  * （赛季选择器踩过同样的坑）。胶囊自然换行，多少个都放得下。
  */
-const BRAND = '#1677ff'
 
 export default function CategoryFilter({ options, value, onChange, extra }) {
   if (!options?.length) return null
@@ -19,9 +18,9 @@ export default function CategoryFilter({ options, value, onChange, extra }) {
             style={{
               cursor: 'pointer', userSelect: 'none', fontSize: 13, lineHeight: 1.5,
               padding: '4px 14px', borderRadius: 999,
-              color: on ? '#fff' : '#595959',
-              background: on ? BRAND : '#fff',
-              border: `1px solid ${on ? BRAND : '#e8e8e8'}`,
+              color: on ? '#1677ff' : '#595959',
+              background: on ? '#e6f4ff' : '#fff',
+              border: `1px solid ${on ? '#91caff' : '#e8e8e8'}`,
               fontWeight: on ? 600 : 400,
               transition: 'all .15s',
             }}

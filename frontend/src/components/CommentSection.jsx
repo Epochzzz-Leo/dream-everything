@@ -78,7 +78,7 @@ function CommentAttachments({ attachmentsJson }) {
               onClick={(e) => e.stopPropagation()}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#f5f5f5', borderRadius: 8, color: 'inherit', maxWidth: 280 }}
             >
-              <FileOutlined style={{ color: '#1677ff', fontSize: 18 }} />
+              <FileOutlined style={{ color: '#4096ff', fontSize: 18 }} />
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'File'}</span>
               {a.size != null && <span style={{ fontSize: 11, color: '#999', flexShrink: 0 }}>{humanSize(a.size)}</span>}
             </a>
@@ -214,7 +214,7 @@ function FloorReplies({ floorId, newsId, authorId, topicOwnerIds, locked, bump, 
                 <span style={{ color: '#8c8c8c' }}>
                   Reply{' '}
                   {r.replyToUserId
-                    ? <Link to={`/users/${r.replyToUserId}`} onClick={(e) => e.stopPropagation()} style={{ color: '#1677ff', fontWeight: 600 }}>@{r.replyToName}</Link>
+                    ? <Link to={`/users/${r.replyToUserId}`} onClick={(e) => e.stopPropagation()} style={{ color: '#262626', fontWeight: 600 }}>@{r.replyToName}</Link>
                     : <b>@{r.replyToName}</b>}
                   {': '}
                 </span>
@@ -624,9 +624,9 @@ export default function CommentSection({
                 display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none',
                 padding: isMobile ? '4px 10px' : '4px 14px', borderRadius: 999,
                 fontSize: isMobile ? 12 : 13, fontWeight: 500, whiteSpace: 'nowrap',
-                color: pollOpen ? '#fff' : '#1677ff',
-                background: pollOpen ? '#1677ff' : '#e6f4ff',
-                border: `1px solid ${pollOpen ? '#1677ff' : '#91caff'}`,
+                color: pollOpen ? '#1677ff' : '#8c8c8c',
+                background: pollOpen ? '#e6f4ff' : '#f5f5f5',
+                border: `1px solid ${pollOpen ? '#91caff' : '#ececec'}`,
                 transition: 'all .15s',
               }}
             >
@@ -641,10 +641,10 @@ export default function CommentSection({
                 display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none',
                 padding: isMobile ? '4px 10px' : '4px 14px', borderRadius: 999,
                 fontSize: isMobile ? 12 : 13, fontWeight: 500, whiteSpace: 'nowrap',
-                color: onlyAuthor ? '#fff' : '#8c8c8c',
-                background: onlyAuthor ? '#1677ff' : '#f5f5f5',
-                border: `1px solid ${onlyAuthor ? '#1677ff' : '#ececec'}`,
-                boxShadow: onlyAuthor ? '0 2px 8px rgba(22,119,255,.25)' : 'none',
+                color: onlyAuthor ? '#1677ff' : '#8c8c8c',
+                background: onlyAuthor ? '#e6f4ff' : '#f5f5f5',
+                border: `1px solid ${onlyAuthor ? '#91caff' : '#ececec'}`,
+                boxShadow: 'none',
                 transition: 'all .15s',
               }}
             >
@@ -689,7 +689,7 @@ export default function CommentSection({
       {/* 楼主发起投票面板：主题必填 + 2-10 个选项 + 说明可选，发布=发一条新楼并挂上投票 */}
       {pollOpen && canOpenRating && !locked && (
         <div style={{ background: '#e6f4ff', border: '1px solid #91caff', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0958d9', marginBottom: 10 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#1677ff', marginBottom: 10 }}>
             <BarChartOutlined style={{ marginRight: 6 }} />New poll (posted as a new comment)
           </div>
           <Space direction="vertical" style={{ width: '100%' }} size={10}>

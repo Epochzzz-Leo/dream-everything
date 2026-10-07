@@ -158,7 +158,7 @@ export default function TopicEditModal({ open, onClose, onSaved, topic, categori
                 position: 'relative', width: '100%', aspectRatio: '3 / 1', borderRadius: 12,
                 overflow: 'hidden', background: bannerPreview || (banner && banner !== '')
                   ? '#f5f5f5'
-                  : 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
+                  : 'linear-gradient(120deg, #eaf4ff 0%, #f6faff 100%)',
                 border: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -169,7 +169,7 @@ export default function TopicEditModal({ open, onClose, onSaved, topic, categori
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               ) : (
-                <span style={{ color: 'rgba(255,255,255,.85)', fontSize: 13 }}>
+                <span style={{ color: '#8c8c8c', fontSize: 13 }}>
                   <PictureOutlined style={{ marginRight: 6 }} />No cover image yet
                 </span>
               )}
@@ -268,7 +268,6 @@ export default function TopicEditModal({ open, onClose, onSaved, topic, categori
                 <Tag
                   key={c.id}
                   closable
-                  color="volcano"
                   onClose={() => setPostCats((arr) => arr.filter((x) => x.id !== c.id))}
                   style={{ marginInlineEnd: 0, fontSize: 13, padding: '2px 8px' }}
                 >

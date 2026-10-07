@@ -168,7 +168,7 @@ function GameCommentMeta({ c }) {
       {c.myScore != null && (
         <>
           <span style={{ margin: '0 8px' }}>·</span>
-          <span style={{ color: '#1677ff', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
+          <span style={{ color: '#262626', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
         </>
       )}
       <span style={{ margin: '0 8px' }}>·</span>{fmtDate(c.commentDate)}
@@ -196,7 +196,7 @@ function LolCommentMeta({ c }) {
       {c.myScore != null && (
         <>
           <span style={{ margin: '0 8px' }}>·</span>
-          <span style={{ color: '#1677ff', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
+          <span style={{ color: '#262626', fontWeight: 700 }}>{`${c.myScore}/5`}</span>
         </>
       )}
       <span style={{ margin: '0 8px' }}>·</span>{fmtDate(c.commentDate)}
@@ -273,7 +273,7 @@ function FollowListModal({ userId, tab, onClose, onTabChange }) {
               onClick={() => { onClose(); navigate(`/users/${r.userId}`) }}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 4px', borderBottom: '1px solid #fafafa', cursor: 'pointer' }}
             >
-              <Avatar size={34} src={r.avatar || undefined} style={{ background: '#1677ff', fontWeight: 700, flexShrink: 0 }}>
+              <Avatar size={34} src={r.avatar || undefined} style={{ background: '#69b1ff', fontWeight: 700, flexShrink: 0 }}>
                 {String(dn(r.userId, r.userNickname) || '?')[0].toUpperCase()}
               </Avatar>
               <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
@@ -468,29 +468,28 @@ export default function UserProfile() {
   // 横幅操作按钮：本人=编辑资料/改密码；他人=关注 + 发私信 + 拉黑。桌面绝对定位右上角，移动端挪到横幅下方
   const actionBtns = isSelf ? (
     <>
-      <Button ghost size="small" icon={<EditOutlined />} onClick={() => { editForm.setFieldsValue({ userNickname: displayName }); setEditOpen(true) }}>
+      <Button size="small" icon={<EditOutlined />} onClick={() => { editForm.setFieldsValue({ userNickname: displayName }); setEditOpen(true) }}>
         Edit profile
       </Button>
-      <Button ghost size="small" icon={<LockOutlined />} onClick={() => setPwdOpen(true)}>
+      <Button size="small" icon={<LockOutlined />} onClick={() => setPwdOpen(true)}>
         Change password
       </Button>
     </>
   ) : me ? (
     <>
       <Button
-        ghost={!following}
+        type={following ? 'default' : 'primary'}
         size="small"
         icon={following ? <CheckOutlined /> : <PlusOutlined />}
         onClick={toggleFollow}
-        style={following ? { background: 'rgba(255,255,255,.28)', borderColor: 'transparent', color: '#fff' } : undefined}
       >
         {following ? 'Following' : 'Follow'}
       </Button>
-      <Button ghost size="small" icon={<MessageOutlined />} onClick={() => navigate(`/messages?peerId=${userId}`)}>
+      <Button size="small" icon={<MessageOutlined />} onClick={() => navigate(`/messages?peerId=${userId}`)}>
         Message
       </Button>
       {/* 备注：只有我自己看得到；设置后全站显示备注名，本页保留真名 */}
-      <Button ghost size="small" icon={<TagOutlined />} onClick={() => { setRemarkInput(remarks?.[userId] || ''); setRemarkOpen(true) }}>
+      <Button size="small" icon={<TagOutlined />} onClick={() => { setRemarkInput(remarks?.[userId] || ''); setRemarkOpen(true) }}>
         {remarks?.[userId] ? 'Edit alias' : 'Alias'}
       </Button>
       <Popconfirm
@@ -500,7 +499,7 @@ export default function UserProfile() {
         okButtonProps={blockedByMe ? undefined : { danger: true }}
         onConfirm={toggleBlock}
       >
-        <Button ghost size="small" icon={<StopOutlined />} style={{ opacity: blockedByMe ? 1 : 0.75 }}>
+        <Button size="small" icon={<StopOutlined />} style={{ opacity: blockedByMe ? 1 : 0.75 }}>
           {blockedByMe ? 'Blocked' : 'Block'}
         </Button>
       </Popconfirm>
@@ -512,8 +511,8 @@ export default function UserProfile() {
       {/* 渐变横幅：身份区。桌面按钮在右上角；移动端缩小尺寸、按钮挪到下方一行，避免挤在一起 */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #1677ff 0%, #4096ff 55%, #69b1ff 100%)',
-          borderRadius: 12, padding: isMobile ? '20px 18px 36px' : '30px 30px 52px', color: '#fff', position: 'relative',
+          background: 'linear-gradient(120deg, #eaf4ff 0%, #f6faff 100%)', border: '1px solid #d6e8ff',
+          borderRadius: 12, padding: isMobile ? '20px 18px 36px' : '30px 30px 52px', color: '#1f1f1f', position: 'relative',
         }}
       >
         {!isMobile && actionBtns && (
@@ -523,7 +522,7 @@ export default function UserProfile() {
           <Avatar
             size={isMobile ? 58 : 76}
             src={user.avatar || undefined}
-            style={{ background: '#fff', color: '#1677ff', fontWeight: 800, fontSize: isMobile ? 26 : 32, flexShrink: 0 }}
+            style={{ background: '#fff', color: '#4096ff', border: '1px solid #d6e8ff', fontWeight: 800, fontSize: isMobile ? 26 : 32, flexShrink: 0 }}
           >
             {displayName.slice(0, 1).toUpperCase()}
           </Avatar>
@@ -532,7 +531,7 @@ export default function UserProfile() {
               <span style={{ fontSize: isMobile ? 20 : 26, fontWeight: 700 }}>{displayName}</span>
               {/* 个人主页始终展示真名；我设了备注就在旁边挂个小标 */}
               {!isSelf && remarks?.[userId] && (
-                <Tag style={{ background: 'rgba(255,255,255,.22)', border: 'none', color: '#fff' }}>
+                <Tag>
                   <TagOutlined /> {remarks[userId]}
                 </Tag>
               )}
@@ -571,7 +570,7 @@ export default function UserProfile() {
             <Row gutter={isMobile ? 4 : 16}>
               <Col xs={4} sm={4}>{cell('Posts', stats.posts ?? 0)}</Col>
               <Col xs={4} sm={4}>{cell('Comments', stats.comments ?? 0)}</Col>
-              <Col xs={4} sm={4}>{cell('Likes', stats.likes ?? 0, { color: '#1677ff', prefix: <LikeOutlined /> })}</Col>
+              <Col xs={4} sm={4}>{cell('Likes', stats.likes ?? 0, { prefix: <LikeOutlined /> })}</Col>
               <Col xs={4} sm={4}>{cell('Following', followingCount ?? 0, { onClick: followGuard('following'), titleAttr: 'View following' })}</Col>
               <Col xs={4} sm={4}>{cell('Followers', followerCount ?? 0, { onClick: followGuard('followers'), titleAttr: 'View followers' })}</Col>
               <Col xs={4} sm={4}>{cell('Days here', daysSince(user.registTime))}</Col>
@@ -661,7 +660,7 @@ export default function UserProfile() {
               <Avatar
                 size={64}
                 src={avatarPreview || user.avatar || undefined}
-                style={{ background: '#e6f4ff', color: '#1677ff', fontWeight: 800, fontSize: 26 }}
+                style={{ background: '#e6f4ff', color: '#4096ff', fontWeight: 800, fontSize: 26 }}
               >
                 {displayName.slice(0, 1).toUpperCase()}
               </Avatar>

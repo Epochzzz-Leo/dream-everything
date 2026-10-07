@@ -30,7 +30,7 @@ import { trackClick, trackImpression } from '../../utils/feedEvents'
  */
 
 const PAGE = 10
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 const GITHUB_URL = 'https://github.com/Epochzzz-Leo/dream-everything'
 const TABS = ['foryou', 'latest', 'following']
@@ -79,21 +79,16 @@ export default function FeedHome() {
 
       {/* 只有访客看得到：从简历点进来的人第一眼要知道这是什么站 */}
       {!authLoading && !user && (
-        <div
-          style={{
-            borderRadius: 16, color: '#fff', marginBottom: 16, padding: isMobile ? '16px 14px' : '22px 26px',
-            background: 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)',
-          }}
-        >
+        <div className="banner-light" style={{ borderRadius: 16, marginBottom: 16, padding: isMobile ? '16px 14px' : '22px 26px' }}>
           <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800 }}>Dream Everything</div>
-          <div style={{ opacity: 0.9, marginTop: 6, fontSize: 13.5 }}>
+          <div style={{ color: '#595959', marginTop: 6, fontSize: 13.5 }}>
             A forum and 50 seasons of NBA stats, built and run by one person.
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-            <Button className="banner-btn" icon={<LineChartOutlined />} onClick={() => navigate('/league')}>
+            <Button type="primary" icon={<LineChartOutlined />} onClick={() => navigate('/league')}>
               Explore NBA stats
             </Button>
-            <Button className="banner-btn" icon={<GithubOutlined />} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+            <Button icon={<GithubOutlined />} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
               GitHub
             </Button>
           </div>

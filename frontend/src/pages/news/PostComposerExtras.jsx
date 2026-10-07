@@ -25,7 +25,7 @@ function TagChip({ text, count, active, onClick }) {
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none',
         padding: '5px 12px', borderRadius: 999, fontSize: 13, lineHeight: 1.4,
-        color: active ? '#0958d9' : '#595959',
+        color: active ? '#1677ff' : '#595959',
         background: active ? '#e6f4ff' : '#f5f5f5',
         border: `1px solid ${active ? '#91caff' : 'transparent'}`,
         transition: 'all .15s',
@@ -139,7 +139,7 @@ function TagPickerBody({ value, onChange, topicId, official, onClose }) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer',
               padding: '5px 12px', borderRadius: 999, fontSize: 13,
-              color: '#0958d9', background: '#e6f4ff', border: '1px dashed #91caff',
+              color: '#1677ff', background: '#e6f4ff', border: '1px dashed #91caff',
             }}
           >
             {`Create "#${kw.trim().replace(/^#+/, '')}"`}

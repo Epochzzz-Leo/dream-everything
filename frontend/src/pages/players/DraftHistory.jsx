@@ -139,7 +139,7 @@ export default function DraftHistory() {
             loading={years === null}
           />
           {rows && (
-            <Tag color="orange">{((rows.length) === 1 ? `${rows.length} pick` : `${rows.length} picks`)}</Tag>
+            <Tag>{((rows.length) === 1 ? `${rows.length} pick` : `${rows.length} picks`)}</Tag>
           )}
           {rows && (
             <span style={{ color: '#999', fontSize: 12 }}>{`${played} played in the NBA`}</span>

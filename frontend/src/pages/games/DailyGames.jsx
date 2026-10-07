@@ -7,7 +7,6 @@ import useIsMobile from '../../hooks/useIsMobile'
 import GameDayNav from './GameDayNav'
 import { seasonYearLabel } from '../players/rankConfig'
 
-const BRAND = '#1677ff'
 const ROUND_LABEL = { 1: 'First Round', 2: 'Semifinals', 3: 'Conf. Finals', 4: 'Finals' }
 
 /**
@@ -106,7 +105,7 @@ function GameCard({ g, onOpen }) {
       <span style={{ fontWeight: win ? 800 : 500, color: win ? '#222' : '#888', flex: 1 }}>
         <TeamNames value={team} />
       </span>
-      <span style={{ fontWeight: win ? 800 : 500, fontSize: 18, color: win ? BRAND : '#999' }}>{score}</span>
+      <span style={{ fontWeight: win ? 800 : 500, fontSize: 18, color: win ? '#262626' : '#999' }}>{score}</span>
     </div>
   )
   return (

@@ -11,7 +11,7 @@ import MentionTextArea from '../../components/MentionTextArea'
 import { displayName } from '../players/rankConfig'
 import useLoginRedirect from '../../auth/useLoginRedirect'
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 
 /**
  * 赛后评分：给这场比赛打分写短评，给场上每个人打分写短评。

@@ -39,7 +39,7 @@ function RowBody({ type, d, dn }) {
             style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top center', flexShrink: 0, background: '#f0f0f0' }}
           />
         ) : (
-          <Tag color="volcano" style={{ marginInlineEnd: 0, flexShrink: 0 }}>#{d.playerNumber ?? '-'}</Tag>
+          <Tag style={{ marginInlineEnd: 0, flexShrink: 0 }}>#{d.playerNumber ?? '-'}</Tag>
         )}
         {/* 原来名字后面还有个灰色副标题，「永远显示另一种语言的名字」——英文界面上就是一行中文名。
             网站只保留英文之后主名就是英文名，副标题没有可补充的了，整个去掉 */}
@@ -52,7 +52,7 @@ function RowBody({ type, d, dn }) {
       <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
         <TeamLogo code={d.code} size={20} />
         <b>{teamName(d.code)}</b>
-        <Tag color="orange" style={{ marginInlineEnd: 0 }}>{d.code}</Tag>
+        <Tag style={{ marginInlineEnd: 0 }}>{d.code}</Tag>
         {d.conf && <span style={{ color: '#bbb', fontSize: 12 }}>{d.conf} · {d.div}</span>}
       </span>
     )
@@ -68,7 +68,7 @@ function RowBody({ type, d, dn }) {
       </span>
     )
   }
-  if (type === 'news') return newsRow(d, <ReadOutlined style={{ color: '#1677ff' }} />)
+  if (type === 'news') return newsRow(d, <ReadOutlined style={{ color: '#4096ff' }} />)
   if (type === 'forum') return newsRow(d, <FileTextOutlined style={{ color: '#999' }} />)
   return (
     <span>
@@ -94,7 +94,7 @@ export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick 
       )}
       {!loading && rows.map((r, i) =>
         r.kind === 'group' ? (
-          <div key={r.key} style={{ padding: '10px 12px 4px', fontSize: 12, fontWeight: 600, color: '#1677ff', letterSpacing: 1 }}>
+          <div key={r.key} style={{ padding: '10px 12px 4px', fontSize: 12, fontWeight: 600, color: '#8c8c8c', letterSpacing: 1 }}>
             {r.label}
           </div>
         ) : (
@@ -109,7 +109,7 @@ export function SearchResults({ rows, loading, kw, active = -1, onHover, onPick 
             }}
           >
             <span style={{ flex: 1, minWidth: 0 }}><RowBody type={r.type} d={r.d} dn={dn} /></span>
-            {active === i && <EnterOutlined style={{ color: '#1677ff' }} />}
+            {active === i && <EnterOutlined style={{ color: '#4096ff' }} />}
           </div>
         ),
       )}

@@ -9,8 +9,6 @@ import useAuthWide from '../hooks/useAuthWide'
  * 内层 ConfigProvider 把控件加高到 44、圆角 10，让表单更"落地页"一点。
  */
 
-const BRAND = '#1677ff'
-
 /** 页面背景装饰：色斑 / 点阵 / 球场弧线圆环，全部 absolute，不参与布局 */
 function Backdrop() {
   const blob = (size, color, pos) => ({
@@ -24,7 +22,7 @@ function Backdrop() {
   return (
     <>
       {/* 柔光色斑 */}
-      <div style={blob(460, 'rgba(22,119,255,.16)', { top: -140, left: -120 })} />
+      <div style={blob(460, 'rgba(64,150,255,.16)', { top: -140, left: -120 })} />
       <div style={blob(420, 'rgba(64,150,255,.14)', { bottom: -150, right: -100 })} />
       <div style={blob(300, 'rgba(47,84,235,.07)', { top: '30%', right: '12%' })} />
       {/* 细点阵 */}
@@ -36,10 +34,10 @@ function Backdrop() {
         }}
       />
       {/* 球场弧线：左下"三分线"同心圆 + 右上"中圈" */}
-      <div style={ring(680, 'rgba(22,119,255,.12)', 2, { left: -280, bottom: -300 })} />
-      <div style={ring(520, 'rgba(22,119,255,.10)', 2, { left: -210, bottom: -230 })} />
-      <div style={ring(380, 'rgba(22,119,255,.08)', 2, { left: -140, bottom: -160 })} />
-      <div style={ring(300, 'rgba(22,119,255,.10)', 2, { top: -120, right: -90 })} />
+      <div style={ring(680, 'rgba(64,150,255,.12)', 2, { left: -280, bottom: -300 })} />
+      <div style={ring(520, 'rgba(64,150,255,.10)', 2, { left: -210, bottom: -230 })} />
+      <div style={ring(380, 'rgba(64,150,255,.08)', 2, { left: -140, bottom: -160 })} />
+      <div style={ring(300, 'rgba(64,150,255,.10)', 2, { top: -120, right: -90 })} />
       <div style={ring(210, 'rgba(20,30,50,.06)', 2, { top: -75, right: -35 })} />
     </>
   )
@@ -48,14 +46,15 @@ function Backdrop() {
 function BrandPanel() {
   const ring = (size, pos) => ({
     position: 'absolute', width: size, height: size, borderRadius: '50%',
-    border: '2px solid rgba(255,255,255,.14)', ...pos,
+    border: '2px solid rgba(64,150,255,.16)', ...pos,
   })
   return (
     <div
       style={{
-        width: 380, flexShrink: 0, position: 'relative', overflow: 'hidden', color: '#fff',
+        width: 380, flexShrink: 0, position: 'relative', overflow: 'hidden', color: '#1f1f1f',
         padding: '40px 36px', display: 'flex', flexDirection: 'column',
-        background: 'linear-gradient(165deg, #1677ff 0%, #0958d9 55%, #002c8c 100%)',
+        background: 'linear-gradient(165deg, #e6f4ff 0%, #f0f7ff 55%, #fafcff 100%)',
+        borderRight: '1px solid #e6f0fb',
       }}
     >
       <div style={ring(230, { top: -80, right: -70 })} />
@@ -64,7 +63,7 @@ function BrandPanel() {
       <div style={ring(200, { bottom: -90, left: -90 })} />
 
       <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 1 }}>Epoch</div>
-      <div style={{ width: 34, height: 3, borderRadius: 2, background: 'rgba(255,255,255,.55)', marginTop: 10 }} />
+      <div style={{ width: 34, height: 3, borderRadius: 2, background: '#91caff', marginTop: 10 }} />
 
       <div style={{ flex: 1 }} />
 
@@ -120,7 +119,7 @@ export default function AuthShell({ title, subtitle, children }) {
               display: 'flex', flexDirection: 'column', justifyContent: 'center',
             }}
           >
-            {!wide && <div style={{ fontSize: 17, fontWeight: 800, color: BRAND, marginBottom: 4 }}>Epoch</div>}
+            {!wide && <div style={{ fontSize: 17, fontWeight: 800, color: '#1f1f1f', marginBottom: 4 }}>Epoch</div>}
             <div style={{ fontSize: wide ? 24 : 20, fontWeight: 800, marginBottom: subtitle ? 0 : (wide ? 30 : 20) }}>
               {title}
             </div>

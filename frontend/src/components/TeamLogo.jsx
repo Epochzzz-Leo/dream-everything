@@ -65,7 +65,7 @@ export function HomeAwayTag({ home, size = 18, style }) {
         fontSize: Math.round(size * 0.61), lineHeight: `${size - 2}px`,
         textAlign: 'center', fontWeight: 700,
         background: home ? '#e6f4ff' : '#fafafa',
-        color: home ? '#1677ff' : '#aaa',
+        color: home ? '#4096ff' : '#aaa',
         border: `1px solid ${home ? '#bae0ff' : '#eee'}`,
         ...style,
       }}

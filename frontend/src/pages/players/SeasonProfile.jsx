@@ -104,7 +104,7 @@ export function percentileOf(rows, getter, mine) {
 }
 
 // 单系列雷达 = 共享 RadarChart 的一个系列（对比页用双系列覆盖）
-const Radar = ({ data, color = '#1677ff', fill = 'rgba(22,119,255,.22)' }) => (
+const Radar = ({ data, color = '#69b1ff', fill = 'rgba(105,177,255,.25)' }) => (
   <RadarChart series={[{ color, fill, data }]} />
 )
 
@@ -140,7 +140,7 @@ export function RankChip({ rank, scope = 'league', to, unqualified, tied }) {
     <span
       style={{
         fontSize: fs, fontWeight: 600, color, whiteSpace: 'nowrap',
-        background: rank <= 3 ? 'rgba(22,119,255,.08)' : '#f5f5f5',
+        background: rank <= 3 ? 'rgba(64,150,255,.08)' : '#f5f5f5',
         padding: pad, borderRadius: 10, cursor: to ? 'pointer' : undefined,
       }}
     >
@@ -328,7 +328,7 @@ export default function SeasonProfile({ playerId, honors, onTeamChange, onSeason
         {/* 基本信息 + 当季荣誉 */}
         <Space size={[6, 8]} wrap style={{ marginBottom: 16 }}>
           {/* 队标已经在身份头那枚大的上了，这里只留中文队名 */}
-          {!isCareer && <Tag color="volcano"><TeamNames value={row.playerTeam} /></Tag>}
+          {!isCareer && <Tag><TeamNames value={row.playerTeam} /></Tag>}
           {!isCareer && row.playerPosition && <Tag>{row.playerPosition}</Tag>}
           {/* 整季在队、一场没打。B-R 的 Inactive 名单不带原因，所以只说「未出场」，
               不说「报销」——数据能证明前者，证不了后者 */}
@@ -351,7 +351,7 @@ export default function SeasonProfile({ playerId, honors, onTeamChange, onSeason
 
         {/* 常规赛数据卡（六维雷达挪到卡片下方） */}
         <div style={{ fontWeight: 700, marginBottom: 10, fontSize: 15 }}>{isCareer ? 'Career avg' : 'Regular Season'}</div>
-        {statCard(row, league, '#1677ff', 'rg')}
+        {statCard(row, league, '#262626', 'rg')}
         {/* 高阶数据单独一块：跟基础数据混在一起就是 30 多个格子，一屏塞不下。
             生涯档整块不出——B-R 只按赛季发布高阶指标，没有生涯合计，21 个格子会全是 "/" */}
         {!isCareer && (
@@ -363,7 +363,7 @@ export default function SeasonProfile({ playerId, honors, onTeamChange, onSeason
                 PER league avg 15; BPM / ratings are per 100 possessions
               </span>
             </div>
-            {statCard(row, league, '#1677ff', 'rg', ADVANCED_STATS)}
+            {statCard(row, league, '#262626', 'rg', ADVANCED_STATS)}
           </>
         )}
         <div style={{ maxWidth: 440, margin: '20px auto 0' }}>
@@ -401,25 +401,25 @@ export default function SeasonProfile({ playerId, honors, onTeamChange, onSeason
                 仍占 14px 间距，所以没内容就不渲染 */}
             {!isCareer && (
               <Space size={[6, 8]} wrap style={{ marginBottom: 14 }}>
-                <Tag color="volcano"><TeamNames value={poRow.playerTeam} /></Tag>
+                <Tag><TeamNames value={poRow.playerTeam} /></Tag>
               </Space>
             )}
             {/* 季后赛数据卡（雷达同样在卡片下方，只和当季季后赛球员比） */}
             <div style={{ fontWeight: 700, marginBottom: 10, fontSize: 15 }}>Playoffs</div>
-            {statCard(poRow, poLeague, '#0958d9', 'po')}
+            {statCard(poRow, poLeague, '#262626', 'po')}
             {!isCareer && (
               <>
                 <div style={{ fontWeight: 700, margin: '20px 0 10px', fontSize: 15 }}>
                   Advanced
                   <GlossaryIcon />
                 </div>
-                {statCard(poRow, poLeague, '#0958d9', 'po', ADVANCED_STATS)}
+                {statCard(poRow, poLeague, '#262626', 'po', ADVANCED_STATS)}
               </>
             )}
             <div style={{ maxWidth: 440, margin: '20px auto 0' }}>
               {poLeague === null
                 ? <Spin style={{ display: 'block', margin: '60px auto' }} />
-                : <Radar data={radarOf(poRow, poLeague)} color="#0958d9" fill="rgba(9,88,217,.20)" />}
+                : <Radar data={radarOf(poRow, poLeague)} color="#4096ff" fill="rgba(64,150,255,.20)" />}
               <div style={{ textAlign: 'center', color: '#bbb', fontSize: 12, marginTop: 2 }}>
                 {isCareer
                   ? 'Six axes = career playoff-player percentile (0-100)'

@@ -22,7 +22,7 @@ import useIsMobile from '../../hooks/useIsMobile'
  * - owner 的成员权限管理在专题内页操作。
  */
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 const clamp = (n) => ({ display: '-webkit-box', WebkitLineClamp: n, WebkitBoxOrient: 'vertical', overflow: 'hidden' })
 
 export default function TopicsList() {
@@ -119,22 +119,22 @@ export default function TopicsList() {
     } catch { /* 已提示 */ }
   }
 
-  const ring = (size, pos) => ({ position: 'absolute', width: size, height: size, borderRadius: '50%', border: '2px solid rgba(255,255,255,.16)', ...pos })
+  const ring = (size, pos) => ({ position: 'absolute', width: size, height: size, borderRadius: '50%', border: '2px solid rgba(64,150,255,.12)', ...pos })
 
   return (
     <>
-      <style>{'.topic-card-badge{display:block;width:100%;height:100%} .topic-card{transition:all .2s} .topic-card:hover{border-color:#91caff;box-shadow:0 6px 18px rgba(22,119,255,.1);transform:translateY(-2px)}'}</style>
+      <style>{'.topic-card-badge{display:block;width:100%;height:100%} .topic-card{transition:all .2s} .topic-card:hover{border-color:#bae0ff;box-shadow:0 6px 18px rgba(64,150,255,.08);transform:translateY(-2px)}'}</style>
 
       {/* 横幅 */}
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, color: '#fff', padding: isMobile ? '16px 14px' : '24px 28px', marginBottom: 18, background: 'linear-gradient(120deg, #1677ff 0%, #0958d9 60%, #003eb3 100%)' }}>
+      <div className="banner-light" style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: isMobile ? '16px 14px' : '24px 28px', marginBottom: 18 }}>
         <div style={ring(190, { top: -80, right: 120 })} />
         <div style={ring(120, { bottom: -50, right: 300 })} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: isMobile ? 18 : 23, fontWeight: 800 }}>Chat Everything</div>
-            <div style={{ opacity: 0.88, marginTop: 6, fontSize: 13 }}>See what you see, think what you think</div>
+            <div style={{ color: '#595959', marginTop: 6, fontSize: 13 }}>See what you see, think what you think</div>
           </div>
-          {/* 横幅上的按钮统一走 .banner-btn（玻璃质感），别用 antd 默认那套白底灰边 */}
+          {/* 横幅上的按钮统一走 .banner-btn：深色横幅上是玻璃质感，浅色横幅（banner-light）里自动变成白底细边框，见 index.css */}
           {user?.isSuperManager && (
             <Button className="banner-btn" size={isMobile ? 'middle' : 'large'} icon={<AppstoreOutlined />} onClick={() => setCatOpen(true)}>
               Categories

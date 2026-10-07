@@ -171,7 +171,7 @@ export default function CommentComposer({ newsId, placeholder, submitText: submi
                 <Image src={att.url} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} />
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', background: '#f5f5f5', borderRadius: 8, maxWidth: 200, height: 72, boxSizing: 'border-box' }}>
-                  <FileOutlined style={{ color: '#1677ff', fontSize: 18 }} />
+                  <FileOutlined style={{ color: '#4096ff', fontSize: 18 }} />
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</div>
                     <div style={{ fontSize: 11, color: '#999' }}>{humanSize(att.size)}</div>

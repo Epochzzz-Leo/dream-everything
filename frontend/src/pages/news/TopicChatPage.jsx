@@ -33,7 +33,7 @@ import ChatExportModal from '../../components/ChatExportModal'
  * 自己发的消息也从广播回来，不做本地回显。
  */
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.zip,.rar,.7z'
 
 const toolIcon = {
@@ -500,7 +500,7 @@ export default function TopicChatPage() {
               const has = days?.has(current.format('YYYY-MM-DD'))
               return (
                 <div className="ant-picker-cell-inner" style={has
-                  ? { background: '#e6f4ff', color: '#0958d9', fontWeight: 700, borderRadius: 4 }
+                  ? { background: '#e6f4ff', color: '#1677ff', fontWeight: 700, borderRadius: 4 }
                   : undefined}
                 >
                   {current.date()}
@@ -612,8 +612,8 @@ export default function TopicChatPage() {
                       <div style={{
                         padding: '7px 11px', borderRadius: 10, fontSize: 14, lineHeight: 1.6,
                         wordBreak: 'break-word', whiteSpace: 'pre-wrap',
-                        background: mine ? BRAND : '#f7f7f7',
-                        color: mine ? '#fff' : '#333',
+                        background: mine ? '#e6f4ff' : '#f7f7f7',
+                        color: '#1f1f1f',
                       }}>
                         {renderText(m.content, m.mentions, user?.userId)}
                       </div>
@@ -653,7 +653,7 @@ export default function TopicChatPage() {
                   onMouseEnter={() => setAtIndex(i)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', cursor: 'pointer',
-                    background: i === atIndex ? 'rgba(22,119,255,.08)' : 'transparent',
+                    background: i === atIndex ? 'rgba(64,150,255,.08)' : 'transparent',
                   }}
                 >
                   {u.avatar
@@ -715,7 +715,7 @@ export default function TopicChatPage() {
               loading={sending}
               disabled={!text.trim()}
               onClick={() => send()}
-              style={{ flexShrink: 0, width: 34, height: 34, minWidth: 34, boxShadow: text.trim() ? '0 4px 12px rgba(22,119,255,.3)' : 'none' }}
+              style={{ flexShrink: 0, width: 34, height: 34, minWidth: 34, boxShadow: text.trim() ? '0 4px 12px rgba(64,150,255,.25)' : 'none' }}
             />
           </div>
         </div>

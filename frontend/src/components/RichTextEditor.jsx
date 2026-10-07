@@ -107,7 +107,7 @@ function MentionPanel({ top, left, search, onPick, onClose, placeholder: placeho
             <div
               onMouseDown={(e) => { e.preventDefault(); onPick(u) }}
               onMouseEnter={() => setActive(i)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', cursor: 'pointer', background: i === active ? 'rgba(22,119,255,.08)' : 'transparent' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', cursor: 'pointer', background: i === active ? 'rgba(64,150,255,.08)' : 'transparent' }}
             >
               {u.avatar ? (
                 <Avatar size={22} src={u.avatar} />

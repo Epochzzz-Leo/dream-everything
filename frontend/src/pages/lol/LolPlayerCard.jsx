@@ -158,7 +158,7 @@ export default function LolPlayerCard({ userId, initialPuuid, days, open, onClos
                 style={{
                   padding: '3px 9px', margin: 0,
                   cursor: accounts.length > 1 ? 'pointer' : 'default',
-                  borderColor: on ? '#1677ff' : undefined,
+                  borderColor: on ? '#91caff' : undefined,
                   background: on ? '#e6f4ff' : '#fafafa',
                   opacity: on ? 1 : 0.5,
                 }}
@@ -281,7 +281,7 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                 onClick={() => togglePos(p.pos)}
                 style={{
                   padding: '3px 9px', margin: 0, cursor: 'pointer', fontSize: 13,
-                  borderColor: on ? '#1677ff' : undefined,
+                  borderColor: on ? '#91caff' : undefined,
                   background: on ? '#e6f4ff' : '#fafafa',
                   // 有选中项时才把没选的压暗——一个都没选是「全都算」，
                   // 那时整排压暗会让人以为什么都没生效
@@ -319,7 +319,6 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                   key={p}
                   closable
                   onClose={() => togglePos(p)}
-                  color="volcano"
                   style={{ margin: 0 }}
                 >
                   {POSITION_LABEL[p] || 'Other'}
@@ -329,7 +328,6 @@ function Body({ d, isMobile, tab, setTab, champ, setChamp, poses, togglePos, onO
                 <Tag
                   closable
                   onClose={() => setChamp(null)}
-                  color="orange"
                   style={{ margin: 0 }}
                 >
                   {`Only ${champ}`}

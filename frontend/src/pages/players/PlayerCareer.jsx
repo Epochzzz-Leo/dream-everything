@@ -39,7 +39,7 @@ function AwardCard({ award, entries }) {
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>
             {award.label}
-            <span style={{ marginLeft: 8, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: award.gold ? '#d48806' : '#1677ff' }}>
+            <span style={{ marginLeft: 8, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: award.gold ? '#d48806' : '#262626' }}>
               ×{entries.length}
             </span>
           </div>
@@ -67,10 +67,10 @@ function HonorShelf({ honors }) {
   return (
     <>
       <Card
-        style={{ marginBottom: 16, background: 'linear-gradient(120deg, #1677ff 0%, #4096ff 100%)', border: 'none' }}
+        style={{ marginBottom: 16, background: '#f0f7ff', border: '1px solid #d6e8ff' }}
         styles={{ body: { padding: '14px 20px' } }}
       >
-        <span style={{ color: '#fff', fontWeight: 600, fontSize: 15, lineHeight: 2 }}>{summary}</span>
+        <span style={{ color: '#1f1f1f', fontWeight: 600, fontSize: 15, lineHeight: 2 }}>{summary}</span>
       </Card>
       <Row gutter={[16, 16]}>
         {owned.map((x) => (
@@ -193,7 +193,7 @@ function PlayoffTable({ playerId }) {
     },
     { title: 'GS/GP', dataIndex: 'playerAppearance', width: 94, render: (_, r) => `${r.playerFrAppearance ?? 0}/${r.playerAppearance ?? 0}` },
     { title: 'MIN', dataIndex: 'playingTime', width: 48, render: (v) => num(v) },
-    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => <b style={{ color: '#1677ff' }}>{num(v)}</b> },
+    { title: 'PTS', dataIndex: 'playerAvgScore', width: 48, render: (v) => <b>{num(v)}</b> },
     { title: 'REB', dataIndex: 'playerAvgReb', width: 48, render: (v) => num(v) },
     { title: 'AST', dataIndex: 'playerAvgAss', width: 48, render: (v) => num(v) },
     { title: 'FG', dataIndex: 'playerAvgFgm', width: 88, render: (_, r) => fmtPair(r.playerAvgFgm, r.playerAvgFga) },
@@ -328,7 +328,7 @@ export default function PlayerCareer() {
           ) : (
             <div
               style={{
-                width: 56, height: 56, borderRadius: '50%', background: 'rgba(22,119,255,.1)', color: '#1677ff',
+                width: 56, height: 56, borderRadius: '50%', background: '#f5f5f5', color: '#262626',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20,
               }}
             >
@@ -342,7 +342,7 @@ export default function PlayerCareer() {
               {displayName(honors) || '…'}
               {/* 圆牌让位给照片时，球衣号跟到名字后面，信息不丢 */}
               {honors?.photo && honors?.playerNumber && (
-                <span style={{ marginLeft: 8, fontSize: isMobile ? 13 : 14, fontWeight: 800, color: '#1677ff' }}>#{honors.playerNumber}</span>
+                <span style={{ marginLeft: 8, fontSize: isMobile ? 13 : 14, fontWeight: 800, color: '#8c8c8c' }}>#{honors.playerNumber}</span>
               )}
             </div>
             {/* 名字下面原来还有一行「另一种名字」（中文界面配英文原名、英文界面配中文名）。
@@ -377,12 +377,13 @@ export default function PlayerCareer() {
           token: { borderRadius: 22, borderRadiusSM: 18 },
           components: {
             Segmented: {
-              itemSelectedBg: '#1677ff',
-              itemSelectedColor: '#ffffff',
+              // 选中 = 灰轨道上一块白色滑块、深色字（2026-10-08 起不再用实心主色块）
+              itemSelectedBg: '#ffffff',
+              itemSelectedColor: '#1f1f1f',
               trackBg: '#efefef',
               itemColor: '#666',
-              itemHoverColor: '#1677ff',
-              itemHoverBg: 'rgba(22,119,255,0.08)',
+              itemHoverColor: '#1f1f1f',
+              itemHoverBg: 'rgba(0,0,0,0.04)',
             },
           },
         }}

@@ -211,7 +211,7 @@ export default function TopicMemberModal({ topicId, open, onClose, onChange }) {
       {/* 小题主管理（题主/超管，最多 3 人） */}
       {canEditSub && (
         <div style={{ marginBottom: 16, background: '#e6f4ff', border: '1px solid #91caff', borderRadius: 10, padding: '10px 14px' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0958d9', marginBottom: 10 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#1677ff', marginBottom: 10 }}>
             <CrownFilled style={{ marginRight: 6 }} />Co-owners (up to 3 · set by the owner)
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>

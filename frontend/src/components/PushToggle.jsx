@@ -163,7 +163,7 @@ export default function PushToggle({ compact = false, variant }) {
     <Space size={8}>
       <Tooltip title={isIos && !standalone ? 'Add to Home Screen first on iPhone' : 'Get notified about mentions, replies and schedule assignments'}>
         <Space size={6}>
-          <BellOutlined style={{ color: on ? '#1677ff' : '#bbb' }} />
+          <BellOutlined style={{ color: on ? '#4096ff' : '#bbb' }} />
           <Text style={{ fontSize: 13, color: '#666' }}>Notifications</Text>
           <Switch size="small" checked={on} loading={busy} onChange={toggle} />
         </Space>

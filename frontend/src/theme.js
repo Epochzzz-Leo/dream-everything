@@ -2,13 +2,14 @@
  * 全站主题（antd v5 Design Token）。
  * antd v5 不再用 less 覆盖样式，而是"设计令牌"：在 ConfigProvider 上改一份 token，
  * 按钮/链接/选中态/表头等所有组件的派生色（hover、浅色底、边框）自动跟着算出来。
- * 主色是蓝色（blue-6）。2026-10-08 以前是「篮球橙」（volcano-6 #fa541c），按用户要求整站换成蓝色，
- * 代码里写死的橘色按同一档位换成了蓝色，带含义的颜色（头衔调色板、评分分档、对比页两侧等）没动，见 vault 83。
+ * 主色是浅一档的蓝（blue-5 #4096ff）。2026-10-08 以前是「篮球橙」（volcano-6 #fa541c），按用户要求整站换成蓝色；
+ * 当天又按用户要求调浅、并收着用：大色块改成淡蓝底配深色字，NBA 页面的名字和数字用正文黑色（见 vault 84）。
+ * 第一次换色时，代码里写死的橘色按同一档位换成了蓝色，带含义的颜色（头衔调色板、评分分档、对比页两侧等）没动，见 vault 83。
  */
 export const themeConfig = {
   token: {
-    colorPrimary: '#1677ff', // 蓝（blue-6）
-    colorInfo: '#1677ff',
+    colorPrimary: '#4096ff', // 浅一档的蓝（blue-5）
+    colorInfo: '#4096ff',
     borderRadius: 8,
     fontSize: 14,
   },

@@ -28,6 +28,9 @@ const A_FILL = 'rgba(250,84,28,.20)'
 const B_FILL = 'rgba(47,84,235,.18)'
 const A_TINT = 'rgba(250,84,28,.07)'
 const B_TINT = 'rgba(47,84,235,.07)'
+// 对战台（浅色横幅）上两侧的描边色：选人虚线框、头像外圈
+const A_EDGE = '#ffbb96'
+const B_EDGE = '#adc6ff'
 
 // 生涯对位的数据项。出场和上场时间原来单独写在 GRID_STATS 前面；后来 GRID_STATS 自己也加上了这两项
 // （a81cacb），这里再写一遍就成了重复的两行，React 也报重复 key。直接用 GRID_STATS。
@@ -58,7 +61,7 @@ function PlayerPick({ value, onChange, side, photo }) {
   const [team, setTeam] = useState(null)
   const [roster, setRoster] = useState(null)
   const timer = useRef()
-  const color = side === 'A' ? A_COLOR : B_COLOR
+  const edge = side === 'A' ? A_EDGE : B_EDGE
   const tint = side === 'A' ? A_TINT : B_TINT
   const mirror = side === 'B' // B 方内容贴右、镜像排列
 
@@ -122,18 +125,18 @@ function PlayerPick({ value, onChange, side, photo }) {
                 alt={value.name || ''}
                 style={{
                   width: isMobile ? 38 : 52, height: isMobile ? 38 : 52, borderRadius: '50%',
-                  objectFit: 'cover', objectPosition: 'top center', background: 'rgba(255,255,255,.95)',
-                  flexShrink: 0, boxShadow: '0 3px 10px rgba(0,0,0,.18)',
+                  objectFit: 'cover', objectPosition: 'top center', background: '#fff',
+                  flexShrink: 0, border: `2px solid ${edge}`, boxSizing: 'border-box',
                 }}
               />
             ) : (
               <div
                 style={{
                   width: isMobile ? 38 : 52, height: isMobile ? 38 : 52, borderRadius: '50%',
-                  background: 'rgba(255,255,255,.95)', color,
+                  background: '#fff', color: '#262626',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900,
                   fontSize: isMobile ? 12 : 15,
-                  flexShrink: 0, boxShadow: '0 3px 10px rgba(0,0,0,.18)',
+                  flexShrink: 0, border: `2px solid ${edge}`, boxSizing: 'border-box',
                 }}
               >
                 #{value.number ?? '-'}
@@ -143,7 +146,7 @@ function PlayerPick({ value, onChange, side, photo }) {
               {/* 手机上名字允许换到两行整名展示——截断成「勒布…」没法看 */}
               <div
                 style={{
-                  fontWeight: 900, fontSize: isMobile ? 14 : 21, color: '#fff', textShadow: '0 2px 6px rgba(0,0,0,.25)',
+                  fontWeight: 900, fontSize: isMobile ? 14 : 21, color: '#1f1f1f',
                   ...(isMobile
                     ? { lineHeight: 1.25 }
                     : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
@@ -151,14 +154,14 @@ function PlayerPick({ value, onChange, side, photo }) {
               >
                 {value.name}
               </div>
-              <div style={{ fontSize: isMobile ? 11 : 12, color: 'rgba(255,255,255,.78)' }}>Click to change player</div>
+              <div style={{ fontSize: isMobile ? 11 : 12, color: '#8c8c8c' }}>Click to change player</div>
             </div>
           </>
         ) : (
           <div
             style={{
-              border: '1.5px dashed rgba(255,255,255,.65)', color: '#fff', borderRadius: 12,
-              padding: isMobile ? '10px 14px' : '14px 24px', fontWeight: 700, background: 'rgba(255,255,255,.10)',
+              border: `1.5px dashed ${edge}`, color: '#262626', borderRadius: 12,
+              padding: isMobile ? '10px 14px' : '14px 24px', fontWeight: 700, background: 'rgba(255,255,255,.75)',
               whiteSpace: 'nowrap',
             }}
           >
@@ -210,7 +213,7 @@ function PlayerPick({ value, onChange, side, photo }) {
                   onMouseEnter={(e) => { e.currentTarget.style.background = tint }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  <Tag color="volcano" style={{ marginInlineEnd: 0 }}>#{pp.playerNumber ?? '-'}</Tag>
+                  <Tag style={{ marginInlineEnd: 0 }}>#{pp.playerNumber ?? '-'}</Tag>
                   <b>{displayName(pp)}</b>
                 </div>
               ))}
@@ -224,7 +227,7 @@ function PlayerPick({ value, onChange, side, photo }) {
               <span style={{ color: '#888', fontSize: 13 }}>Season</span>
               <SeasonPicker value={rosterSeason} onChange={(v) => { setRosterSeason(v); setRoster(null) }} includeCareer={false} />
               {team && (
-                <Tag color="volcano" style={{ marginInlineEnd: 0, cursor: 'pointer' }} onClick={() => { setTeam(null); setRoster(null) }}>
+                <Tag style={{ marginInlineEnd: 0, cursor: 'pointer' }} onClick={() => { setTeam(null); setRoster(null) }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <TeamLogo code={team} size={14} /> {teamName(team)} ✕
                   </span>
@@ -396,7 +399,7 @@ function CompareRows({ rowA, rowB, stats, leagueA, leagueB, rankScope = 'league'
   )
 }
 
-/** 名字行（A vs B，色点 + 各自链到个人页）。
+/** 名字行（A vs B，色点 + 各自链到个人页）。名字用正文黑色，哪边是哪边靠名字旁的色点（2026-10-08 起）。
  * 手机上名字和标签挤一行会在名字中间折行、标签横插其间——改成每侧竖排：
  * 名字整行（放不下换整行，不截断），赛季/球队标签独立第二行。 */
 function NamesBar({ a, b, extraA, extraB }) {
@@ -422,7 +425,7 @@ function NamesBar({ a, b, extraA, extraB }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ textAlign: 'right', lineHeight: 1.3 }}>
             {dot(A_COLOR)}
-            <Link to={`/players/${a.id}`} style={{ color: A_COLOR, fontWeight: 800, fontSize: 15, marginLeft: 6 }}>{a.name}</Link>
+            <Link to={`/players/${a.id}`} style={{ color: '#1f1f1f', fontWeight: 800, fontSize: 15, marginLeft: 6 }}>{a.name}</Link>
           </div>
           {extraA && (
             <div style={{ marginTop: 6, display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 4 }}>{extraA}</div>
@@ -431,7 +434,7 @@ function NamesBar({ a, b, extraA, extraB }) {
         {vsBadge}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ lineHeight: 1.3 }}>
-            <Link to={`/players/${b.id}`} style={{ color: B_COLOR, fontWeight: 800, fontSize: 15, marginRight: 6 }}>{b.name}</Link>
+            <Link to={`/players/${b.id}`} style={{ color: '#1f1f1f', fontWeight: 800, fontSize: 15, marginRight: 6 }}>{b.name}</Link>
             {dot(B_COLOR)}
           </div>
           {extraB && <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>{extraB}</div>}
@@ -443,13 +446,13 @@ function NamesBar({ a, b, extraA, extraB }) {
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
       <div style={{ flex: 1, textAlign: 'right' }}>
         {dot(A_COLOR)}
-        <Link to={`/players/${a.id}`} style={{ color: A_COLOR, fontWeight: 800, fontSize: 17, margin: '0 0 0 8px' }}>{a.name}</Link>
+        <Link to={`/players/${a.id}`} style={{ color: '#1f1f1f', fontWeight: 800, fontSize: 17, margin: '0 0 0 8px' }}>{a.name}</Link>
         {extraA && <span style={{ marginLeft: 8 }}>{extraA}</span>}
       </div>
       {vsBadge}
       <div style={{ flex: 1 }}>
         {extraB && <span style={{ marginRight: 8 }}>{extraB}</span>}
-        <Link to={`/players/${b.id}`} style={{ color: B_COLOR, fontWeight: 800, fontSize: 17, marginRight: 8 }}>{b.name}</Link>
+        <Link to={`/players/${b.id}`} style={{ color: '#1f1f1f', fontWeight: 800, fontSize: 17, marginRight: 8 }}>{b.name}</Link>
         {dot(B_COLOR)}
       </div>
     </div>
@@ -560,7 +563,7 @@ export default function PlayerCompare() {
 
   const ring = (size, pos) => ({
     position: 'absolute', width: size, height: size, borderRadius: '50%',
-    border: '2px solid rgba(255,255,255,.15)', ...pos,
+    border: '2px solid rgba(0,0,0,.035)', ...pos,
   })
 
   const teamTagA = (r) => (seasonA === CAREER_SEASON ? <Tag>Career</Tag> : <Tag color="volcano"><TeamChain value={r.playerTeam} size={14} /></Tag>)
@@ -568,12 +571,14 @@ export default function PlayerCompare() {
 
   return (
     <>
-      {/* 对战台：橙蓝对角撞色 + 内嵌选人 + 白色 VS 徽章 */}
+      {/* 对战台：橙蓝对角拼色 + 内嵌选人 + 白色 VS 徽章。
+          2026-10-08 起改成淡橙 / 淡蓝底、深色字（原来是深橙 #ad2102 对深蓝 #10239e、白字），和全站的浅色横幅一致；
+          A 橙 B 蓝的分边不变 */}
       <div
         style={{
           position: 'relative', borderRadius: 18, overflow: 'hidden', marginBottom: 16,
-          background: 'linear-gradient(105deg, #ad2102 0%, #fa541c 49.75%, #2f54eb 50.25%, #10239e 100%)',
-          boxShadow: '0 6px 22px rgba(0,0,0,.14)',
+          background: 'linear-gradient(105deg, #ffe9dc 0%, #fff7f2 49.75%, #f2f5ff 50.25%, #e3eaff 100%)',
+          border: '1px solid #f0f0f0',
         }}
       >
         <div style={ring(210, { top: -90, left: -60 })} />
@@ -588,7 +593,7 @@ export default function PlayerCompare() {
               width: isMobile ? 42 : 54, height: isMobile ? 42 : 54, borderRadius: '50%', background: '#fff', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontStyle: 'italic', fontWeight: 900, fontSize: isMobile ? 13 : 17, color: '#1f1f1f', letterSpacing: 1,
-              boxShadow: '0 4px 14px rgba(0,0,0,.28)',
+              border: '1px solid #f0f0f0', boxShadow: '0 2px 10px rgba(0,0,0,.08)',
             }}
           >
             VS
@@ -607,7 +612,7 @@ export default function PlayerCompare() {
             }}
           >
             <SeasonPicker value={seasonA} onChange={setSeasonA} compact={isMobile} />
-            {!isMobile && <span style={{ color: 'rgba(255,255,255,.75)', fontSize: 12 }}>Seasons are chosen independently per side</span>}
+            {!isMobile && <span style={{ color: '#8c8c8c', fontSize: 12 }}>Seasons are chosen independently per side</span>}
             <SeasonPicker value={seasonB} onChange={setSeasonB} compact={isMobile} />
           </div>
         )}

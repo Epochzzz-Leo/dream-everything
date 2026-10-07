@@ -423,7 +423,7 @@ export default function NewsEdit() {
             <div style={{ marginTop: 22 }}>
               {(topicName || official) && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 2px 12px', fontSize: 15, fontWeight: 600 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1677ff' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4096ff' }} />
                   {official ? 'Official News' : topicName}
                 </div>
               )}
@@ -531,7 +531,7 @@ export default function NewsEdit() {
                 onClick={() => { setCategoryId(on ? undefined : c.id); setCatOpen(false) }}
                 style={{
                   cursor: 'pointer', userSelect: 'none', padding: '6px 14px', borderRadius: 999, fontSize: 13,
-                  color: on ? '#0958d9' : '#595959',
+                  color: on ? '#1677ff' : '#595959',
                   background: on ? '#e6f4ff' : '#f5f5f5',
                   border: `1px solid ${on ? '#91caff' : 'transparent'}`,
                 }}

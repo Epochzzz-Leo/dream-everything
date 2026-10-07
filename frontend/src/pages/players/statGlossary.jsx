@@ -18,7 +18,7 @@ import useIsMobile from '../../hooks/useIsMobile'
 const GROUPS = [
   {
     group: 'Overall Value',
-    color: '#1677ff',
+    color: '#4096ff',
     intro: 'One number for overall contribution, comparable across positions',
     items: [
       {
@@ -68,7 +68,7 @@ const GROUPS = [
   },
   {
     group: 'Scoring & Efficiency',
-    color: '#1677ff',
+    color: '#4096ff',
     intro: 'Who gets more points per attempt',
     items: [
       {

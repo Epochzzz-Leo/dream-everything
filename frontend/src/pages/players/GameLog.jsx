@@ -54,7 +54,7 @@ function buildColumns(seasonType, isMobile, openGame) {
     },
     { title: 'Starter', dataIndex: 'starter', width: 48, render: (v) => (Number(v) ? '✓' : '-') },
     { title: 'MIN', dataIndex: 'playingTime', width: 48 },
-    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b style={{ color: '#1677ff' }}>{v}</b> },
+    { title: 'PTS', dataIndex: 'pts', width: 48, render: (v) => <b>{v}</b> },
     { title: 'REB', dataIndex: 'reb', width: 48 },
     { title: 'AST', dataIndex: 'ast', width: 48 },
     // 命中数和命中率分开成列，和单场详情、场均表同一套写法。

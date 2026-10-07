@@ -35,7 +35,7 @@ const TEAM_STATS = [
 function RankBadge({ rank, scope = 'league' }) {
   const color = rank <= 3 ? MEDAL[rank - 1] : '#999'
   return (
-    <span style={{ fontSize: 12, fontWeight: 600, color, background: rank <= 3 ? 'rgba(22,119,255,.08)' : '#f5f5f5', padding: '2px 8px', borderRadius: 10 }}>
+    <span style={{ fontSize: 12, fontWeight: 600, color, background: rank <= 3 ? 'rgba(64,150,255,.08)' : '#f5f5f5', padding: '2px 8px', borderRadius: 10 }}>
       {scope === 'playoffs' ? `Playoffs #${rank}` : `League #${rank}`}
     </span>
   )
@@ -88,7 +88,7 @@ function SeasonOverview({ teamCode, seasonNum }) {
                 type="circle"
                 size={110}
                 percent={Math.round(winRate * 100)}
-                strokeColor="#1677ff"
+                strokeColor="#69b1ff"
                 format={(p) => (
                   <div style={{ lineHeight: 1.3 }}>
                     <div style={{ fontSize: 20, fontWeight: 700 }}>{p}%</div>
@@ -104,7 +104,7 @@ function SeasonOverview({ teamCode, seasonNum }) {
                 {/* 原来是「西部」+「第」+「 4」拼出来的，英文界面上成了「西部 # 4」。
                     现在 conf 本身就是英文（West），整句写成 West #4 */}
                 <Space size={6} wrap style={{ marginTop: 10 }}>
-                  <Tag color="orange">{`League #${winRankLeague()}`}</Tag>
+                  <Tag>{`League #${winRankLeague()}`}</Tag>
                   {conf && <Tag>{`${conf} #${winRankConf()}`}</Tag>}
                 </Space>
                 <div style={{ marginTop: 10 }}>
@@ -125,7 +125,7 @@ function SeasonOverview({ teamCode, seasonNum }) {
               const rank = rankOf(s)
               const val = s.get ? s.get(me) : Number(me[s.key])
               const display = s.signed ? `${val >= 0 ? '+' : ''}${val.toFixed(1)}` : fmtNum(val)
-              const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#1677ff'
+              const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#262626'
               return (
                 <Col key={s.key} xs={12} sm={6}>
                   <Card styles={{ body: { padding: '14px 16px' } }}>
@@ -198,7 +198,7 @@ function PlayoffOverview({ teamCode, seasonNum }) {
                   type="circle"
                   size={110}
                   percent={Math.round(winRate * 100)}
-                  strokeColor={isChamp ? '#d4a017' : '#1677ff'}
+                  strokeColor={isChamp ? '#d4a017' : '#69b1ff'}
                   format={(p) => (
                     <div style={{ lineHeight: 1.3 }}>
                       <div style={{ fontSize: 20, fontWeight: 700 }}>{p}%</div>
@@ -237,7 +237,7 @@ function PlayoffOverview({ teamCode, seasonNum }) {
             const rank = rankOf(s)
             const val = s.get ? s.get(me) : Number(me[s.key])
             const display = s.signed ? `${val >= 0 ? '+' : ''}${val.toFixed(1)}` : fmtNum(val)
-            const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#1677ff'
+            const color = s.signed ? (val >= 0 ? '#3f8600' : '#cf1322') : '#262626'
             return (
               <Col key={s.key} xs={12} sm={6}>
                 <Card styles={{ body: { padding: '14px 16px' } }}>
@@ -346,7 +346,7 @@ function PlayoffHistory({ teamCode }) {
         <Space size={8} wrap>
           <Tag color="geekblue">{`Playoffs ×${rows.length}`}</Tag>
           {/* 括号用半角：原来全角括号写在 JSX 里，英文界面上也是「（55.6%）」 */}
-          <Tag color="orange">{`Playoff record ${agg.w}-${agg.l} (${fmtRatio(agg.w, agg.w + agg.l)})`}</Tag>
+          <Tag>{`Playoff record ${agg.w}-${agg.l} (${fmtRatio(agg.w, agg.w + agg.l)})`}</Tag>
           <Tag color={PLAYOFF_TAG['First Round']}>{`First Round ×${cnt('First Round')}`}</Tag>
           <Tag color={PLAYOFF_TAG['Semifinals']}>{`Conf. Semis ×${cnt('Semifinals')}`}</Tag>
           <Tag color={PLAYOFF_TAG['Conf. Finals']}>{`Conf. Finals ×${cnt('Conf. Finals')}`}</Tag>
@@ -452,7 +452,7 @@ function TeamHistory({ teamCode }) {
         if (!k) return '-'
         return (
           <span style={{ whiteSpace: 'nowrap' }}>
-            <b style={{ color: k.league <= 3 ? '#1677ff' : undefined }}>{`League #${k.league}`}</b>
+            <b>{`League #${k.league}`}</b>
             {confShort && <span style={{ color: '#999', fontSize: 12, marginLeft: 6 }}>{`${confShort} #${k.conf}`}</span>}
           </span>
         )
@@ -491,7 +491,7 @@ function TeamHistory({ teamCode }) {
       extra={
         <Space size={8} wrap>
           <Tag>{((rows.length) === 1 ? `History: ${rows.length} season` : `History: ${rows.length} seasons`)}</Tag>
-          <Tag color="orange">{`All-time record ${totalW}-${totalL} (${fmtRatio(totalW, totalW + totalL)})`}</Tag>
+          <Tag>{`All-time record ${totalW}-${totalL} (${fmtRatio(totalW, totalW + totalL)})`}</Tag>
           <Tag color="purple">{`Conf. 1st ×${confFirsts}`}</Tag>
           <Tag color="cyan">{`Div. 1st ×${divFirsts}`}</Tag>
           <Tag color="geekblue">{`Playoffs ×${playoffs}`}</Tag>

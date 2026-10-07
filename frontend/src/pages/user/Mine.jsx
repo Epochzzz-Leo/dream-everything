@@ -12,7 +12,7 @@ import PushToggle from '../../components/PushToggle'
 import AnnouncementEditModal from '../../components/AnnouncementEditModal'
 import useLoginRedirect from '../../auth/useLoginRedirect'
 
-const BRAND = '#1677ff'
+const BRAND = '#4096ff'
 
 /**
  * 一行可点的条目：左图标 + 文字 + 右侧内容（角标/开关）+ 箭头。
@@ -151,7 +151,7 @@ export default function Mine() {
               >
                 {s.pinned
                   ? <PushpinFilled style={{ fontSize: 11, color: BRAND, flexShrink: 0 }} />
-                  : <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4096ff', flexShrink: 0 }} />}
+                  : <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#d9d9d9', flexShrink: 0 }} />}
                 <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {s.name}
                 </span>

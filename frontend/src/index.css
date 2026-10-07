@@ -216,7 +216,7 @@ body {
 .banner-btn.banner-btn-on.ant-btn {
   background: #fff !important;
   border-color: #fff !important;
-  color: #0958d9 !important;
+  color: #1677ff !important;
 }
 .banner-btn.banner-btn-on.ant-btn:hover {
   background: rgba(255, 255, 255, 0.88) !important;
@@ -407,6 +407,39 @@ body {
 
    **必须用不透明的色值**，不能写 rgba(…, .05)：这一行里也有固定列，
    半透明会让横向滚动时内容从它底下透出来。#f3f8ff 就是那个 5% 品牌蓝叠在白底上的效果（以前是橙色时为 #fff6f3）。 */
+/* ===== 浅色横幅（2026-10-08）=====
+   横幅不再是深色渐变压白字，而是淡蓝底 + 深色字（用户：「这个蓝色太深了，改成那种淡蓝色，整体网站最好淡化主题色的存在」）。
+   上面那套 .banner-btn 是给深色底设计的玻璃按钮（白色半透明），放到浅底上就看不见了，
+   所以在浅色横幅里把它改成白底细边框。有背景图的专题横幅仍然是深色那一套。 */
+.banner-light {
+  background: linear-gradient(120deg, #eaf4ff 0%, #f6faff 100%);
+  border: 1px solid #d6e8ff;
+  color: #1f1f1f;
+}
+.banner-light .banner-btn.ant-btn {
+  background: #fff !important;
+  border-color: #d6e4ff !important;
+  color: #1f1f1f !important;
+  box-shadow: none !important;
+}
+.banner-light .banner-btn.ant-btn:hover {
+  border-color: #91caff !important;
+  color: #1677ff !important;
+}
+
+/* ===== NBA 数据页的链接（2026-10-08）=====
+   AppLayout 在 NBA 数据页的内容区挂 nba-scope。球员名、球队名这些链接用正文的黑色，不用主题色
+   （用户：「NBA 的那些网页，比如球员名字什么的，就正常黑色字体就可以，不用配上主题色」），
+   鼠标移上去才变成淡蓝，让人知道能点。
+   只管「自己没写颜色」的链接：代码里写了 style={{ color }} 的（红色的 Delete、灰色的「Full rankings」、
+   对比页的名字）一律不碰，所以选择器带 :not([style*="color"])。按钮（<a class="ant-btn">）也不碰。 */
+.nba-scope a:not(.ant-btn):not([style*="color"]) {
+  color: inherit;
+}
+.nba-scope a:not(.ant-btn):not([style*="color"]):hover {
+  color: #4096ff;
+}
+
 .lol-mine > td {
   background: #f3f8ff !important;
 }

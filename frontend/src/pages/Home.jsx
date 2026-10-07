@@ -23,7 +23,6 @@ import { byHotThenNewest } from '../utils/hot'
  * 数据并行拉取，各区块独立 loading；切赛季只刷新赛季维度的区块。
  */
 
-const BRAND = '#1677ff'
 const MEDAL = ['#f5222d', '#fa8c16', '#faad14']
 
 const LEADER_STATS = [
@@ -42,7 +41,7 @@ const clamp = (lines) => ({
 function SectionTitle({ title, extra, onExtra }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 2px 14px' }}>
-      <span style={{ width: 4, height: 18, borderRadius: 2, background: BRAND }} />
+      <span style={{ width: 4, height: 18, borderRadius: 2, background: '#91caff' }} />
       <span style={{ fontSize: 17, fontWeight: 700 }}>{title}</span>
       <span style={{ flex: 1 }} />
       {extra && (
@@ -84,7 +83,7 @@ function LeaderCard({ stat, rows, seasonNum }) {
             </Link>
             <span style={{ fontSize: 12, color: '#999', flexShrink: 0 }}><TeamCell value={top.playerTeam} size={14} /></span>
           </div>
-          <div style={{ fontSize: isMobile ? 22 : 30, fontWeight: 800, color: BRAND, fontVariantNumeric: 'tabular-nums', lineHeight: 1.25, marginBottom: 10 }}>
+          <div style={{ fontSize: isMobile ? 22 : 30, fontWeight: 800, color: '#262626', fontVariantNumeric: 'tabular-nums', lineHeight: 1.25, marginBottom: 10 }}>
             {fmtNum(top[stat.field])}
           </div>
           {rows.slice(1, 3).map((r, i) => (
@@ -348,7 +347,7 @@ export default function Home() {
           }}
         >
           <span style={{ fontSize: 20 }}>👋</span>
-          <span style={{ color: '#002c8c', fontWeight: 500 }}>Sign in to post, comment and like</span>
+          <span style={{ color: '#1f1f1f', fontWeight: 500 }}>Sign in to post, comment and like</span>
           <span style={{ flex: 1 }} />
           <Button type="primary" onClick={() => goLogin()}>Sign in</Button>
           <Button onClick={() => navigate('/register')}>Sign up</Button>

@@ -234,7 +234,7 @@ function personColumns(isMobile, onOpen) {
               表格整体是居中对齐的（.stat-compact 那条规则），这里必须显式声明 left，
               否则两行各自按自己的宽度居中，起点参差不齐 */}
           <div style={{ minWidth: 0, textAlign: 'left' }}>
-            <div style={{ fontWeight: 700, color: '#1677ff', whiteSpace: 'nowrap' }}>
+            <div style={{ fontWeight: 700, color: '#262626', whiteSpace: 'nowrap' }}>
               {r.gameName || '(unlinked)'}
               {r.tagLine && <span style={{ color: '#ddd', fontWeight: 400 }}>#{r.tagLine}</span>}
             </div>

@@ -68,7 +68,7 @@ export default function Register() {
           block
           size={wide ? 'large' : 'middle'}
           loading={submitting}
-          style={{ fontWeight: 700, boxShadow: '0 6px 16px rgba(22,119,255,.3)' }}
+          style={{ fontWeight: 700, boxShadow: '0 6px 16px rgba(64,150,255,.22)' }}
         >
           Sign up
         </Button>
